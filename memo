@@ -1,0 +1,15 @@
+
+
+printful　api(最悪手動)
+
+オーダーデータ作る、checkoutの時点で、でもstripeが承認するまでfalse
+
+
+データを新しく作るときはsupabase sqlコードを忘れるな
+
+ブランド商品追加も自動でできるようにapi
+
+
+git add .
+git commit -m "changes"
+git push origin main

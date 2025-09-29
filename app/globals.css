@@ -12,15 +12,71 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Force light theme variables (no automatic dark mode) */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Neural Flow Background Animation */
+.neural-flow-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse at 50% 50%, rgba(41, 227, 255, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse at 30% 20%, rgba(41, 227, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(41, 227, 255, 0.06) 0%, transparent 65%);
+  animation: neuralFlow 30s ease-in-out infinite;
+  filter: blur(2px);
+}
+
+@keyframes neuralFlow {
+  0%, 100% {
+    transform: translateX(0) translateY(0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateX(-5px) translateY(-3px) scale(1.02);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(3px) translateY(-5px) scale(0.98);
+    opacity: 0.2;
+  }
+  75% {
+    transform: translateX(-2px) translateY(3px) scale(1.01);
+    opacity: 0.35;
+  }
+}
+
+/* Particle effect overlay */
+.neural-flow-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(0.5px 0.5px at 15% 25%, rgba(41, 227, 255, 0.2), transparent),
+    radial-gradient(0.3px 0.3px at 35% 65%, rgba(41, 227, 255, 0.15), transparent),
+    radial-gradient(0.4px 0.4px at 85% 35%, rgba(41, 227, 255, 0.18), transparent),
+    radial-gradient(0.2px 0.2px at 55% 15%, rgba(41, 227, 255, 0.1), transparent);
+  background-size: 400px 400px, 500px 500px, 450px 450px, 350px 350px;
+  animation: particleFloat 35s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  100% {
+    transform: translateX(-20px) translateY(-10px);
+  }
 }
