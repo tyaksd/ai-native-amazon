@@ -136,16 +136,9 @@ export default function RootLayout({
               </div>
             </div>
           </div>
-          <div className="border-t border-white/20">
+          <div className="">
             <div className="mx-auto max-w-7xl px-6 sm:px-10 py-6 text-xs text-white/70 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>©2025 Godship, Inc.</div>
-              <div className="flex flex-wrap gap-x-4 gap-y-2">
-                <a href="#" className="hover:underline">Terms of Service</a>
-                <a href="#" className="hover:underline">Privacy Policy</a>
-                <a href="#" className="hover:underline">Cookie Policy</a>
-                <a href="#" className="hover:underline">Accessibility</a>
-                <a href="#" className="hover:underline">Sitemap</a>
-              </div>
             </div>
           </div>
         </footer>
