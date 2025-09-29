@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getProductById } from "@/lib/data";
+import { getProductById, Product } from "@/lib/data";
 
 type CartItem = {
   id: string;
@@ -16,23 +16,24 @@ function formatUSD(value: number) {
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<(Product & { quantity: number })[]>([]);
 
   useEffect(() => {
-    // Load cart from localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      const items = JSON.parse(savedCart);
-      setCartItems(items);
-      
-      // Load product details
-      const productDetails = items.map((item: CartItem) => {
-        const product = getProductById(item.id);
-        return product ? { ...product, quantity: item.quantity } : null;
-      }).filter(Boolean);
-      
-      setProducts(productDetails);
+    const load = async () => {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const items: CartItem[] = JSON.parse(savedCart);
+        setCartItems(items);
+        const productDetails = await Promise.all(
+          items.map(async (item) => {
+            const product = await getProductById(item.id);
+            return product ? { ...product, quantity: item.quantity } : null;
+          })
+        );
+        setProducts(productDetails.filter(Boolean) as (Product & { quantity: number })[]);
+      }
     }
+    load();
   }, []);
 
   const removeFromCart = (productId: string) => {

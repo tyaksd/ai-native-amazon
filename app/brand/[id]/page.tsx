@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { getBrandById, getProductsByBrand, Brand, Product } from "@/lib/data";
 
 function formatUSD(value: number) {
@@ -14,7 +14,7 @@ type PageProps = {
 };
 
 export default function BrandPage({ params }: PageProps) {
-  const resolvedParams = use(params as any) as { id: string }
+  const resolvedParams = params as { id: string }
   const [brand, setBrand] = useState<Brand | null>(null)
   const [items, setItems] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)

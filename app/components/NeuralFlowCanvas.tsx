@@ -32,7 +32,6 @@ export default function NeuralFlowCanvas({ highlight = { x: 0.7, y: 0.4 }, class
 
     const BASE = '#0A122A'
     const FOG = 'rgba(22,28,43,0.30)'
-    const HLC = 'rgba(41,227,255,0.60)'
 
     const NUM = Math.max(120, Math.floor((w * h) / 16000))
     const cx = w * 0.5, cy = h * 0.5
@@ -72,7 +71,7 @@ export default function NeuralFlowCanvas({ highlight = { x: 0.7, y: 0.4 }, class
       ctx.save()
       ctx.globalCompositeOperation = 'screen'
       ctx.fillStyle = 'rgba(255,255,255,0.12)'
-      for (let p of particles) {
+      for (const p of particles) {
         const dx = cx - p.x, dy = cy - p.y
         const dist = Math.hypot(dx, dy) + 0.0001
         const attract = 0.012
