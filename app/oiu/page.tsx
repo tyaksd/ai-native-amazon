@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct } from '@/lib/data'
 import { uploadImage } from '@/lib/cloudinary-client'
 
@@ -29,9 +30,7 @@ export default function AdminPage() {
     colors: [] as string[],
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[]
   })
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [brandIconFile, setBrandIconFile] = useState<File | null>(null)
-  const [brandBackgroundFile, setBrandBackgroundFile] = useState<File | null>(null)
+  // removed unused file states
   const [colorInput, setColorInput] = useState('')
   const [sizeInput, setSizeInput] = useState('')
 
@@ -127,8 +126,6 @@ export default function AdminPage() {
       if (brand) {
         setBrands(prev => [...prev, brand])
         setNewBrand({ name: '', icon: '', background_image: '', description: '' })
-        setBrandIconFile(null)
-        setBrandBackgroundFile(null)
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)
@@ -171,7 +168,6 @@ export default function AdminPage() {
           colors: [],
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL']
         })
-        setImageFiles([])
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)
@@ -410,7 +406,6 @@ export default function AdminPage() {
                         onChange={(e) => {
                           const files = Array.from(e.target.files || [])
                           if (files.length > 0) {
-                            setImageFiles(prev => [...prev, ...files])
                             handleImageUpload(files)
                           }
                         }}
@@ -423,7 +418,7 @@ export default function AdminPage() {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {newProduct.images.map((image, index) => (
                               <div key={index} className="relative">
-                                <img src={image} alt={`Preview ${index + 1}`} className="h-20 w-20 object-cover rounded" />
+                                <Image src={image} alt={`Preview ${index + 1}`} width={80} height={80} className="h-20 w-20 object-cover rounded" />
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -464,7 +459,7 @@ export default function AdminPage() {
                             <div className="grid grid-cols-2 gap-1 mb-3">
                               {product.images.slice(0, 4).map((image, index) => (
                                 <div key={index} className="aspect-square overflow-hidden rounded">
-                                  <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                                  <Image src={image} alt={`${product.name} ${index + 1}`} width={400} height={400} className="w-full h-full object-cover" />
                                 </div>
                               ))}
                             </div>
@@ -541,18 +536,17 @@ export default function AdminPage() {
                           type="file"
                           accept="image/*"
                           onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (file) {
-                              setBrandIconFile(file)
-                              handleBrandIconUpload(file)
-                            }
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleBrandIconUpload(file)
+                          }
                           }}
                           className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                           required
                         />
                         {newBrand.icon && (
                           <div className="mt-2">
-                            <img src={newBrand.icon} alt="Brand Icon Preview" className="h-20 w-20 object-cover rounded" />
+                            <Image src={newBrand.icon} alt="Brand Icon Preview" width={80} height={80} className="h-20 w-20 object-cover rounded" />
                           </div>
                         )}
                       </div>
@@ -577,7 +571,6 @@ export default function AdminPage() {
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) {
-                            setBrandBackgroundFile(file)
                             handleBrandBackgroundUpload(file)
                           }
                         }}
@@ -585,7 +578,7 @@ export default function AdminPage() {
                       />
                       {newBrand.background_image && (
                         <div className="mt-2">
-                          <img src={newBrand.background_image} alt="Brand Background Preview" className="h-32 w-full object-cover rounded" />
+                          <Image src={newBrand.background_image} alt="Brand Background Preview" width={800} height={128} className="h-32 w-full object-cover rounded" />
                         </div>
                       )}
                     </div>
@@ -606,7 +599,7 @@ export default function AdminPage() {
                       <div key={brand.id} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center space-x-3 mb-3">
                           {brand.icon ? (
-                            <img src={brand.icon} alt={brand.name} className="w-8 h-8 object-cover rounded" />
+                            <Image src={brand.icon} alt={brand.name} width={32} height={32} className="w-8 h-8 object-cover rounded" />
                           ) : (
                             <div className="w-8 h-8 rounded bg-gray-200" aria-label="No icon" />
                           )}
@@ -614,7 +607,7 @@ export default function AdminPage() {
                         </div>
                         {brand.background_image && (
                           <div className="mb-3">
-                            <img src={brand.background_image} alt={`${brand.name} background`} className="w-full h-24 object-cover rounded" />
+                            <Image src={brand.background_image} alt={`${brand.name} background`} width={800} height={96} className="w-full h-24 object-cover rounded" />
                           </div>
                         )}
                         {brand.description && (

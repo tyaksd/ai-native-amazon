@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { getProductById, getBrandById, Product, Brand } from "@/lib/data";
 
 function formatUSD(value: number) {
@@ -76,7 +76,7 @@ type PageProps = {
 };
 
 export default function ProductDetail({ params }: PageProps) {
-  const resolvedParams = use(params as any) as { id: string }
+  const resolvedParams = params as { id: string }
   const [product, setProduct] = useState<Product | null>(null)
   const [brand, setBrand] = useState<Brand | null>(null)
   const [loading, setLoading] = useState(true)
@@ -253,8 +253,9 @@ export default function ProductDetail({ params }: PageProps) {
               </div>
               <button
                 onClick={() => {
-                  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-                  const existingItem = cart.find((item: any) => item.id === product.id);
+                  type CartItemLocal = { id: string; quantity: number };
+                  const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
+                  const existingItem = cart.find((item) => item.id === product.id);
                   if (existingItem) {
                     existingItem.quantity += quantity;
                   } else {
