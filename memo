@@ -7,9 +7,13 @@ printful　api(最悪手動)
 
 データを新しく作るときはsupabase sqlコードを忘れるな
 
-ブランド商品追加も自動でできるようにapi
+ブランド商品追加も自動でできるようにapi画像も
+openai api繋げる
 
 いいねで保存できるようにする
+
+決済できてない
+
 
 git add .
 git commit -m "changes"

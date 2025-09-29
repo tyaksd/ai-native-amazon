@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Discover Products Made for You. Explore creations born from your taste, crafted on demand.",
   openGraph: {
     title: "Godship",
-    description: "Godship designs and manages AI-native e-commerce stores.",
+    description: "Discover Products Made for You. Explore creations born from your taste, crafted on demand.",
     images: [
       {
         url: "/gblack.png",
