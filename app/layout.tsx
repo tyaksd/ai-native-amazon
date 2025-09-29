@@ -96,32 +96,43 @@ export default function RootLayout({
             <div className="md:col-span-2">
               <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">The best selection of AI brands for you</h3>
             </div>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:col-span-3">
               <div>
                 <div className="text-sm font-semibold mb-3">Company</div>
                 <ul className="space-y-2 text-sm text-white/80">
                   <li><a href="/about" className="hover:underline">About us</a></li>
-                  <li><a href="#" className="hover:underline">Newsroom</a></li>
-                  <li><a href="#" className="hover:underline">Careers</a></li>
+                  <li><a href="/company/newsroom" className="hover:underline">Newsroom</a></li>
+                  <li><a href="/company/careers" className="hover:underline">Careers</a></li>
                 </ul>
               </div>
               <div>
                 <div className="text-sm font-semibold mb-3">Explore</div>
                 <ul className="space-y-2 text-sm text-white/80">
-                  <li><a href="#" className="hover:underline">Help center</a></li>
-                  <li><a href="#" className="hover:underline">Markets</a></li>
+                  <li><a href="/explore/help-center" className="hover:underline">Help center</a></li>
+                  <li><a href="/explore/markets" className="hover:underline">Markets</a></li>
                 </ul>
                 <div className="mt-4 flex items-center gap-4 text-white/80">
-                  <a href="#" aria-label="Instagram" className="hover:text-white">
+                  <a href="https://www.instagram.com/godship.io?igsh=MWRlZ3Y1d3AyY3Btbw%3D%3D&utm_source=qr" aria-label="Instagram" className="hover:text-white" target="_blank" rel="noopener noreferrer">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M7 3.75A3.25 3.25 0 003.75 7v10A3.25 3.25 0 007 20.25h10A3.25 3.25 0 0020.25 17V7A3.25 3.25 0 0017 3.75H7zm5 3.25a5 5 0 110 10 5 5 0 010-10zm6-1a1 1 0 110 2 1 1 0 010-2zM12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>
                   </a>
                   <a href="#" aria-label="Facebook" className="hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M13 10h3V7h-3V6a2 2 0 012-2h1V1h-2a4 4 0 00-4 4v2H9v3h2v8h3v-8z"/></svg>
                   </a>
-                  <a href="#" aria-label="X" className="hover:text-white">
+                  <a href="https://x.com/godshipai?s=21" aria-label="X" className="hover:text-white" target="_blank" rel="noopener noreferrer">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M3 3h3l5 7 5-7h3l-6.5 9L19 21h-3l-4-5.5L8 21H5l6.5-9L3 3z"/></svg>
                   </a>
                 </div>
+              </div>
+              <div>
+                <div className="text-sm font-semibold mb-3">Legal</div>
+                <ul className="space-y-2 text-sm text-white/80">
+                  <li><a href="/legal/terms-of-service" className="hover:underline">Terms of Service</a></li>
+                  <li><a href="/legal/privacy-policy" className="hover:underline">Privacy Policy</a></li>
+                  <li><a href="/legal/cookie-policy" className="hover:underline">Cookie Policy</a></li>
+                  <li><a href="/legal/shipping-delivery" className="hover:underline">Shipping & Delivery</a></li>
+                  <li><a href="/legal/returns-refunds" className="hover:underline">Returns & Refunds</a></li>
+                  <li><a href="/legal/legal-notice" className="hover:underline">Legal Notice</a></li>
+                </ul>
               </div>
             </div>
           </div>

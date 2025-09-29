@@ -2,8 +2,7 @@
 
 printful　api(最悪手動)
 
-オーダーデータ作る、checkoutの時点で、でもstripeが承認するまでfalse
-
+オーダーデーTA（サイズ、個数、色)作る、checkoutの時点で、でもstripeが承認するまでfalse
 
 データを新しく作るときはsupabase sqlコードを忘れるな
 
@@ -14,7 +13,20 @@ openai api繋げる
 
 決済できてない
 
+各ストアを運用するAIエージェント
+
+　godshipのx instagram運用AIエージェント
+
+デザインcopilotモードこれは後でいい
+
+世の中のブランドと商品を大量に学習するai
+トレンド定量化ai
+クリエイティブ定量化ai
+
 
 git add .
 git commit -m "changes"
 git push origin main
+
+<＜ルール＞＞
+カラーは全部大文字で
