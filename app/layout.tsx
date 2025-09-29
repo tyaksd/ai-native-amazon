@@ -15,8 +15,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Godship Mall - Modern Apparel",
-  description: "A modern e-commerce mall for contemporary apparel.",
+  title: "Godship - The AI E-Commerce",
+  description: "Discover Products Made for You. Explore creations born from your taste, crafted on demand.",
+  openGraph: {
+    title: "Godship",
+    description: "Godship designs and manages AI-native e-commerce stores.",
+    images: [
+      {
+        url: "/gblack.png",
+        width: 1200,
+        height: 630,
+        alt: "Godship - The AI E-Commerce",
+      },
+    ],
+    type: "website",
+    siteName: "Godship",
+  },
 };
 
 export default function RootLayout({

@@ -9,6 +9,7 @@ printful　api(最悪手動)
 
 ブランド商品追加も自動でできるようにapi
 
+いいねで保存できるようにする
 
 git add .
 git commit -m "changes"
