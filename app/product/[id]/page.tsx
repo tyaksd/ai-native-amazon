@@ -89,6 +89,8 @@ export default function ProductDetail({ params }: PageProps) {
   const [selectedSize, setSelectedSize] = useState<string>('')
   const [showNotice, setShowNotice] = useState(false)
   const [noticeMessage, setNoticeMessage] = useState('')
+  const [showAdded, setShowAdded] = useState(false)
+  const [addedMessage, setAddedMessage] = useState('')
 
   useEffect(() => {
     const loadData = async () => {
@@ -136,6 +138,12 @@ export default function ProductDetail({ params }: PageProps) {
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-pulse">
           Copied!
+        </div>
+      )}
+      {/* Added to Cart Banner */}
+      {showAdded && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg z-50">
+          {addedMessage}
         </div>
       )}
       {/* Notice Banner */}
@@ -292,7 +300,9 @@ export default function ProductDetail({ params }: PageProps) {
                     cart.push({ id: product.id, quantity: quantity });
                   }
                   localStorage.setItem('cart', JSON.stringify(cart));
-                  alert(`Added ${quantity} item(s) to cart!`);
+                  setAddedMessage(`Added ${quantity} item(s) to cart`);
+                  setShowAdded(true);
+                  setTimeout(() => setShowAdded(false), 1000);
                 }}
                 className="flex items-center gap-2 px-4 py-3 sm:py-2 bg-black text-white rounded-md hover:bg-gray-800 flex-[5] justify-center"
               >
@@ -332,7 +342,30 @@ export default function ProductDetail({ params }: PageProps) {
             {/* Checkout button */}
             <button 
               onClick={() => {
-                window.location.href = '/cart';
+                const savedCart = localStorage.getItem('cart')
+                const currentCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
+
+                if (!currentCart || currentCart.length === 0) {
+                  const needsColor = product.colors && product.colors.length > 0 && !selectedColor
+                  const needsSize = product.sizes && product.sizes.length > 0 && !selectedSize
+                  if (needsColor || needsSize) {
+                    if (needsColor && needsSize) {
+                      setNoticeMessage('Choose color and size')
+                    } else if (needsColor) {
+                      setNoticeMessage('Choose color')
+                    } else {
+                      setNoticeMessage('Choose size')
+                    }
+                    setShowNotice(true)
+                    setTimeout(() => setShowNotice(false), 1200)
+                    return
+                  }
+
+                  const newCart = [{ id: product.id, quantity }]
+                  localStorage.setItem('cart', JSON.stringify(newCart))
+                }
+
+                window.location.href = '/checkout'
               }}
               className="w-full rounded-full bg-blue-600 text-white px-6 py-4 text-sm font-medium hover:bg-blue-700 transition-colors"
             >

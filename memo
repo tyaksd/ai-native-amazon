@@ -33,6 +33,22 @@ openai api繋げる
 <＜ルール＞＞
 カラーは全部大文字で
 
+<<<<<<githubの変更がvercelでディプロイしているコードに自動で反映されない時>>>>>>>>
+1. Git に正しい author を設定
+まず GitHub に登録しているメールを確認します（例：yourname@gmail.com や xxxx@users.noreply.github.com）。
+git config --global user.name  "あなたの名前"
+git config --global user.email "GitHubに登録しているメール"
+2. 設定を確認
+git config --global --list
+で user.email が GitHub のメールになっているか確認。
+3. コミットを修正
+すでに push したコミットが「.local」になっているので、最新のコミットだけ直したいなら：
+# 最新コミットの author を修正
+git commit --amend --reset-author --no-edit
+# 修正を force push
+git push origin main -f
+これで最新コミットの author が正しい GitHub メールに置き換わります。
+<<<<<<<<<<>>>>>>>>>>
 
 git add .
 git commit -m "changes"

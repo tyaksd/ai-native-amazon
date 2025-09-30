@@ -147,7 +147,10 @@ export default function Cart() {
                 <span>{formatUSD(getTotalPrice())}</span>
               </div>
             </div>
-            <button className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors">
+            <button 
+              className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
+              onClick={() => { window.location.href = '/checkout' }}
+            >
               Checkout
             </button>
             <Link href="/" className="block text-center text-sm text-gray-600 hover:text-gray-800 mt-4">
