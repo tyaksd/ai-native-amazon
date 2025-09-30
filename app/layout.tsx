@@ -136,7 +136,7 @@ export default function RootLayout({
               </div>
             </div>
           </div>
-          <div className="">
+          <div className="e">
             <div className="mx-auto max-w-7xl px-6 sm:px-10 py-6 text-xs text-white/70 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
               <div>©2025 Godship, Inc.</div>
             </div>

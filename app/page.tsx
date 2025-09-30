@@ -99,7 +99,7 @@ export default function Home() {
          <div className="grid gap-2 sm:gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {products.map((p) => (
             <div key={p.id} className="group rounded-lg overflow-hidden">
-              <Link href={`/product/${p.id}`} className="block">
+              <Link href={`/${p.brand_id}/${p.id}`} className="block">
                 {p.images && p.images.length > 0 ? (
                   <div className="aspect-square overflow-hidden">
                     <Image src={p.images[0]} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
@@ -112,10 +112,10 @@ export default function Home() {
               </Link>
               <div className="pt-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Link href={`/product/${p.id}`} className="block font-medium text-gray-900 truncate hover:underline">
+                  <Link href={`/${p.brand_id}/${p.id}`} className="block font-medium text-gray-900 truncate hover:underline">
                     {p.name}
                   </Link>
-                  <Link href={`/brand/${p.brand_id}`} className="shrink-0 opacity-80 hover:opacity-100">
+                  <Link href={`/${p.brand_id}`} className="shrink-0 opacity-80 hover:opacity-100">
                     <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} />
                   </Link>
                 </div>

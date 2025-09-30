@@ -1,5 +1,3 @@
-
-
 printful　api(最悪手動)
 
 オーダーデーTA（サイズ、個数、色)作る、checkoutの時点で、でもstripeが承認するまでfalse
@@ -23,10 +21,10 @@ openai api繋げる
 トレンド定量化ai
 クリエイティブ定量化ai
 
+ブランドページのall newページ切り替え反応しない
 
-git add .
-git commit -m "changes"
-git push origin main
+
+
 
 <＜ルール＞＞
 カラーは全部大文字で

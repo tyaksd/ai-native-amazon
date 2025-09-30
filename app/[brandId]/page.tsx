@@ -10,11 +10,11 @@ function formatUSD(value: number) {
 }
 
 type PageProps = {
-  params: { id: string };
+  params: { brandId: string };
 };
 
 export default function BrandPage({ params }: PageProps) {
-  const resolvedParams = params as { id: string }
+  const resolvedParams = params as { brandId: string }
   const [brand, setBrand] = useState<Brand | null>(null)
   const [items, setItems] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,8 +23,8 @@ export default function BrandPage({ params }: PageProps) {
     const loadData = async () => {
       try {
         const [brandData, productsData] = await Promise.all([
-          getBrandById(resolvedParams.id),
-          getProductsByBrand(resolvedParams.id)
+          getBrandById(resolvedParams.brandId),
+          getProductsByBrand(resolvedParams.brandId)
         ])
         setBrand(brandData)
         setItems(productsData)
@@ -35,7 +35,7 @@ export default function BrandPage({ params }: PageProps) {
       }
     }
     loadData()
-  }, [resolvedParams.id])
+  }, [resolvedParams.brandId])
 
   if (loading) {
     return (
@@ -114,7 +114,7 @@ export default function BrandPage({ params }: PageProps) {
             ) : (
               <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                 {items.map((p) => (
-                  <Link key={p.id} href={`/product/${p.id}`} className="group block">
+                  <Link key={p.id} href={`/${p.brand_id}/${p.id}`} className="group block">
                     <div className="relative">
                       <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
                         {p.images && p.images.length > 0 ? (

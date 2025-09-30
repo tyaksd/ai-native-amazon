@@ -85,6 +85,8 @@ export default function ProductDetail({ params }: PageProps) {
   const [showCopied, setShowCopied] = useState(false)
   const [selectedColor, setSelectedColor] = useState<string>('')
   const [selectedSize, setSelectedSize] = useState<string>('')
+  const [showNotice, setShowNotice] = useState(false)
+  const [noticeMessage, setNoticeMessage] = useState('')
 
   useEffect(() => {
     const loadData = async () => {
@@ -127,6 +129,12 @@ export default function ProductDetail({ params }: PageProps) {
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-pulse">
           Copied!
+        </div>
+      )}
+      {/* Notice Banner */}
+      {showNotice && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+          {noticeMessage}
         </div>
       )}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-5 mt-0">
@@ -178,7 +186,7 @@ export default function ProductDetail({ params }: PageProps) {
           </div>
           {brand && (
             <div className="mb-4">
-              <Link href={`/brand/${brand.id}`} className="inline-flex items-center gap-3 text-xl text-gray-600 hover:text-black">
+              <Link href={`/${brand.id}`} className="inline-flex items-center gap-3 text-xl text-gray-600 hover:text-black">
                 <Image src={brand.icon} alt={brand.name} width={30} height={30} />
                 <span className="font-semibold">{brand.name}</span>
               </Link>
@@ -253,6 +261,21 @@ export default function ProductDetail({ params }: PageProps) {
               </div>
               <button
                 onClick={() => {
+                  const needsColor = product.colors && product.colors.length > 0 && !selectedColor
+                  const needsSize = product.sizes && product.sizes.length > 0 && !selectedSize
+                  if (needsColor || needsSize) {
+                    if (needsColor && needsSize) {
+                      setNoticeMessage('Choose color and size')
+                    } else if (needsColor) {
+                      setNoticeMessage('Choose color')
+                    } else {
+                      setNoticeMessage('Choose size')
+                    }
+                    setShowNotice(true)
+                    setTimeout(() => setShowNotice(false), 1200)
+                    return
+                  }
+
                   type CartItemLocal = { id: string; quantity: number };
                   const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
                   const existingItem = cart.find((item) => item.id === product.id);
