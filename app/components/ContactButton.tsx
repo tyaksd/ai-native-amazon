@@ -6,12 +6,10 @@ export default function ContactButton() {
     const mailtoLink = 'mailto:jack@godship.io';
     window.location.href = mailtoLink;
     
-    // フォールバック: クリップボードにコピー
+    // フォールバック: クリップボードにコピー（通知なし）
     setTimeout(() => {
-      navigator.clipboard.writeText('jack@godship.io').then(() => {
-        alert('メールアドレスをクリップボードにコピーしました: jack@godship.io');
-      }).catch(() => {
-        alert('メールアドレス: jack@godship.io');
+      navigator.clipboard.writeText('jack@godship.io').catch(() => {
+        // エラーが発生しても何もしない
       });
     }, 1000);
   };
