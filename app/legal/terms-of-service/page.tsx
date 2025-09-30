@@ -11,7 +11,7 @@ export default function TermsOfServicePage() {
           <h2 className="text-xl font-semibold text-gray-900">1. About Us</h2>
           <p className="mt-3 leading-7">
             These Terms of Service (&quot;Terms&quot;) govern your access to and use of the website
-            godship.io (the "Site") and any orders placed through the Site. The Site is
+            godship.io (the &quot;Site&quot;) and any orders placed through the Site. The Site is
             operated by Takuto Yasui (&quot;Seller,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). Our contact
             details are listed in the Legal Notice.
           </p>

@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
           </p>
           <p className="mt-3 leading-7 font-medium">CCPA/CPRA (California)</p>
           <p className="mt-1 leading-7">
-            You may request disclosure, deletion, and opt out of "selling" or "sharing" personal information.
+            You may request disclosure, deletion, and opt out of &quot;selling&quot; or &quot;sharing&quot; personal information.
             We do not knowingly sell personal information. Contact jack@godship.io.
           </p>
         </section>
