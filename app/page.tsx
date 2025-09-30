@@ -143,7 +143,7 @@ export default function Home() {
           <div>
             <div className="mb-6 mt-4">
               <h2 className="text-xl font-semibold tracking-tight">
-                Search Results for "{searchQuery}"
+                Search Results for {searchQuery}
               </h2>
             </div>
             
@@ -217,7 +217,7 @@ export default function Home() {
             {/* No Results */}
             {searchResults.brands.length === 0 && searchResults.products.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-600">No results found for "{searchQuery}"</p>
+                <p className="text-gray-600">No results found for {searchQuery}</p>
               </div>
             )}
           </div>

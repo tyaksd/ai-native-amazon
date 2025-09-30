@@ -10,14 +10,14 @@ export default function TermsOfServicePage() {
         <section>
           <h2 className="text-xl font-semibold text-gray-900">1. About Us</h2>
           <p className="mt-3 leading-7">
-            These Terms of Service ("Terms") govern your access to and use of the website
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of the website
             godship.io (the "Site") and any orders placed through the Site. The Site is
-            operated by Takuto Yasui ("Seller," "we," "us," or "our"). Our contact
+            operated by Takuto Yasui (&quot;Seller,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). Our contact
             details are listed in the Legal Notice.
           </p>
           <p className="mt-3 leading-7">
             By using the Site, you agree to these Terms and our Privacy Policy, Cookie Policy,
-            Shipping & Delivery, and Returns & Refunds (collectively, the "Policies"). If you
+            Shipping & Delivery, and Returns & Refunds (collectively, the &quot;Policies&quot;). If you
             do not agree, do not use the Site.
           </p>
         </section>
@@ -120,7 +120,7 @@ export default function TermsOfServicePage() {
         <section>
           <h2 className="text-xl font-semibold text-gray-900">12. Disclaimers</h2>
           <p className="mt-3 leading-7">
-            To the fullest extent permitted by law, the Site and products are provided “as is.”
+            To the fullest extent permitted by law, the Site and products are provided &quot;as is.&quot;
             We disclaim all warranties not expressly stated in these Terms. Nothing here
             excludes warranties that cannot be excluded under applicable consumer laws.
           </p>

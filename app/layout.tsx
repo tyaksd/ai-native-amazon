@@ -98,9 +98,9 @@ export default function RootLayout({
               <div>
                 <div className="text-sm font-semibold mb-3">Company</div>
                 <ul className="space-y-2 text-sm text-white/80">
-                  <li><a href="/about" className="hover:underline">About us</a></li>
-                  <li><a href="/company/newsroom" className="hover:underline">Newsroom</a></li>
-                  <li><a href="/company/careers" className="hover:underline">Careers</a></li>
+                  <li><Link href="/about" className="hover:underline">About us</Link></li>
+                  <li><Link href="/company/newsroom" className="hover:underline">Newsroom</Link></li>
+                  <li><Link href="/company/careers" className="hover:underline">Careers</Link></li>
                   <li>
                     <ContactButton />
                   </li>
@@ -109,8 +109,8 @@ export default function RootLayout({
               <div>
                 <div className="text-sm font-semibold mb-3">Explore</div>
                 <ul className="space-y-2 text-sm text-white/80">
-                  <li><a href="/explore/help-center" className="hover:underline">FAQ</a></li>
-                  <li><a href="/explore/markets" className="hover:underline">Markets</a></li>
+                  <li><Link href="/explore/help-center" className="hover:underline">FAQ</Link></li>
+                  <li><Link href="/explore/markets" className="hover:underline">Markets</Link></li>
                 </ul>
                 <div className="mt-4 flex items-center gap-4 text-white/80">
                   <a href="https://www.instagram.com/godship.io?igsh=MWRlZ3Y1d3AyY3Btbw%3D%3D&utm_source=qr" aria-label="Instagram" className="hover:text-white" target="_blank" rel="noopener noreferrer">
@@ -127,12 +127,12 @@ export default function RootLayout({
               <div>
                 <div className="text-sm font-semibold mb-3">Legal</div>
                 <ul className="space-y-2 text-sm text-white/80">
-                  <li><a href="/legal/terms-of-service" className="hover:underline">Terms of Service</a></li>
-                  <li><a href="/legal/privacy-policy" className="hover:underline">Privacy Policy</a></li>
-                  <li><a href="/legal/cookie-policy" className="hover:underline">Cookie Policy</a></li>
-                  <li><a href="/legal/shipping-delivery" className="hover:underline">Shipping & Delivery</a></li>
-                  <li><a href="/legal/returns-refunds" className="hover:underline">Returns & Refunds</a></li>
-                  <li><a href="/legal/legal-notice" className="hover:underline">Legal Notice</a></li>
+                  <li><Link href="/legal/terms-of-service" className="hover:underline">Terms of Service</Link></li>
+                  <li><Link href="/legal/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
+                  <li><Link href="/legal/cookie-policy" className="hover:underline">Cookie Policy</Link></li>
+                  <li><Link href="/legal/shipping-delivery" className="hover:underline">Shipping & Delivery</Link></li>
+                  <li><Link href="/legal/returns-refunds" className="hover:underline">Returns & Refunds</Link></li>
+                  <li><Link href="/legal/legal-notice" className="hover:underline">Legal Notice</Link></li>
                 </ul>
               </div>
             </div>

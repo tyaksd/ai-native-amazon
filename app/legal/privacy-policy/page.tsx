@@ -72,7 +72,7 @@ export default function PrivacyPolicyPage() {
           <p className="mt-3 leading-7">
             We use cookies and similar technologies for essential functions, performance, and marketing. See our
             Cookie Policy for details and choices, including consent management (EU/EEA/UK) and opt-out options
-            (e.g., "Do Not Sell or Share" for CCPA where applicable).
+            (e.g., &quot;Do Not Sell or Share&quot; for CCPA where applicable).
           </p>
         </section>
 
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-xl font-semibold text-gray-900">10. Changes</h2>
           <p className="mt-3 leading-7">
-            We may update this Policy; changes will be posted with a new "Last updated" date.
+            We may update this Policy; changes will be posted with a new &quot;Last updated&quot; date.
           </p>
         </section>
 
