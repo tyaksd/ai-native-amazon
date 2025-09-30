@@ -180,3 +180,50 @@ export async function deleteProduct(productId: string): Promise<boolean> {
 
   return true
 }
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .ilike('name', `${query}%`)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error searching products:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function searchBrands(query: string): Promise<Brand[]> {
+  const { data, error } = await supabase
+    .from('brands')
+    .select('*')
+    .ilike('name', `${query}%`)
+    .order('name')
+
+  if (error) {
+    console.error('Error searching brands:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function getRandomProducts(excludeId: string, limit: number = 4): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .neq('id', excludeId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching random products:', error)
+    return []
+  }
+
+  // ランダムに並び替えて指定された数だけ取得
+  const shuffled = (data || []).sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, limit)
+}

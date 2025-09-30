@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from 'react'
-import { getProductById, getBrandById, Product, Brand } from "@/lib/data";
+import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
+import ProductCarousel from "@/app/components/ProductCarousel";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -79,6 +80,7 @@ export default function ProductDetail({ params }: PageProps) {
   const resolvedParams = params as { id: string }
   const [product, setProduct] = useState<Product | null>(null)
   const [brand, setBrand] = useState<Brand | null>(null)
+  const [brandProducts, setBrandProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -96,6 +98,11 @@ export default function ProductDetail({ params }: PageProps) {
           setProduct(productData)
           const brandData = await getBrandById(productData.brand_id)
           setBrand(brandData)
+          
+          // 同じブランドの他の商品を取得（現在の商品を除く）
+          const allBrandProducts = await getProductsByBrand(productData.brand_id)
+          const otherBrandProducts = allBrandProducts.filter(p => p.id !== productData.id).slice(0, 4)
+          setBrandProducts(otherBrandProducts)
         }
       } catch (error) {
         console.error('Error loading product:', error)
@@ -334,6 +341,9 @@ export default function ProductDetail({ params }: PageProps) {
           </div>
         </div>
       </div>
+      
+      {/* 同じブランドの他の商品セクション */}
+      <ProductCarousel products={brandProducts} title="More from this brand" />
     </div>
   );
 }
