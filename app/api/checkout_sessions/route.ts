@@ -1,9 +1,15 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-08-27.basil",
-})
+export const runtime = 'nodejs'
+
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY not configured')
+  }
+  return new Stripe(key, { apiVersion: "2025-08-27.basil" })
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,6 +35,7 @@ export async function POST(req: NextRequest) {
 
     const origin = req.headers.get('origin') || req.nextUrl.origin
 
+    const stripe = getStripe()
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
