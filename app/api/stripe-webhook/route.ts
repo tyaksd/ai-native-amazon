@@ -3,7 +3,13 @@ import Stripe from 'stripe'
 import { headers } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: '2025-08-27.basil' })
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY not configured')
+  }
+  return new Stripe(key, { apiVersion: '2025-08-27.basil' })
+}
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
 
 export const runtime = 'nodejs'
@@ -19,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event
   try {
+    const stripe = getStripe()
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -31,6 +38,7 @@ export async function POST(req: NextRequest) {
       const sessionId = session.id
 
       // Retrieve the session again expanding line_items for reliable access
+      const stripe = getStripe()
       const fullSession = await stripe.checkout.sessions.retrieve(sessionId, {
         expand: ['line_items', 'line_items.data.price.product'],
       })
@@ -41,6 +49,7 @@ export async function POST(req: NextRequest) {
 
       let lineItems = (fullSession.line_items?.data || []) as unknown as Stripe.LineItem[]
       if (!lineItems || lineItems.length === 0) {
+        const stripe = getStripe()
         const fetched = await stripe.checkout.sessions.listLineItems(sessionId, { expand: ['data.price.product'] })
         lineItems = fetched.data as unknown as Stripe.LineItem[]
       }

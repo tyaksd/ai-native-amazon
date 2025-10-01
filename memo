@@ -58,7 +58,9 @@ git push origin main -f
 これで最新コミットの author が正しい GitHub メールに置き換わります。
 <<<<<<<<<<>>>>>>>>>>
 
-
+git add .
+git commit -m "changes"
+git push origin main
 
 stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
