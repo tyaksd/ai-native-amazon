@@ -67,9 +67,10 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json({ id: session.id, url: session.url })
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal error'
     console.error('Stripe session error:', err)
-    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 

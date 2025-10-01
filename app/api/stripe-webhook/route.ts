@@ -20,8 +20,9 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
-  } catch (err: any) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
   try {
@@ -88,7 +89,15 @@ export async function POST(req: NextRequest) {
 
       if (Array.isArray(cartMeta) && cartMeta.length > 0) {
         console.log('Using cart metadata for items')
-        itemsPayload = cartMeta.map((ci: any) => ({
+        type CartMetaItem = {
+          id?: string
+          name?: string
+          price?: number
+          quantity?: number
+          size?: string | null
+          color?: string | null
+        }
+        itemsPayload = (cartMeta as CartMetaItem[]).map((ci) => ({
           order_id: order.id,
           product_id: ci.id || null,
           product_name: ci.name || 'Item',
@@ -104,18 +113,18 @@ export async function POST(req: NextRequest) {
           const price = item.price as Stripe.Price | null
           const product = (price?.product ?? null) as Stripe.Product | string | null
           const productObj = typeof product === 'object' && product !== null ? (product as Stripe.Product) : null
-          const metadata = productObj?.metadata || {}
+          const metadata: Record<string, string> | undefined = productObj?.metadata
           const quantity = item.quantity || 1
           const amountTotal = (item.amount_total ?? item.amount_subtotal ?? 0) / 100
           const computedUnit = quantity > 0 ? amountTotal / quantity : amountTotal
           return {
             order_id: order.id,
-            product_id: (metadata as any).product_id || null,
+            product_id: metadata?.product_id ?? null,
             product_name: productObj?.name || item.description || price?.nickname || 'Item',
             unit_price: computedUnit,
             quantity,
-            size: (metadata as any).size || null,
-            color: (metadata as any).color || null,
+            size: metadata?.size ?? null,
+            color: metadata?.color ?? null,
           }
         })
       }
@@ -138,9 +147,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ received: true })
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Internal error'
     console.error('Webhook handling error:', e)
-    return NextResponse.json({ error: e.message || 'Internal error' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
