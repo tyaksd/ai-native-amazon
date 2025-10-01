@@ -167,7 +167,7 @@ export default function Home() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="font-semibold text-gray-900 truncate">{brand.name}</h4>
-                            <p className="text-sm text-gray-600 truncate">
+                            <p className="text-sm text-gray-600 truncate break-words">
                               {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
                             </p>
                           </div>

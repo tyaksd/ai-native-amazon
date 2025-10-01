@@ -28,7 +28,15 @@ openai api繋げる
 
 非PCの時、ヘッダーにsearchロゴが表示されるが、押しても何も反応しないので、押すとヘッダーの全てがsearchの文字入力欄になってスマホ/ipadの入力が起動するようにして、
 
+決済完了後メール送信、というかshopoifyのメールキャンペーンautomationに載っているメール字自動化を基本的に全部搭載
 
+/ufuhとかでオーダーを見れるようにして
+
+決済後にカートに商品が残り続ける問題。決済終わったらカートの商品は削除するようにして
+
+配達先住所stripeのフォーム全体的に修正
+
+AIようのUI
 
 <＜ルール＞＞
 カラーは全部大文字で
@@ -53,3 +61,7 @@ git push origin main -f
 git add .
 git commit -m "changes"
 git push origin main
+
+stripe login
+stripe listen --forward-to http://localhost:3000/api/stripe-webhook
+

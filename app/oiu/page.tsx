@@ -611,7 +611,7 @@ export default function AdminPage() {
                           </div>
                         )}
                         {brand.description && (
-                          <p className="text-sm text-gray-600">{brand.description}</p>
+                          <p className="text-sm text-gray-600 break-words">{brand.description}</p>
                         )}
                       </div>
                     ))}

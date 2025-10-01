@@ -156,7 +156,7 @@ export default function BrandPage({ params }: PageProps) {
                   <h3 className="font-semibold text-gray-900">About {brand.name}</h3>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-4 break-words">
                 {brand.description || `${brand.name}: Extraordinary Design Since 2020. Handcrafted with precision, ${brand.name} channels years of artistry into contemporary fashion and lifestyle products.`}
               </p>
             </div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
 import ProductCarousel from "@/app/components/ProductCarousel";
 
@@ -73,11 +73,12 @@ function getColorFromName(colorName: string): string {
 }
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default function ProductDetail({ params }: PageProps) {
-  const resolvedParams = params as { id: string }
+  const resolvedParams = use(params)
+  const productId = resolvedParams.id
   const [product, setProduct] = useState<Product | null>(null)
   const [brand, setBrand] = useState<Brand | null>(null)
   const [brandProducts, setBrandProducts] = useState<Product[]>([])
@@ -95,7 +96,7 @@ export default function ProductDetail({ params }: PageProps) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const productData = await getProductById(resolvedParams.id)
+        const productData = await getProductById(productId)
         if (productData) {
           setProduct(productData)
           const brandData = await getBrandById(productData.brand_id)
@@ -113,7 +114,14 @@ export default function ProductDetail({ params }: PageProps) {
       }
     }
     loadData()
-  }, [resolvedParams.id])
+  }, [productId])
+
+  // If there is exactly one available color, auto-select it
+  useEffect(() => {
+    if (product?.colors && product.colors.length === 1 && !selectedColor) {
+      setSelectedColor(product.colors[0])
+    }
+  }, [product, selectedColor])
 
   if (loading) {
     return (
@@ -291,13 +299,22 @@ export default function ProductDetail({ params }: PageProps) {
                     return
                   }
 
-                  type CartItemLocal = { id: string; quantity: number };
+                  type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
                   const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
-                  const existingItem = cart.find((item) => item.id === product.id);
+                  const existingItem = cart.find((item) => 
+                    item.id === product.id && 
+                    (product.sizes?.length ? (item.size || null) === (selectedSize || null) : true) &&
+                    (product.colors?.length ? (item.color || null) === (selectedColor || null) : true)
+                  );
                   if (existingItem) {
                     existingItem.quantity += quantity;
                   } else {
-                    cart.push({ id: product.id, quantity: quantity });
+                    cart.push({ 
+                      id: product.id, 
+                      quantity: quantity,
+                      size: product.sizes && product.sizes.length > 0 ? (selectedSize || null) : null,
+                      color: product.colors && product.colors.length > 0 ? (selectedColor || null) : null,
+                    });
                   }
                   localStorage.setItem('cart', JSON.stringify(cart));
                   setAddedMessage(`Added ${quantity} item(s) to cart`);
@@ -342,34 +359,81 @@ export default function ProductDetail({ params }: PageProps) {
             {/* Checkout button */}
             <button 
               onClick={() => {
-                const savedCart = localStorage.getItem('cart')
-                const currentCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
+                void (async () => {
+                  try {
+                    const savedCart = localStorage.getItem('cart')
+                    const currentCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
 
-                if (!currentCart || currentCart.length === 0) {
-                  const needsColor = product.colors && product.colors.length > 0 && !selectedColor
-                  const needsSize = product.sizes && product.sizes.length > 0 && !selectedSize
-                  if (needsColor || needsSize) {
-                    if (needsColor && needsSize) {
-                      setNoticeMessage('Choose color and size')
-                    } else if (needsColor) {
-                      setNoticeMessage('Choose color')
-                    } else {
-                      setNoticeMessage('Choose size')
+                    // Validate options (we add current product to cart before checkout)
+                    const needsColor = product.colors && product.colors.length > 0 && !selectedColor
+                    const needsSize = product.sizes && product.sizes.length > 0 && !selectedSize
+                    if (needsColor || needsSize) {
+                      if (needsColor && needsSize) {
+                        setNoticeMessage('Choose color and size')
+                      } else if (needsColor) {
+                        setNoticeMessage('Choose color')
+                      } else {
+                        setNoticeMessage('Choose size')
+                      }
+                      setShowNotice(true)
+                      setTimeout(() => setShowNotice(false), 1200)
+                      return
                     }
+
+                    // Merge current product into cart
+                    const mergedCart = [...currentCart]
+                    const existing = mergedCart.find(ci => ci.id === product.id)
+                    if (existing) {
+                      existing.quantity += quantity
+                    } else {
+                      mergedCart.push({ id: product.id, quantity })
+                    }
+                    localStorage.setItem('cart', JSON.stringify(mergedCart))
+
+                    // Build Stripe line items from merged cart
+                    const itemsSource = mergedCart
+
+                    const productsData = await Promise.all(itemsSource.map(async (ci) => {
+                      const p = ci.id === product.id ? product : await getProductById(ci.id)
+                      if (!p) return null
+                      // Include size/color for the current product if selected
+                      const size = ci.id === product.id ? (selectedSize || null) : null
+                      const color = ci.id === product.id ? (selectedColor || null) : null
+                      return { id: p.id, name: p.name, price: p.price, quantity: ci.quantity, size, color }
+                    }))
+                    const items = productsData.filter(Boolean) as { id: string; name: string; price: number; quantity: number; size?: string | null; color?: string | null }[]
+                    if (items.length === 0) {
+                      setNoticeMessage('Unable to prepare checkout')
+                      setShowNotice(true)
+                      setTimeout(() => setShowNotice(false), 1200)
+                      return
+                    }
+
+                    const res = await fetch('/api/checkout_sessions', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ items })
+                    })
+                    const data = await res.json()
+                    if (!res.ok || !data?.url) {
+                      console.error('Checkout session error:', data)
+                      setNoticeMessage('Failed to start checkout')
+                      setShowNotice(true)
+                      setTimeout(() => setShowNotice(false), 1200)
+                      return
+                    }
+                    window.location.href = data.url as string
+                  } catch (e) {
+                    console.error(e)
+                    setNoticeMessage('Checkout error')
                     setShowNotice(true)
                     setTimeout(() => setShowNotice(false), 1200)
-                    return
                   }
-
-                  const newCart = [{ id: product.id, quantity }]
-                  localStorage.setItem('cart', JSON.stringify(newCart))
-                }
-
-                window.location.href = '/checkout'
+                })()
               }}
               className="w-full rounded-full bg-blue-600 text-white px-6 py-4 text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              Checkout
+              Buy Now
             </button>
           </div>
         </div>

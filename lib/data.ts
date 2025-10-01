@@ -68,6 +68,8 @@ export async function getBrandById(brandId: string): Promise<Brand | null> {
 }
 
 export async function getProductById(productId: string): Promise<Product | null> {
+  console.log('Fetching product with ID:', productId)
+  
   const { data, error } = await supabase
     .from('products')
     .select('*')
@@ -76,9 +78,15 @@ export async function getProductById(productId: string): Promise<Product | null>
 
   if (error) {
     console.error('Error fetching product:', error)
+    console.error('Product ID:', productId)
+    console.error('Error message:', error.message)
+    console.error('Error code:', error.code)
+    console.error('Error details:', error.details)
+    console.error('Error hint:', error.hint)
     return null
   }
 
+  console.log('Product found:', data)
   return data
 }
 

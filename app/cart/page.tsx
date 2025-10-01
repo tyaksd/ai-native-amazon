@@ -8,6 +8,8 @@ import { getProductById, Product } from "@/lib/data";
 type CartItem = {
   id: string;
   quantity: number;
+  size?: string | null;
+  color?: string | null;
 };
 
 function formatUSD(value: number) {
@@ -27,7 +29,7 @@ export default function Cart() {
         const productDetails = await Promise.all(
           items.map(async (item) => {
             const product = await getProductById(item.id);
-            return product ? { ...product, quantity: item.quantity } : null;
+            return product ? { ...product, quantity: item.quantity, sizes: product.sizes, colors: product.colors } : null;
           })
         );
         setProducts(productDetails.filter(Boolean) as (Product & { quantity: number })[]);
@@ -36,21 +38,21 @@ export default function Cart() {
     load();
   }, []);
 
-  const removeFromCart = (productId: string) => {
-    const updatedCart = cartItems.filter(item => item.id !== productId);
+  const removeFromCart = (productId: string, size?: string | null, color?: string | null) => {
+    const updatedCart = cartItems.filter(item => !(item.id === productId && (item.size || null) === (size || null) && (item.color || null) === (color || null)));
     setCartItems(updatedCart);
-    setProducts(products.filter(p => p.id !== productId));
+    setProducts(products.filter(p => !(p.id === productId)));
     localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  const updateQuantity = (productId: string, newQuantity: number) => {
+  const updateQuantity = (productId: string, newQuantity: number, size?: string | null, color?: string | null) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, size, color);
       return;
     }
 
     const updatedCart = cartItems.map(item => 
-      item.id === productId ? { ...item, quantity: newQuantity } : item
+      (item.id === productId && (item.size || null) === (size || null) && (item.color || null) === (color || null)) ? { ...item, quantity: newQuantity } : item
     );
     setCartItems(updatedCart);
     
@@ -87,8 +89,8 @@ export default function Cart() {
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
-            {products.map((product) => (
-              <div key={product.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
+            {products.map((product, idx) => (
+              <div key={`${product.id}-${idx}`} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
                 <Image 
                   src={product.images && product.images.length > 0 ? product.images[0] : '/clothingsample.png'} 
                   alt={product.name} 
@@ -99,25 +101,28 @@ export default function Cart() {
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{product.name}</h3>
                   <p className="text-sm text-gray-600">{product.id.toUpperCase()}</p>
+                  {(cartItems[idx]?.size || cartItems[idx]?.color) && (
+                    <p className="text-sm text-gray-600">{cartItems[idx]?.size ? `Size: ${cartItems[idx]?.size}` : ''} {cartItems[idx]?.color ? `Color: ${cartItems[idx]?.color}` : ''}</p>
+                  )}
                   <p className="text-lg font-semibold text-gray-900">{formatUSD(product.price)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
-                    onClick={() => updateQuantity(product.id, product.quantity - 1)}
+                    onClick={() => updateQuantity(product.id, product.quantity - 1, cartItems[idx]?.size || null, cartItems[idx]?.color || null)}
                     className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50"
                   >
                     -
                   </button>
                   <span className="w-8 text-center">{product.quantity}</span>
                   <button 
-                    onClick={() => updateQuantity(product.id, product.quantity + 1)}
+                    onClick={() => updateQuantity(product.id, product.quantity + 1, cartItems[idx]?.size || null, cartItems[idx]?.color || null)}
                     className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50"
                   >
                     +
                   </button>
                 </div>
                 <button 
-                  onClick={() => removeFromCart(product.id)}
+                  onClick={() => removeFromCart(product.id, cartItems[idx]?.size || null, cartItems[idx]?.color || null)}
                   className="text-red-600 hover:text-red-800"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -149,9 +154,36 @@ export default function Cart() {
             </div>
             <button 
               className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
-              onClick={() => { window.location.href = '/checkout' }}
+              onClick={() => {
+                void (async () => {
+                  try {
+                    const items = products.map((p, idx) => ({ 
+                      id: p.id, 
+                      name: p.name, 
+                      price: p.price, 
+                      quantity: p.quantity,
+                      size: cartItems[idx]?.size || null,
+                      color: cartItems[idx]?.color || null,
+                    }))
+                    if (!items.length) return
+                    const res = await fetch('/api/checkout_sessions', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ items })
+                    })
+                    const data = await res.json()
+                    if (!res.ok || !data?.url) {
+                      console.error('Checkout session error:', data)
+                      return
+                    }
+                    window.location.href = data.url as string
+                  } catch (e) {
+                    console.error(e)
+                  }
+                })()
+              }}
             >
-              Checkout
+              Buy Now
             </button>
             <Link href="/" className="block text-center text-sm text-gray-600 hover:text-gray-800 mt-4">
               Continue Shopping
