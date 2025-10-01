@@ -16,6 +16,11 @@ type ProductCarouselProps = {
 
 export default function ProductCarousel({ products, title = "You might also like" }: ProductCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef<boolean>(false);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartXRef = useRef<number>(0);
+  const dragStartScrollLeftRef = useRef<number>(0);
+  const resumeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -31,9 +36,15 @@ export default function ProductCarousel({ products, title = "You might also like
       const originalWidth = (el.scrollWidth || 0) / 2;
 
       if (originalWidth > 0) {
-        scrollPosition += SPEED;
-        if (scrollPosition >= originalWidth) scrollPosition -= originalWidth;
-        el.scrollLeft = scrollPosition;
+        if (!isPausedRef.current) {
+          scrollPosition += SPEED;
+          if (scrollPosition >= originalWidth) scrollPosition -= originalWidth;
+          el.scrollLeft = scrollPosition;
+        } else {
+          // ユーザー操作中は現在位置を基準にしておく
+          const mod = el.scrollLeft % originalWidth;
+          scrollPosition = mod >= 0 ? mod : mod + originalWidth;
+        }
       }
       rafId = requestAnimationFrame(animate);
     };
@@ -48,12 +59,71 @@ export default function ProductCarousel({ products, title = "You might also like
     };
     document.addEventListener('visibilitychange', onVisibility);
 
+    // ユーザー操作ハンドラ
+    const pauseAuto = () => {
+      isPausedRef.current = true;
+      if (resumeTimerRef.current) {
+        window.clearTimeout(resumeTimerRef.current);
+        resumeTimerRef.current = null;
+      }
+    };
+
+    const resumeAutoAfterIdle = (ms = 1200) => {
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = window.setTimeout(() => {
+        isPausedRef.current = false;
+      }, ms);
+    };
+
+    const onWheel = () => {
+      pauseAuto();
+      resumeAutoAfterIdle();
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!el) return;
+      pauseAuto();
+      isDraggingRef.current = true;
+      el.setPointerCapture(e.pointerId);
+      dragStartXRef.current = e.clientX;
+      dragStartScrollLeftRef.current = el.scrollLeft;
+      (el as HTMLElement).style.cursor = 'grabbing';
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!el || !isDraggingRef.current) return;
+      const dx = e.clientX - dragStartXRef.current;
+      el.scrollLeft = dragStartScrollLeftRef.current - dx;
+    };
+
+    const endDrag = (e?: PointerEvent) => {
+      if (!el) return;
+      isDraggingRef.current = false;
+      (el as HTMLElement).style.cursor = '';
+      if (e) {
+        try { el.releasePointerCapture(e.pointerId); } catch {}
+      }
+      resumeAutoAfterIdle();
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: true });
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+
     // 画像ロードやリサイズで幅が変わっても、毎フレーム originalWidth を参照するので追加処理不要
     rafId = requestAnimationFrame(animate); // ★ 即起動
 
     return () => {
       cancelAnimationFrame(rafId);
       document.removeEventListener('visibilitychange', onVisibility);
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('pointerdown', onPointerDown);
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerup', endDrag);
+      el.removeEventListener('pointercancel', endDrag);
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
     };
   }, [products]);
 
@@ -65,8 +135,7 @@ export default function ProductCarousel({ products, title = "You might also like
       <div className="relative overflow-hidden">
         <div
           ref={scrollContainerRef}
-          // ユーザー操作は不可にするため hidden（自動は hidden でも動きます）
-          className="flex gap-2 sm:gap-6 overflow-x-hidden scrollbar-hide pb-4"
+          className="flex gap-2 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 cursor-grab"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {/* 元セット */}
