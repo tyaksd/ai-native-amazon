@@ -1,19 +1,12 @@
 printful　api(最悪手動)
-
-オーダーデーTA（サイズ、個数、色)作る、checkoutの時点で、でもstripeが承認するまでfalse
-
-データを新しく作るときはsupabase sqlコードを忘れるな
+printfulの発送されたかを、orderにtrue, falseで保存
 
 ブランド商品追加も自動でできるようにapi画像も
 openai api繋げる
 
-いいねで保存できるようにする
-
-決済できてない
-
 各ストアを運用するAIエージェント
 
-　godshipのx instagram運用AIエージェント
+godshipのx instagram運用AIエージェント
 
 デザインcopilotモードこれは後でいい
 
@@ -21,25 +14,17 @@ openai api繋げる
 トレンド定量化ai
 クリエイティブ定量化ai
 
-ブランドページのall newページ切り替え反応しない
+shopoifyのメールキャンペーンautomationに載っているメール字自動化を基本的に全部搭載
 
-最初自動で流れ出す、途中でユーザーがスクロールに介入するとユーザー任せ、ユーザーがスクロールをやめるとそこからまたスクロール再開について、どうしても
-できなかったので、自動スクロールだけにした
-
-非PCの時、ヘッダーにsearchロゴが表示されるが、押しても何も反応しないので、押すとヘッダーの全てがsearchの文字入力欄になってスマホ/ipadの入力が起動するようにして、
-
-決済完了後メール送信、というかshopoifyのメールキャンペーンautomationに載っているメール字自動化を基本的に全部搭載
+stripe本番
 
 /ufuhとかでオーダーを見れるようにして
-
-決済後にカートに商品が残り続ける問題。決済終わったらカートの商品は削除するようにして
-
-配達先住所stripeのフォーム全体的に修正
 
 AIようのUI
 
 <＜ルール＞＞
 カラーは全部大文字で
+
 
 <<<<<<githubの変更がvercelでディプロイしているコードに自動で反映されない時>>>>>>>>
 1. Git に正しい author を設定
@@ -57,6 +42,10 @@ git commit --amend --reset-author --no-edit
 git push origin main -f
 これで最新コミットの author が正しい GitHub メールに置き換わります。
 <<<<<<<<<<>>>>>>>>>>
+
+<<<<<教訓>>>>>>>.
+データを新しく作るときはsupabase sqlコードを忘れるな
+
 
 git add .
 git commit -m "changes"

@@ -8,10 +8,12 @@ import { uploadImage } from '@/lib/cloudinary-client'
 export default function AdminPage() {
   const [brands, setBrands] = useState<Brand[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'brands' | 'products'>('products')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
   const [createdMessage, setCreatedMessage] = useState<'Created!' | ''>('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('All')
 
   // Form states
   const [newBrand, setNewBrand] = useState({ 
@@ -26,7 +28,7 @@ export default function AdminPage() {
     price: '',
     brand_id: '',
     description: '',
-    category: 'All',
+    category: 'T-Shirt',
     colors: [] as string[],
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[]
   })
@@ -37,6 +39,15 @@ export default function AdminPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // Filter products by category
+  useEffect(() => {
+    if (selectedCategory === 'All') {
+      setFilteredProducts(products)
+    } else {
+      setFilteredProducts(products.filter(product => product.category === selectedCategory))
+    }
+  }, [products, selectedCategory])
 
   const loadData = async () => {
     setLoading(true)
@@ -164,7 +175,7 @@ export default function AdminPage() {
           price: '',
           brand_id: '',
           description: '',
-          category: 'All',
+          category: 'T-Shirt',
           colors: [],
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL']
         })
@@ -299,10 +310,16 @@ export default function AdminPage() {
                         onChange={(e) => setNewProduct(prev => ({ ...prev, category: e.target.value }))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       >
-                        <option value="All">All</option>
-                        <option value="Men">Men</option>
-                        <option value="Women">Women</option>
-                        <option value="Hot">Hot</option>
+                        <option value="T-Shirt">T-Shirt</option>
+                        <option value="Hoodie">Hoodie</option>
+                        <option value="Sweatshirt">Sweatshirt</option>
+                        <option value="Jacket">Jacket</option>
+                        <option value="Pants">Pants</option>
+                        <option value="Shorts">Shorts</option>
+                        <option value="Hat">Hat</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Shoes">Shoes</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                     
@@ -449,9 +466,31 @@ export default function AdminPage() {
 
                 {/* Products List */}
                 <div>
-                  <h2 className="text-lg font-semibold mb-4">All Products</h2>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold">All Products ({filteredProducts.length})</h2>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium text-gray-700">Filter by category:</label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                      >
+                        <option value="All">All Categories</option>
+                        <option value="T-Shirt">T-Shirt</option>
+                        <option value="Hoodie">Hoodie</option>
+                        <option value="Sweatshirt">Sweatshirt</option>
+                        <option value="Jacket">Jacket</option>
+                        <option value="Pants">Pants</option>
+                        <option value="Shorts">Shorts</option>
+                        <option value="Hat">Hat</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Shoes">Shoes</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {products.map(product => {
+                    {filteredProducts.map(product => {
                       const brand = brands.find(b => b.id === product.brand_id)
                       return (
                         <div key={product.id} className="border border-gray-200 rounded-lg p-4">

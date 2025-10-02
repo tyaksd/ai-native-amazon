@@ -21,6 +21,7 @@ export default function ProductCarousel({ products, title = "You might also like
   const dragStartXRef = useRef<number>(0);
   const dragStartScrollLeftRef = useRef<number>(0);
   const resumeTimerRef = useRef<number | null>(null);
+  const dragThreshold = 5; // ドラッグとクリックを区別する閾値（ピクセル）
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -83,27 +84,46 @@ export default function ProductCarousel({ products, title = "You might also like
     const onPointerDown = (e: PointerEvent) => {
       if (!el) return;
       pauseAuto();
-      isDraggingRef.current = true;
+      isDraggingRef.current = false; // 最初はドラッグではない
       el.setPointerCapture(e.pointerId);
       dragStartXRef.current = e.clientX;
       dragStartScrollLeftRef.current = el.scrollLeft;
-      (el as HTMLElement).style.cursor = 'grabbing';
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (!el || !isDraggingRef.current) return;
-      const dx = e.clientX - dragStartXRef.current;
-      el.scrollLeft = dragStartScrollLeftRef.current - dx;
+      if (!el) return;
+      const dx = Math.abs(e.clientX - dragStartXRef.current);
+      
+      // 閾値を超えた場合のみドラッグ開始
+      if (dx > dragThreshold && !isDraggingRef.current) {
+        isDraggingRef.current = true;
+        (el as HTMLElement).style.cursor = 'grabbing';
+      }
+      
+      if (isDraggingRef.current) {
+        const deltaX = e.clientX - dragStartXRef.current;
+        el.scrollLeft = dragStartScrollLeftRef.current - deltaX;
+      }
     };
 
     const endDrag = (e?: PointerEvent) => {
       if (!el) return;
+      const wasDragging = isDraggingRef.current;
       isDraggingRef.current = false;
       (el as HTMLElement).style.cursor = '';
       if (e) {
         try { el.releasePointerCapture(e.pointerId); } catch {}
       }
-      resumeAutoAfterIdle();
+      
+      // ドラッグしていなかった場合のみリンクを有効にする
+      if (!wasDragging) {
+        // クリックイベントを許可するために少し遅延
+        setTimeout(() => {
+          resumeAutoAfterIdle();
+        }, 10);
+      } else {
+        resumeAutoAfterIdle();
+      }
     };
 
     el.addEventListener('wheel', onWheel, { passive: true });
@@ -141,7 +161,16 @@ export default function ProductCarousel({ products, title = "You might also like
           {/* 元セット */}
           {products.map((product) => (
             <div key={product.id} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">
-              <Link href={`/product/${product.id}`} className="block">
+              <Link 
+                href={`/product/${product.id}`} 
+                className="block"
+                onClick={(e) => {
+                  // ドラッグ中でない場合のみナビゲーションを許可
+                  if (isDraggingRef.current) {
+                    e.preventDefault();
+                  }
+                }}
+              >
                 {product.images?.length ? (
                   <div className="aspect-square overflow-hidden">
                     <Image
@@ -160,7 +189,16 @@ export default function ProductCarousel({ products, title = "You might also like
               </Link>
               <div className="pt-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Link href={`/product/${product.id}`} className="block font-medium text-gray-900 truncate hover:underline">
+                  <Link 
+                    href={`/product/${product.id}`} 
+                    className="block font-medium text-gray-900 truncate hover:underline"
+                    onClick={(e) => {
+                      // ドラッグ中でない場合のみナビゲーションを許可
+                      if (isDraggingRef.current) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
                     {product.name}
                   </Link>
                 </div>
@@ -172,7 +210,16 @@ export default function ProductCarousel({ products, title = "You might also like
           {/* 複製セット（シームレスループ用） */}
           {products.map((product) => (
             <div key={`dup-${product.id}`} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">
-              <Link href={`/product/${product.id}`} className="block">
+              <Link 
+                href={`/product/${product.id}`} 
+                className="block"
+                onClick={(e) => {
+                  // ドラッグ中でない場合のみナビゲーションを許可
+                  if (isDraggingRef.current) {
+                    e.preventDefault();
+                  }
+                }}
+              >
                 {product.images?.length ? (
                   <div className="aspect-square overflow-hidden">
                     <Image
@@ -191,7 +238,16 @@ export default function ProductCarousel({ products, title = "You might also like
               </Link>
               <div className="pt-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Link href={`/product/${product.id}`} className="block font-medium text-gray-900 truncate hover:underline">
+                  <Link 
+                    href={`/product/${product.id}`} 
+                    className="block font-medium text-gray-900 truncate hover:underline"
+                    onClick={(e) => {
+                      // ドラッグ中でない場合のみナビゲーションを許可
+                      if (isDraggingRef.current) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
                     {product.name}
                   </Link>
                 </div>

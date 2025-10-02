@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from 'react'
-import { getBrandById, getProductsByBrand, Brand, Product } from "@/lib/data";
+import { useEffect, useMemo, useState } from "react";
+import { getBrandById, getProductsByBrand, type Brand, type Product } from "@/lib/data";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -13,61 +13,47 @@ type PageProps = {
   params: { brandId: string };
 };
 
-export default function BrandPage({ params }: PageProps) {
-  const resolvedParams = params as { brandId: string }
-  const [brand, setBrand] = useState<Brand | null>(null)
-  const [items, setItems] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedTab, setSelectedTab] = useState<'all' | 'new'>('all')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All')
-
+export default function BrandNewProductsPage({ params }: PageProps) {
+  const resolvedParams = params as { brandId: string };
+  const [brand, setBrand] = useState<Brand | null>(null);
+  const [items, setItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const isNewProduct = (createdAt: string) => {
-    const created = new Date(createdAt).getTime()
-    const now = Date.now()
-    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
-    return now - created <= THIRTY_DAYS_MS
-  }
+    const created = new Date(createdAt).getTime();
+    const now = Date.now();
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    return now - created <= THIRTY_DAYS_MS;
+  };
 
-  const displayedItems = useMemo(() => {
-    let filtered = items
-    
-    // Filter by tab (all vs new)
-    if (selectedTab === 'new') {
-      filtered = filtered.filter(p => isNewProduct(p.created_at))
-    }
-    
-    // Filter by category
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter(p => p.category === selectedCategory)
-    }
-    
-    return filtered
-  }, [items, selectedTab, selectedCategory])
+  const newItems = useMemo(() => {
+    return items.filter((p) => isNewProduct(p.created_at));
+  }, [items]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const [brandData, productsData] = await Promise.all([
           getBrandById(resolvedParams.brandId),
-          getProductsByBrand(resolvedParams.brandId)
-        ])
-        setBrand(brandData)
-        setItems(productsData)
+          getProductsByBrand(resolvedParams.brandId),
+        ]);
+        setBrand(brandData);
+        setItems(productsData);
       } catch (error) {
-        console.error('Error loading brand data:', error)
+        console.error("Error loading brand new products:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    loadData()
-  }, [resolvedParams.brandId])
+    };
+    loadData();
+  }, [resolvedParams.brandId]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (!brand) {
@@ -84,20 +70,20 @@ export default function BrandPage({ params }: PageProps) {
       {/* Hero Banner */}
       <div className="relative h-35 md:h-48 bg-gradient-to-r from-gray-100 to-gray-200">
         {brand.background_image && (
-          <Image 
-            src={brand.background_image} 
-            alt={`${brand.name} background`} 
-            fill 
-            className="object-cover" 
+          <Image
+            src={brand.background_image}
+            alt={`${brand.name} background`}
+            fill
+            className="object-cover"
           />
         )}
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative h-full flex items-end justify-start">
           <div className="transform translate-y-8 translate-x-8">
             <div className="w-20 h-20 bg-white/90 rounded-lg shadow-lg overflow-hidden">
-              <Image 
-                src={brand.icon} 
-                alt={brand.name} 
+              <Image
+                src={brand.icon}
+                alt={brand.name}
                 fill
                 className="object-cover"
               />
@@ -118,57 +104,26 @@ export default function BrandPage({ params }: PageProps) {
             {/* Category Navigation */}
             <div className="mb-8">
               <div className="flex flex-wrap gap-2 border-b border-gray-200">
-                <button
-                  onClick={() => setSelectedTab('all')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    selectedTab === 'all'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
+                <Link
+                  href={`/${brand.id}`}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors border-transparent text-gray-600 hover:text-gray-900`}
                 >
                   All Products
-                </button>
-                <button
-                  onClick={() => setSelectedTab('new')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    selectedTab === 'new'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
+                </Link>
+                <span
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors border-gray-900 text-gray-900`}
                 >
                   New
-                </button>
-              </div>
-              
-              {/* Category Filter */}
-              <div className="mt-4 flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Filter by category:</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="All">All Categories</option>
-                  <option value="T-Shirt">T-Shirt</option>
-                  <option value="Hoodie">Hoodie</option>
-                  <option value="Sweatshirt">Sweatshirt</option>
-                  <option value="Jacket">Jacket</option>
-                  <option value="Pants">Pants</option>
-                  <option value="Shorts">Shorts</option>
-                  <option value="Hat">Hat</option>
-                  <option value="Accessories">Accessories</option>
-                  <option value="Shoes">Shoes</option>
-                  <option value="Other">Other</option>
-                </select>
+                </span>
               </div>
             </div>
 
             {/* Products Grid */}
-            {displayedItems.length === 0 ? (
-              <div className="text-gray-600 text-center py-12">No products available for this brand.</div>
+            {newItems.length === 0 ? (
+              <div className="text-gray-600 text-center py-12">No new products in the last 30 days.</div>
             ) : (
               <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-                {displayedItems.map((p) => (
+                {newItems.map((p) => (
                   <Link key={p.id} href={`/${p.brand_id}/${p.id}`} className="group block">
                     <div className="relative">
                       <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
@@ -188,12 +143,7 @@ export default function BrandPage({ params }: PageProps) {
                     </div>
                     <div className="mt-3">
                       <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                          {p.category}
-                        </span>
-                      </div>
+                      <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
                     </div>
                   </Link>
                 ))}
@@ -206,11 +156,11 @@ export default function BrandPage({ params }: PageProps) {
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
-                  <Image 
-                    src={brand.icon} 
-                    alt={brand.name} 
-                    width={40} 
-                    height={40} 
+                  <Image
+                    src={brand.icon}
+                    alt={brand.name}
+                    width={40}
+                    height={40}
                     className="object-cover"
                   />
                 </div>

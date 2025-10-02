@@ -35,3 +35,25 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # godship
+
+## Environment Variables
+
+Set these in `.env.local` or your hosting provider:
+
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+
+### SMTP for Order Confirmation Emails
+
+To send confirmation emails (from `jack@godship.io` using Titan SMTP), add:
+
+- SMTP_HOST
+- SMTP_PORT (465 for SSL, 587 for STARTTLS)
+- SMTP_USER
+- SMTP_PASS
+- MAIL_FROM (default: `jack@godship.io`)
+
+After successful Stripe Checkout, the webhook creates an order, inserts items, then emails `orders.customer_email` with a receipt.

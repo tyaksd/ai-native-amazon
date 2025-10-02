@@ -153,7 +153,7 @@ export default function Cart() {
               </div>
             </div>
             <button 
-              className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors"
+              className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
               onClick={() => {
                 void (async () => {
                   try {

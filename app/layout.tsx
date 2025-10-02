@@ -6,6 +6,7 @@ import "./globals.css";
 import MobileSearch from "./components/MobileSearch";
 import LogoLink from "./components/LogoLink";
 import ContactButton from "./components/ContactButton";
+import NewsletterSignup from "./components/NewsletterSignup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,6 +66,11 @@ export default function RootLayout({
               </form>
             </div>
             <div className="hidden md:flex items-center gap-3">
+              <Link href="/favorites" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900" title="Favorites">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </Link>
               <Link href="/cart" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path d="M2.25 3.75a.75.75 0 000 1.5h1.862c.27 0 .505.181.574.442l2.14 8.023A2.25 2.25 0 008.996 15h7.258a2.25 2.25 0 002.17-1.607l1.6-5.6a.75.75 0 00-.72-.968H6.615l-.36-1.35A2.25 2.25 0 004.112 3.75H2.25z" />
@@ -77,6 +83,11 @@ export default function RootLayout({
             </div>
             <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-700">
               <MobileSearch />
+              <Link href="/favorites" aria-label="Favorites" className="p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </Link>
               <Link href="/cart" aria-label="Cart" className="p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path d="M2.25 3.75a.75.75 0 000 1.5h1.862c.27 0 .505.181.574.442l2.14 8.023A2.25 2.25 0 008.996 15h7.258a2.25 2.25 0 002.17-1.607l1.6-5.6a.75.75 0 00-.72-.968H6.615l-.36-1.35A2.25 2.25 0 004.112 3.75H2.25z" />
@@ -90,7 +101,10 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="mt-16 bg-black text-white">
-          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+          <div className="mx-auto max-w-7xl px-3 sm:px-3 py-1">
+            <NewsletterSignup />
+          </div>
+          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-6 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
             <div className="md:col-span-2">
               <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">The best selection of AI brands for you</h3>
             </div>

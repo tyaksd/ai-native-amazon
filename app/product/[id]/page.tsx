@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, use } from 'react'
 import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
 import ProductCarousel from "@/app/components/ProductCarousel";
+import FavoriteButton from "@/app/components/FavoriteButton";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -204,8 +205,16 @@ export default function ProductDetail({ params }: PageProps) {
         </div>
         <div className="md:ml-0 md:col-span-2 md:pt-16">
           <div>
-            <h1 className="text-3xl font-semibold mb-2 tracking-tight text-gray-900">{product.name}</h1>
-            <div className="text-xl mb-4 text-gray-900">{formatUSD(product.price)}</div>
+            <div className="flex items-start justify-between mb-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-gray-900 flex-1">{product.name}</h1>
+              <FavoriteButton productId={product.id} className="ml-4 flex-shrink-0" />
+            </div>
+            <div className="text-xl mb-2 text-gray-900">{formatUSD(product.price)}</div>
+            <div className="mb-4">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {product.category}
+              </span>
+            </div>
           </div>
           {brand && (
             <div className="mb-4">
@@ -435,6 +444,12 @@ export default function ProductDetail({ params }: PageProps) {
             >
               Buy Now
             </button>
+            
+            {/* Free Shipping Text */}
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <Image src="/truck.png" alt="Truck" width={20} height={20} className="w-5 h-5" />
+              <span className="text-gray-600 text-sm">Free Shipping</span>
+            </div>
           </div>
         </div>
       </div>
