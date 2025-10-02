@@ -2,14 +2,14 @@
 
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation' // Removed unused import
 
 export default function MobileSearch() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(64) // フォールバック
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const router = useRouter()
+  // const router = useRouter() // Removed unused router
 
   useEffect(() => setMounted(true), [])
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface FavoriteButtonProps {
@@ -17,7 +17,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
   const [message, setMessage] = useState('')
 
   // Get a simple user ID (for demo purposes, we'll use localStorage)
-  const getUserId = () => {
+  const getUserId = useCallback(() => {
     if (userId) return userId
     let storedUserId = localStorage.getItem('user_id')
     if (!storedUserId) {
@@ -25,7 +25,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
       localStorage.setItem('user_id', storedUserId)
     }
     return storedUserId
-  }
+  }, [userId])
 
   // Check if product is favorited
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
     }
 
     checkFavorite()
-  }, [productId])
+  }, [productId, getUserId])
 
   const toggleFavorite = async () => {
     if (isLoading) return

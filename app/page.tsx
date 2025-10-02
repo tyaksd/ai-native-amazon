@@ -16,7 +16,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchResults, setSearchResults] = useState<{products: Product[], brands: Brand[]} | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
+  const [, setIsSearching] = useState(false) // Using underscore to indicate intentionally unused
   const shuffleProducts = (items: Product[]) => {
     const arr = [...items]
     for (let i = arr.length - 1; i > 0; i--) {

@@ -337,10 +337,16 @@ export async function POST(req: NextRequest) {
       
             // ===== Shipping address =====
       // 優先: session.shipping_details.address → Charge.shipping.address → PI.shipping.address（フォールバック）
+      // Define interface for shipping details
+      interface ShippingDetails {
+        address?: Stripe.Address
+        name?: string
+      }
+      
       const shippingAddress =
-      (fullSession as any).shipping_details?.address ??
-      (firstCharge?.shipping as any)?.address ??
-      (pi?.shipping as any)?.address ??
+      (fullSession as Stripe.Checkout.Session & { shipping_details?: ShippingDetails }).shipping_details?.address ??
+      (firstCharge?.shipping as Stripe.Charge.Shipping)?.address ??
+      (pi?.shipping as Stripe.PaymentIntent.Shipping)?.address ??
       null
 
             // ===== Billing address =====
@@ -353,9 +359,9 @@ export async function POST(req: NextRequest) {
 
 
         const shippingName =
-  (fullSession as any).shipping_details?.name ??
-  (firstCharge?.shipping as any)?.name ??
-  (pi?.shipping as any)?.name ?? null;
+  (fullSession as Stripe.Checkout.Session & { shipping_details?: ShippingDetails }).shipping_details?.name ??
+  (firstCharge?.shipping as Stripe.Charge.Shipping)?.name ??
+  (pi?.shipping as Stripe.PaymentIntent.Shipping)?.name ?? null;
 
 const billingName =
   firstCharge?.billing_details?.name ??
@@ -426,7 +432,15 @@ const billingName =
       })()
 
       if (Array.isArray(cartMeta) && cartMeta.length > 0) {
-        itemsPayload = cartMeta.map((ci: any) => ({
+        type CartMetaItem = {
+          id?: string
+          name?: string
+          price?: number
+          quantity?: number
+          size?: string | null
+          color?: string | null
+        }
+        itemsPayload = (cartMeta as CartMetaItem[]).map((ci) => ({
           order_id: order.id,
           product_id: ci.id || null,
           product_name: ci.name || 'Item',
