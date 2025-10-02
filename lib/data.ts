@@ -18,8 +18,10 @@ export type Product = {
   brand_id: string;
   description: string | null;
   category: string;
+  type: string;
   colors: string[];
   sizes: string[];
+  gender: string;
   created_at: string;
   updated_at: string;
 };
@@ -114,6 +116,36 @@ export async function getProductsByCategory(category: string): Promise<Product[]
 
   if (error) {
     console.error('Error fetching products by category:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function getProductsByType(type: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('type', type)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching products by type:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function getProductsByGender(gender: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('gender', gender)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching products by gender:', error)
     return []
   }
 
@@ -234,4 +266,133 @@ export async function getRandomProducts(excludeId: string, limit: number = 4): P
   // ランダムに並び替えて指定された数だけ取得
   const shuffled = (data || []).sort(() => 0.5 - Math.random())
   return shuffled.slice(0, limit)
+}
+
+export async function getProductCategories(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('category')
+    .not('category', 'is', null)
+
+  if (error) {
+    console.error('Error fetching product categories:', error)
+    return []
+  }
+
+  // 重複を除去してカテゴリーの配列を作成
+  const categories = [...new Set(data?.map(item => item.category).filter(Boolean))]
+  return categories.sort()
+}
+
+// カテゴリーとタイプのマッピング
+export function getCategoryTypeMapping(): Record<string, string[]> {
+  return {
+    'Clothing': ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Jacket', 'Pants', 'Shorts'],
+    'Accessories': ['Bags'],
+    'Hats': ['Hat'],
+    'Others': ['Other']
+  }
+}
+
+// 大分類を取得する関数
+export async function getMainCategories(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('category')
+    .not('category', 'is', null)
+
+  if (error) {
+    console.error('Error fetching product categories:', error)
+    return []
+  }
+
+  const existingCategories = [...new Set(data?.map(item => item.category).filter(Boolean))]
+  return existingCategories.sort()
+}
+
+// 特定の大分類のタイプを取得する関数
+export async function getTypesByCategory(category: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('type')
+    .eq('category', category)
+    .not('type', 'is', null)
+
+  if (error) {
+    console.error('Error fetching product types:', error)
+    return []
+  }
+
+  const existingTypes = [...new Set(data?.map(item => item.type).filter(Boolean))]
+  return existingTypes.sort()
+}
+
+// 特定のカテゴリーの性別を取得する関数
+export async function getGendersByCategory(category: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('gender')
+    .eq('category', category)
+    .not('gender', 'is', null)
+
+  if (error) {
+    console.error('Error fetching product genders:', error)
+    return []
+  }
+
+  const existingGenders = [...new Set(data?.map(item => item.gender).filter(Boolean))]
+  return existingGenders.sort()
+}
+
+// 特定のカテゴリーと性別のタイプを取得する関数
+export async function getTypesByCategoryAndGender(category: string, gender: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('type')
+    .eq('category', category)
+    .eq('gender', gender)
+    .not('type', 'is', null)
+
+  if (error) {
+    console.error('Error fetching product types by category and gender:', error)
+    return []
+  }
+
+  const existingTypes = [...new Set(data?.map(item => item.type).filter(Boolean))]
+  return existingTypes.sort()
+}
+
+// カテゴリー、性別、タイプで商品を絞り込む関数
+export async function getProductsByCategoryGenderAndType(category: string, gender: string, type: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('category', category)
+    .eq('gender', gender)
+    .eq('type', type)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching products by category, gender and type:', error)
+    return []
+  }
+
+  return data || []
+}
+
+// カテゴリーと性別で商品を絞り込む関数
+export async function getProductsByCategoryAndGender(category: string, gender: string): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('category', category)
+    .eq('gender', gender)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching products by category and gender:', error)
+    return []
+  }
+
+  return data || []
 }

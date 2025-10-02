@@ -8,10 +8,11 @@ interface FavoriteButtonProps {
   userId?: string
   className?: string
   onFavoriteRemoved?: (productId: string) => void
+  initialFavoriteState?: boolean
 }
 
-export default function FavoriteButton({ productId, userId, className = '', onFavoriteRemoved }: FavoriteButtonProps) {
-  const [isFavorited, setIsFavorited] = useState(false)
+export default function FavoriteButton({ productId, userId, className = '', onFavoriteRemoved, initialFavoriteState }: FavoriteButtonProps) {
+  const [isFavorited, setIsFavorited] = useState(initialFavoriteState || false)
   const [isLoading, setIsLoading] = useState(false)
   const [showMessage, setShowMessage] = useState(false)
   const [message, setMessage] = useState('')
@@ -27,8 +28,13 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
     return storedUserId
   }, [userId])
 
-  // Check if product is favorited
+  // Check if product is favorited - only if initialFavoriteState is not provided
   useEffect(() => {
+    if (initialFavoriteState !== undefined) {
+      setIsFavorited(initialFavoriteState)
+      return
+    }
+
     const checkFavorite = async () => {
       try {
         const currentUserId = getUserId()
@@ -50,7 +56,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
     }
 
     checkFavorite()
-  }, [productId, getUserId])
+  }, [productId, getUserId, initialFavoriteState])
 
   const toggleFavorite = async () => {
     if (isLoading) return
@@ -123,10 +129,10 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
         title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
       >
         {isLoading ? (
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-current border-t-transparent rounded-full animate-spin" />
         ) : (
           <svg
-            className="w-5 h-5"
+            className="w-7 h-7"
             fill={isFavorited ? 'currentColor' : 'none'}
             stroke="currentColor"
             viewBox="0 0 24 24"

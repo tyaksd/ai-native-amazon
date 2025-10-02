@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getBrandById, getProductsByBrand, type Brand, type Product } from "@/lib/data";
+import FavoriteButton from '@/app/components/FavoriteButton';
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -122,11 +123,11 @@ export default function BrandNewProductsPage({ params }: PageProps) {
             {newItems.length === 0 ? (
               <div className="text-gray-600 text-center py-12">No new products in the last 30 days.</div>
             ) : (
-              <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
                 {newItems.map((p) => (
-                  <Link key={p.id} href={`/${p.brand_id}/${p.id}`} className="group block">
-                    <div className="relative">
-                      <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                  <div key={p.id} className="group relative">
+                    <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                      <div className="aspect-square bg-gray-50">
                         {p.images && p.images.length > 0 ? (
                           <Image src={p.images[0]} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         ) : (
@@ -135,17 +136,20 @@ export default function BrandNewProductsPage({ params }: PageProps) {
                           </div>
                         )}
                       </div>
-                      {isNewProduct(p.created_at) && (
-                        <div className="absolute top-2 left-2">
-                          <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
-                        </div>
-                      )}
+                    </Link>
+                    {isNewProduct(p.created_at) && (
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 z-10">
+                      <FavoriteButton productId={p.id} className="bg-white/80 hover:bg-white rounded-full p-1" />
                     </div>
                     <div className="mt-3">
                       <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
                       <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
@@ -161,7 +165,7 @@ export default function BrandNewProductsPage({ params }: PageProps) {
                     alt={brand.name}
                     width={40}
                     height={40}
-                    className="object-cover"
+                    className="object-cover rounded"
                   />
                 </div>
                 <div>

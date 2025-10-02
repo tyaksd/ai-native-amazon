@@ -15,5 +15,9 @@ CREATE INDEX IF NOT EXISTS idx_favorites_product_id ON favorites(product_id);
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 
 -- Create policy to allow all operations for now (we can restrict this later)
-CREATE POLICY "Allow all operations on favorites" ON favorites
-  FOR ALL USING (true);
+DO $$ BEGIN
+    CREATE POLICY "Allow all operations on favorites" ON favorites
+      FOR ALL USING (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;

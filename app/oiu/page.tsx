@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct } from '@/lib/data'
+import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, getCategoryTypeMapping } from '@/lib/data'
 import { uploadImage } from '@/lib/cloudinary-client'
 
 export default function AdminPage() {
@@ -14,6 +14,7 @@ export default function AdminPage() {
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
   const [createdMessage, setCreatedMessage] = useState<'Created!' | ''>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [selectedGender, setSelectedGender] = useState<string>('All')
 
   // Form states
   const [newBrand, setNewBrand] = useState({ 
@@ -28,26 +29,45 @@ export default function AdminPage() {
     price: '',
     brand_id: '',
     description: '',
-    category: 'T-Shirt',
+    category: 'Clothing',
+    type: 'T-Shirt',
     colors: [] as string[],
-    sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[]
+    sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
+    gender: 'Unisex'
   })
   // removed unused file states
   const [colorInput, setColorInput] = useState('')
   const [sizeInput, setSizeInput] = useState('')
 
+  // Helper functions for category/type mapping
+  const getDefaultTypeForCategory = (category: string): string => {
+    const mapping = getCategoryTypeMapping()
+    return mapping[category]?.[0] || 'T-Shirt'
+  }
+
+  const getTypeOptionsForCategory = (category: string): string[] => {
+    const mapping = getCategoryTypeMapping()
+    return mapping[category] || ['T-Shirt']
+  }
+
   useEffect(() => {
     loadData()
   }, [])
 
-  // Filter products by category
+  // Filter products by category and gender
   useEffect(() => {
-    if (selectedCategory === 'All') {
-      setFilteredProducts(products)
-    } else {
-      setFilteredProducts(products.filter(product => product.category === selectedCategory))
+    let filtered = products
+    
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(product => product.category === selectedCategory)
     }
-  }, [products, selectedCategory])
+    
+    if (selectedGender !== 'All') {
+      filtered = filtered.filter(product => product.gender === selectedGender)
+    }
+    
+    setFilteredProducts(filtered)
+  }, [products, selectedCategory, selectedGender])
 
   const loadData = async () => {
     setLoading(true)
@@ -175,9 +195,11 @@ export default function AdminPage() {
           price: '',
           brand_id: '',
           description: '',
-          category: 'T-Shirt',
+          category: 'Clothing',
+          type: 'T-Shirt',
           colors: [],
-          sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL']
+          sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+          gender: 'Unisex'
         })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
@@ -307,19 +329,46 @@ export default function AdminPage() {
                       <label className="block text-sm font-medium text-gray-700">Category</label>
                       <select
                         value={newProduct.category}
-                        onChange={(e) => setNewProduct(prev => ({ ...prev, category: e.target.value }))}
+                        onChange={(e) => {
+                          setNewProduct(prev => ({ 
+                            ...prev, 
+                            category: e.target.value,
+                            type: getDefaultTypeForCategory(e.target.value)
+                          }))
+                        }}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       >
-                        <option value="T-Shirt">T-Shirt</option>
-                        <option value="Hoodie">Hoodie</option>
-                        <option value="Sweatshirt">Sweatshirt</option>
-                        <option value="Jacket">Jacket</option>
-                        <option value="Pants">Pants</option>
-                        <option value="Shorts">Shorts</option>
-                        <option value="Hat">Hat</option>
+                        <option value="Clothing">Clothing</option>
                         <option value="Accessories">Accessories</option>
-                        <option value="Shoes">Shoes</option>
-                        <option value="Other">Other</option>
+                        <option value="Hats">Hats</option>
+                        <option value="Others">Others</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Type</label>
+                      <select
+                        value={newProduct.type}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, type: e.target.value }))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {getTypeOptionsForCategory(newProduct.category).map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Gender</label>
+                      <select
+                        value={newProduct.gender}
+                        onChange={(e) => setNewProduct(prev => ({ ...prev, gender: e.target.value }))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="Men">Men</option>
+                        <option value="Women">Women</option>
+                        <option value="Unisex">Unisex</option>
+                        <option value="Null">Null</option>
                       </select>
                     </div>
                     
@@ -468,25 +517,41 @@ export default function AdminPage() {
                 <div>
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">All Products ({filteredProducts.length})</h2>
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium text-gray-700">Filter by category:</label>
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      >
-                        <option value="All">All Categories</option>
-                        <option value="T-Shirt">T-Shirt</option>
-                        <option value="Hoodie">Hoodie</option>
-                        <option value="Sweatshirt">Sweatshirt</option>
-                        <option value="Jacket">Jacket</option>
-                        <option value="Pants">Pants</option>
-                        <option value="Shorts">Shorts</option>
-                        <option value="Hat">Hat</option>
-                        <option value="Accessories">Accessories</option>
-                        <option value="Shoes">Shoes</option>
-                        <option value="Other">Other</option>
-                      </select>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700">Filter by category:</label>
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        >
+                          <option value="All">All Categories</option>
+                          <option value="T-Shirt">T-Shirt</option>
+                          <option value="Hoodie">Hoodie</option>
+                          <option value="Sweatshirt">Sweatshirt</option>
+                          <option value="Jacket">Jacket</option>
+                          <option value="Pants">Pants</option>
+                          <option value="Shorts">Shorts</option>
+                          <option value="Hat">Hat</option>
+                          <option value="Accessories">Accessories</option>
+                          <option value="Shoes">Shoes</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700">Filter by gender:</label>
+                        <select
+                          value={selectedGender}
+                          onChange={(e) => setSelectedGender(e.target.value)}
+                          className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        >
+                          <option value="All">All Genders</option>
+                          <option value="Men">Men</option>
+                          <option value="Women">Women</option>
+                          <option value="Unisex">Unisex</option>
+                          <option value="Null">Null</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -510,6 +575,7 @@ export default function AdminPage() {
                           <h3 className="font-semibold text-gray-900">{product.name}</h3>
                           <p className="text-sm text-gray-600">Brand: {brand?.name}</p>
                           <p className="text-sm text-gray-600">Category: {product.category}</p>
+                          <p className="text-sm text-gray-600">Gender: {product.gender}</p>
                           {product.colors && product.colors.length > 0 && (
                             <div className="mt-1">
                               <p className="text-sm text-gray-600">Colors:</p>

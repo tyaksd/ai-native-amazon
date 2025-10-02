@@ -6,6 +6,7 @@ import { useState, useEffect, use } from 'react'
 import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
 import ProductCarousel from "@/app/components/ProductCarousel";
 import FavoriteButton from "@/app/components/FavoriteButton";
+import { useFavorites } from "@/lib/useFavorites";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -93,6 +94,9 @@ export default function ProductDetail({ params }: PageProps) {
   const [noticeMessage, setNoticeMessage] = useState('')
   const [showAdded, setShowAdded] = useState(false)
   const [addedMessage, setAddedMessage] = useState('')
+  
+  // Use the favorites hook
+  const { isFavorited, checkFavorites } = useFavorites()
 
   useEffect(() => {
     const loadData = async () => {
@@ -107,6 +111,10 @@ export default function ProductDetail({ params }: PageProps) {
           const allBrandProducts = await getProductsByBrand(productData.brand_id)
           const otherBrandProducts = allBrandProducts.filter(p => p.id !== productData.id).slice(0, 4)
           setBrandProducts(otherBrandProducts)
+          
+          // Check favorites for current product and related products
+          const allProductIds = [productData.id, ...otherBrandProducts.map(p => p.id)]
+          await checkFavorites(allProductIds)
         }
       } catch (error) {
         console.error('Error loading product:', error)
@@ -142,7 +150,7 @@ export default function ProductDetail({ params }: PageProps) {
   }
 
   return (
-    <div className="px-1 pt-0 pb-6 bg-white -mt-4 relative px-3 sm:px-10">
+    <div className="px-1 pt-0 pb-6 bg-white -mt-4 relative  sm:px-10">
       {/* Copied Banner */}
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-pulse">
@@ -161,8 +169,8 @@ export default function ProductDetail({ params }: PageProps) {
           {noticeMessage}
         </div>
       )}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-5 mt-0">
-        <div className="space-y-4 md:col-span-3 md:pl-16">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-5 mt-0 px-3">
+        <div className="space-y-4 md:col-span-3 md:pl-16 ">
           {/* メイン画像 */}
           <div className="aspect-square bg-gradient-to-br from-gray-50 to-white flex items-center justify-center rounded-xl border border-gray-200 ring-1 ring-black/5 overflow-hidden max-w-lg mx-auto md:mx-0 mt-8">
             {product.images && product.images.length > 0 ? (
@@ -207,19 +215,23 @@ export default function ProductDetail({ params }: PageProps) {
           <div>
             <div className="flex items-start justify-between mb-2">
               <h1 className="text-3xl font-semibold tracking-tight text-gray-900 flex-1">{product.name}</h1>
-              <FavoriteButton productId={product.id} className="ml-4 flex-shrink-0" />
+              <FavoriteButton 
+                productId={product.id} 
+                className="ml-4 flex-shrink-0" 
+                initialFavoriteState={isFavorited(product.id)}
+              />
             </div>
             <div className="text-xl mb-2 text-gray-900">{formatUSD(product.price)}</div>
             <div className="mb-4">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {product.category}
+                {product.type}
               </span>
             </div>
           </div>
           {brand && (
             <div className="mb-4">
               <Link href={`/${brand.id}`} className="inline-flex items-center gap-3 text-xl text-gray-600 hover:text-black">
-                <Image src={brand.icon} alt={brand.name} width={30} height={30} />
+                <Image src={brand.icon} alt={brand.name} width={30} height={30} className="rounded" />
                 <span className="font-semibold">{brand.name}</span>
               </Link>
             </div>

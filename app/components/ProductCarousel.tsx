@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/lib/data";
 import { useEffect, useRef } from "react";
+import FavoriteButton from '@/app/components/FavoriteButton';
+import { useFavorites } from '@/lib/useFavorites';
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -22,6 +24,16 @@ export default function ProductCarousel({ products, title = "You might also like
   const dragStartScrollLeftRef = useRef<number>(0);
   const resumeTimerRef = useRef<number | null>(null);
   const dragThreshold = 5; // ドラッグとクリックを区別する閾値（ピクセル）
+  
+  // Use the favorites hook
+  const { isFavorited, checkFavorites } = useFavorites()
+
+  // Check favorites when products change
+  useEffect(() => {
+    if (products.length > 0) {
+      checkFavorites(products.map(p => p.id))
+    }
+  }, [products, checkFavorites])
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -150,17 +162,17 @@ export default function ProductCarousel({ products, title = "You might also like
   if (products.length === 0) return null;
 
   return (
-    <div className="mt-12 px-3 sm:px-10">
+    <div className="mt-12">
       <h2 className="text-xl font-semibold tracking-tight mb-6 text-gray-900">{title}</h2>
       <div className="relative overflow-hidden">
         <div
           ref={scrollContainerRef}
-          className="flex gap-2 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 cursor-grab"
+          className="flex overflow-x-auto scrollbar-hide pb-4 cursor-grab"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {/* 元セット */}
           {products.map((product) => (
-            <div key={product.id} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">
+            <div key={product.id} className="group relative flex-shrink-0 w-48 sm:w-56">
               <Link 
                 href={`/product/${product.id}`} 
                 className="block"
@@ -187,7 +199,14 @@ export default function ProductCarousel({ products, title = "You might also like
                   </div>
                 )}
               </Link>
-              <div className="pt-2">
+              <div className="absolute top-2 right-2 z-10">
+                <FavoriteButton 
+                  productId={product.id} 
+                  className="bg-white/80 hover:bg-white rounded-full p-1" 
+                  initialFavoriteState={isFavorited(product.id)}
+                />
+              </div>
+              <div className="pt-2 ml-2">
                 <div className="flex items-center justify-between gap-3">
                   <Link 
                     href={`/product/${product.id}`} 
@@ -236,7 +255,7 @@ export default function ProductCarousel({ products, title = "You might also like
                   </div>
                 )}
               </Link>
-              <div className="pt-2">
+              <div className="pt-2 ml-2">
                 <div className="flex items-center justify-between gap-3">
                   <Link 
                     href={`/product/${product.id}`} 

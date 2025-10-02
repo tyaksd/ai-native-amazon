@@ -2,24 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, use } from 'react'
 import { getBrandById, getProductsByBrand, Brand, Product } from "@/lib/data";
+import FavoriteButton from '@/app/components/FavoriteButton';
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
 type PageProps = {
-  params: { brandId: string };
+  params: Promise<{ brandId: string }>;
 };
 
 export default function BrandPage({ params }: PageProps) {
-  const resolvedParams = params as { brandId: string }
+  const resolvedParams = use(params)
   const [brand, setBrand] = useState<Brand | null>(null)
   const [items, setItems] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState<'all' | 'new'>('all')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [selectedGender, setSelectedGender] = useState<string>('All')
+  const [selectedType, setSelectedType] = useState<string>('All')
 
   const isNewProduct = (createdAt: string) => {
     const created = new Date(createdAt).getTime()
@@ -41,8 +44,18 @@ export default function BrandPage({ params }: PageProps) {
       filtered = filtered.filter(p => p.category === selectedCategory)
     }
     
+    // Filter by gender
+    if (selectedGender !== 'All') {
+      filtered = filtered.filter(p => p.gender === selectedGender)
+    }
+    
+    // Filter by type
+    if (selectedType !== 'All') {
+      filtered = filtered.filter(p => p.type === selectedType)
+    }
+    
     return filtered
-  }, [items, selectedTab, selectedCategory])
+  }, [items, selectedTab, selectedCategory, selectedGender, selectedType])
 
   useEffect(() => {
     const loadData = async () => {
@@ -99,7 +112,7 @@ export default function BrandPage({ params }: PageProps) {
                 src={brand.icon} 
                 alt={brand.name} 
                 fill
-                className="object-cover"
+                className="object-cover rounded"
               />
             </div>
           </div>
@@ -107,16 +120,16 @@ export default function BrandPage({ params }: PageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-8 px-3 ">
+      <div className="max-w-7xl mx-auto py-8  ">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Brand Info */}
-          <div className="lg:col-span-2">
-            <div className="mb-8 mt-8">
+          <div className="lg:col-span-2 ">
+            <div className="mb-8 mt-8 px-3">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">{brand.name} products</h2>
             </div>
 
             {/* Category Navigation */}
-            <div className="mb-8">
+            <div className="mb-8 px-3">
               <div className="flex flex-wrap gap-2 border-b border-gray-200">
                 <button
                   onClick={() => setSelectedTab('all')}
@@ -161,17 +174,58 @@ export default function BrandPage({ params }: PageProps) {
                   <option value="Other">Other</option>
                 </select>
               </div>
+
+              {/* Gender Filter */}
+              {selectedCategory !== 'All' && (
+                <div className="mt-4 flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Filter by gender:</label>
+                  <select
+                    value={selectedGender}
+                    onChange={(e) => setSelectedGender(e.target.value)}
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option value="All">All Genders</option>
+                    <option value="Men">Men</option>
+                    <option value="Women">Women</option>
+                    <option value="Unisex">Unisex</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Type Filter */}
+              {selectedCategory !== 'All' && selectedGender !== 'All' && (
+                <div className="mt-4 flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Filter by type:</label>
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option value="All">All Types</option>
+                    <option value="T-Shirt">T-Shirt</option>
+                    <option value="Hoodie">Hoodie</option>
+                    <option value="Sweatshirt">Sweatshirt</option>
+                    <option value="Jacket">Jacket</option>
+                    <option value="Pants">Pants</option>
+                    <option value="Shorts">Shorts</option>
+                    <option value="Hat">Hat</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Shoes">Shoes</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Products Grid */}
             {displayedItems.length === 0 ? (
               <div className="text-gray-600 text-center py-12">No products available for this brand.</div>
             ) : (
-              <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
                 {displayedItems.map((p) => (
-                  <Link key={p.id} href={`/${p.brand_id}/${p.id}`} className="group block">
-                    <div className="relative">
-                      <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
+                  <div key={p.id} className="group relative">
+                    <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                      <div className="aspect-square bg-gray-50">
                         {p.images && p.images.length > 0 ? (
                           <Image src={p.images[0]} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         ) : (
@@ -180,13 +234,16 @@ export default function BrandPage({ params }: PageProps) {
                           </div>
                         )}
                       </div>
-                      {isNewProduct(p.created_at) && (
-                        <div className="absolute top-2 left-2">
-                          <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
-                        </div>
-                      )}
+                    </Link>
+                    {isNewProduct(p.created_at) && (
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 z-10">
+                      <FavoriteButton productId={p.id} className="bg-white/80 hover:bg-white rounded-full p-1" />
                     </div>
-                    <div className="mt-3">
+                    <div className="mt-3 ml-2">
                       <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
@@ -195,14 +252,14 @@ export default function BrandPage({ params }: PageProps) {
                         </span>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
           {/* Right Column - About Brand */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 px-3">
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-8">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
@@ -211,7 +268,7 @@ export default function BrandPage({ params }: PageProps) {
                     alt={brand.name} 
                     width={40} 
                     height={40} 
-                    className="object-cover"
+                    className="object-cover rounded"
                   />
                 </div>
                 <div>

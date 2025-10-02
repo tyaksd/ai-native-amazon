@@ -45,6 +45,10 @@ export type Database = {
           price: number
           brand_id: string
           description: string | null
+          category: string
+          type: string
+          colors: string[]
+          sizes: string[]
           created_at: string
           updated_at: string
         }
@@ -55,6 +59,10 @@ export type Database = {
           price: number
           brand_id: string
           description?: string | null
+          category: string
+          type: string
+          colors: string[]
+          sizes: string[]
           created_at?: string
           updated_at?: string
         }
@@ -65,8 +73,32 @@ export type Database = {
           price?: number
           brand_id?: string
           description?: string | null
+          category?: string
+          type?: string
+          colors?: string[]
+          sizes?: string[]
           created_at?: string
           updated_at?: string
+        }
+      }
+      favorites: {
+        Row: {
+          id: string
+          user_id: string
+          product_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          product_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          product_id?: string
+          created_at?: string
         }
       }
     }
