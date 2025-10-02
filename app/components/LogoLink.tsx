@@ -8,7 +8,7 @@ export default function LogoLink() {
   const router = useRouter()
 
   const handleLogoClick = (e: React.MouseEvent) => {
-    // 検索状態をクリアするためにURLパラメータを削除
+    // 検索状態とフィルター状態をクリアするためにURLパラメータを削除
     e.preventDefault()
     router.push('/')
   }

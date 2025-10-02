@@ -65,24 +65,36 @@ export default function Home() {
     // Handle search from URL parameters
     const urlParams = new URLSearchParams(window.location.search)
     const searchParam = urlParams.get('search')
+    
     if (searchParam) {
       setSearchQuery(searchParam)
       handleSearch(searchParam)
+    } else {
+      // 検索パラメータがない場合は、フィルター状態をリセットして全商品を表示
+      setSelectedMainCategory('All')
+      setSelectedGender('All')
+      setSelectedType('All')
+      setSearchQuery('')
+      setSearchResults(null)
     }
-  }, [])
+  }, [checkFavorites])
 
   // Listen for URL changes (for mobile search navigation)
   useEffect(() => {
     const handleUrlChange = () => {
       const urlParams = new URLSearchParams(window.location.search)
       const searchParam = urlParams.get('search')
+      
       if (searchParam && searchParam !== searchQuery) {
         setSearchQuery(searchParam)
         handleSearch(searchParam)
       } else if (!searchParam && (searchResults || searchQuery)) {
-        // 検索パラメータがない場合は検索状態をクリア
+        // 検索パラメータがない場合は検索状態とフィルター状態をクリア
         setSearchResults(null)
         setSearchQuery('')
+        setSelectedMainCategory('All')
+        setSelectedGender('All')
+        setSelectedType('All')
       }
     }
 
@@ -210,7 +222,7 @@ export default function Home() {
   return (
     <div className="">
       {/* Hero Section */}
-      <div className="relative py-6 md:py-12 text-center overflow-hidden bg-white">
+      <div className="relative py-3 md:py-10 text-center overflow-hidden bg-white">
         
         {/* Content */}
         <div className="relative z-10 px-8 sm:px-0">
@@ -322,7 +334,6 @@ export default function Home() {
               
               {/* 大分類フィルター */}
               <div className="mt-3 mb-3">
-                <div className="text-sm font-medium text-gray-700 mb-2">Category</div>
                 <div className="flex flex-wrap gap-2">
                   {["All", ...mainCategories].map((c) => (
                     <button 
@@ -343,7 +354,6 @@ export default function Home() {
               {/* 性別フィルター */}
               {selectedMainCategory !== 'All' && genders.length > 0 && (
                 <div className="mt-3">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Gender</div>
                   <div className="flex flex-wrap gap-2">
                     {["All", ...genders].map((c) => (
                       <button 
@@ -365,7 +375,6 @@ export default function Home() {
               {/* タイプフィルター */}
               {selectedMainCategory !== 'All' && selectedGender !== 'All' && types.length > 0 && (
                 <div className="mt-3">
-                  <div className="text-sm font-medium text-gray-700 mb-2">Type</div>
                   <div className="flex flex-wrap gap-2">
                     {["All", ...types].map((c) => (
                       <button 
