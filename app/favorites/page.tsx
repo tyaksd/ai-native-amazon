@@ -159,7 +159,7 @@ export default function FavoritesPage() {
         <p className="text-gray-600">{favoriteProducts.length} item(s) in your favorites</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-6">
         {favoriteProducts.map((product) => (
           <div key={product.id} className="group relative bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             <Link href={`/product/${product.id}`} className="block">

@@ -43,13 +43,14 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
           .select('id')
           .eq('user_id', currentUserId)
           .eq('product_id', productId)
-          .single()
+          .maybeSingle() // Use maybeSingle() instead of single() to avoid errors when no record found
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+        if (error) {
           console.error('Error checking favorite:', error)
-        } else {
-          setIsFavorited(!!data)
+          return
         }
+        
+        setIsFavorited(!!data)
       } catch (error) {
         console.error('Error checking favorite:', error)
       }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo, use } from 'react'
 import { getBrandById, getProductsByBrand, Brand, Product } from "@/lib/data";
 import FavoriteButton from '@/app/components/FavoriteButton';
+import { useFavorites } from '@/lib/useFavorites';
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -23,6 +24,9 @@ export default function BrandPage({ params }: PageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [selectedType, setSelectedType] = useState<string>('All')
+  
+  // Use the useFavorites hook to manage favorites efficiently
+  const { isFavorited, checkFavorites } = useFavorites()
 
   const isNewProduct = (createdAt: string) => {
     const created = new Date(createdAt).getTime()
@@ -66,6 +70,12 @@ export default function BrandPage({ params }: PageProps) {
         ])
         setBrand(brandData)
         setItems(productsData)
+        
+        // Check favorites for all products at once
+        if (productsData.length > 0) {
+          const productIds = productsData.map(p => p.id)
+          await checkFavorites(productIds)
+        }
       } catch (error) {
         console.error('Error loading brand data:', error)
       } finally {
@@ -73,7 +83,7 @@ export default function BrandPage({ params }: PageProps) {
       }
     }
     loadData()
-  }, [resolvedParams.brandId])
+  }, [resolvedParams.brandId, checkFavorites])
 
   if (loading) {
     return (
@@ -241,7 +251,11 @@ export default function BrandPage({ params }: PageProps) {
                       </div>
                     )}
                     <div className="absolute top-2 right-2 z-10">
-                      <FavoriteButton productId={p.id} className="bg-white/80 hover:bg-white rounded-full p-1" />
+                      <FavoriteButton 
+                        productId={p.id} 
+                        className="bg-white/80 hover:bg-white rounded-full p-1"
+                        initialFavoriteState={isFavorited(p.id)}
+                      />
                     </div>
                     <div className="mt-3 ml-2">
                       <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
