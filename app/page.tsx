@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from 'react'
-import { getBrands, getProducts, getProductsByCategory, getProductsByType, searchProducts, searchBrands, getProductCategories, getMainCategories, getTypesByCategory, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
+import { getBrands, getProducts, getVisibleProducts, getProductsByCategory, getProductsByType, searchProducts, searchBrands, getProductCategories, getMainCategories, getTypesByCategory, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
 
@@ -40,7 +40,7 @@ export default function Home() {
     const loadData = async () => {
       try {
         const [productsData, brandsData, mainCategoriesData] = await Promise.all([
-          getProducts(),
+          getVisibleProducts(),
           getBrands(),
           getMainCategories()
         ])
@@ -166,7 +166,7 @@ export default function Home() {
   useEffect(() => {
     const loadFilteredProducts = async () => {
       if (selectedMainCategory === 'All') {
-        const productsData = await getProducts()
+        const productsData = await getVisibleProducts()
         setProducts(shuffleProducts(productsData))
       } else if (selectedGender === 'All') {
         // 大分類のみで絞り込み

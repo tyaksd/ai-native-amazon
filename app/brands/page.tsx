@@ -7,13 +7,24 @@ import { getBrands, Brand } from '@/lib/data'
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([])
+  const [filteredBrands, setFilteredBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [availableCategories, setAvailableCategories] = useState<string[]>([])
 
   useEffect(() => {
     const loadBrands = async () => {
       try {
         const brandsData = await getBrands()
         setBrands(brandsData)
+        setFilteredBrands(brandsData)
+        
+        // Get unique categories from brands that have categories
+        const categories = [...new Set(brandsData
+          .filter(brand => brand.category)
+          .map(brand => brand.category!)
+        )].sort()
+        setAvailableCategories(categories)
       } catch (error) {
         console.error('Error loading brands:', error)
       } finally {
@@ -22,6 +33,15 @@ export default function BrandsPage() {
     }
     loadBrands()
   }, [])
+
+  // Filter brands by category
+  useEffect(() => {
+    if (selectedCategory === 'All') {
+      setFilteredBrands(brands)
+    } else {
+      setFilteredBrands(brands.filter(brand => brand.category === selectedCategory))
+    }
+  }, [brands, selectedCategory])
 
   if (loading) {
     return (
@@ -33,13 +53,28 @@ export default function BrandsPage() {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-3">
-      <div className="mb-4">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">New Brands</h1>
-        <p className="text-gray-600">Discover brands you love and their unique products</p>
+        <p className="text-gray-600 mb-4">Discover brands you love and their unique products</p>
+        
+        {/* Category Filter */}
+        <div className="flex items-center gap-4">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
+          >
+            <option value="All">All Categories</option>
+            {availableCategories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+          <span className="text-sm text-gray-500">({filteredBrands.length} brands)</span>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {brands.map((brand) => (
+        {filteredBrands.map((brand) => (
           <Link key={brand.id} href={`/${brand.id}`} className="group block">
             <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full">
               {/* Header with brand background image */}
@@ -76,9 +111,16 @@ export default function BrandsPage() {
               
               {/* Content */}
               <div className="p-3">
-                <h3 className="font-bold text-gray-900 text-lg mb-1 group-hover:text-black transition-colors">
-                  {brand.name}
-                </h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-gray-900 text-lg group-hover:text-black transition-colors">
+                    {brand.name}
+                  </h3>
+                  {brand.category && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                      {brand.category}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                   {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
                 </p>

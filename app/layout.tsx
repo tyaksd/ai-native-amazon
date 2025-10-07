@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-// import Image from "next/image"; // Removed unused import
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -101,10 +100,10 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="mt-16 bg-black text-white">
-          <div className="mx-auto max-w-7xl px-3 sm:px-3 py-1">
+          <div className="mx-auto max-w-7xl px-3 sm:px-3">
             <NewsletterSignup />
           </div>
-          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-6 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+          <div className="mx-auto max-w-7xl px-6 sm:px-10  grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
             <div className="md:col-span-2">
               <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">The best selection of AI brands for you</h3>
             </div>

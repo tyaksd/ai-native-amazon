@@ -4,6 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getProductById, Product } from "@/lib/data";
+import { loadStripe } from '@stripe/stripe-js';
+
+// Apple Payの型定義
+declare global {
+  interface Window {
+    ApplePaySession?: {
+      canMakePayments(): boolean;
+    };
+  }
+}
 
 type CartItem = {
   id: string;
@@ -19,6 +29,8 @@ function formatUSD(value: number) {
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<(Product & { quantity: number })[]>([]);
+  const [stripe, setStripe] = useState<any>(null);
+  const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -36,6 +48,24 @@ export default function Cart() {
       }
     }
     load();
+  }, []);
+
+  useEffect(() => {
+    const initializeStripe = async () => {
+      const stripeInstance = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      setStripe(stripeInstance);
+      
+      // Apple Payの利用可能性をチェック（SafariとiOSデバイスで利用可能）
+      const isApplePaySupported = () => {
+        return typeof window !== 'undefined' && 
+               window.ApplePaySession && 
+               window.ApplePaySession.canMakePayments();
+      };
+      
+      setIsApplePayAvailable(isApplePaySupported() || false);
+    };
+    
+    initializeStripe();
   }, []);
 
   const removeFromCart = (productId: string, size?: string | null, color?: string | null) => {
@@ -65,6 +95,38 @@ export default function Cart() {
 
   const getTotalPrice = () => {
     return products.reduce((total, product) => total + (product.price * product.quantity), 0);
+  };
+
+  const handleApplePay = async () => {
+    if (!stripe || !isApplePayAvailable) return;
+
+    try {
+      const items = products.map((p, idx) => ({ 
+        id: p.id, 
+        name: p.name, 
+        price: p.price, 
+        quantity: p.quantity,
+        size: cartItems[idx]?.size || null,
+        color: cartItems[idx]?.color || null,
+      }));
+
+      const res = await fetch('/api/checkout_sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.url) {
+        console.error('Checkout session error:', data);
+        return;
+      }
+
+      // Stripe Checkoutにリダイレクト（Apple Payが自動的に表示される）
+      window.location.href = data.url;
+    } catch (e) {
+      console.error('Apple Pay error:', e);
+    }
   };
 
   if (products.length === 0) {
@@ -152,8 +214,21 @@ export default function Cart() {
                 <span>{formatUSD(getTotalPrice())}</span>
               </div>
             </div>
+            {/* Apple Pay Button */}
+            {isApplePayAvailable && (
+              <button 
+                className="w-full mt-4 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                onClick={handleApplePay}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                Pay with Apple Pay
+              </button>
+            )}
+            
             <button 
-              className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
               onClick={() => {
                 void (async () => {
                   try {

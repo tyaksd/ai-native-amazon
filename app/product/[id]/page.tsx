@@ -6,6 +6,7 @@ import { useState, useEffect, use } from 'react'
 import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
 import ProductCarousel from "@/app/components/ProductCarousel";
 import FavoriteButton from "@/app/components/FavoriteButton";
+import SizeChart from "@/app/components/SizeChart";
 import { useFavorites } from "@/lib/useFavorites";
 
 function formatUSD(value: number) {
@@ -18,9 +19,9 @@ function getColorFromName(colorName: string): string {
     'black': '#000000',
     'white': '#FFFFFF',
     'gray': '#808080',
-    'grey': '#808080',
-    'red': '#FF0000',
-    'blue': '#0000FF',
+    'grey': '#d1d2d6',
+    'red': '#FF1B2B',
+    'blue': '#2665CC',
     'green': '#008000',
     'yellow': '#FFFF00',
     'orange': '#FFA500',
@@ -29,12 +30,20 @@ function getColorFromName(colorName: string): string {
     'brown': '#A52A2A',
     
     // Fashion colors
-    'navy': '#000080',
+    'navy': '#0f1830',
     'olive': '#808000',
     'charcoal': '#36454F',
     'beige': '#F5F5DC',
     'cream': '#FFFDD0',
     'khaki': '#F0E68C',
+    
+    // Specific brand colors
+    'dark heather': '#424848',
+    'darkheather': '#424848',
+    'sand': '#d8c5a9',
+    'natural': '#fff6ea',
+    'military green': '#686f54',
+    'militarygreen': '#686f54',
     
     // Sky colors
     'sky blue': '#87CEEB',
@@ -94,6 +103,7 @@ export default function ProductDetail({ params }: PageProps) {
   const [noticeMessage, setNoticeMessage] = useState('')
   const [showAdded, setShowAdded] = useState(false)
   const [addedMessage, setAddedMessage] = useState('')
+  const [colorImageMap, setColorImageMap] = useState<{[key: string]: number}>({})
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
@@ -111,6 +121,17 @@ export default function ProductDetail({ params }: PageProps) {
           const allBrandProducts = await getProductsByBrand(productData.brand_id)
           const otherBrandProducts = allBrandProducts.filter(p => p.id !== productData.id).slice(0, 4)
           setBrandProducts(otherBrandProducts)
+          
+          // Create color to image mapping
+          if (productData.colors && productData.images) {
+            const mapping: {[key: string]: number} = {}
+            productData.colors.forEach((color, index) => {
+              // Map each color to its corresponding image index
+              // If there are more colors than images, cycle through images
+              mapping[color] = index % productData.images.length
+            })
+            setColorImageMap(mapping)
+          }
           
           // Check favorites for current product and related products
           const allProductIds = [productData.id, ...otherBrandProducts.map(p => p.id)]
@@ -131,6 +152,13 @@ export default function ProductDetail({ params }: PageProps) {
       setSelectedColor(product.colors[0])
     }
   }, [product, selectedColor])
+
+  // Handle color selection and image switching
+  useEffect(() => {
+    if (selectedColor && colorImageMap[selectedColor] !== undefined) {
+      setSelectedImageIndex(colorImageMap[selectedColor])
+    }
+  }, [selectedColor, colorImageMap])
 
   if (loading) {
     return (
@@ -179,7 +207,8 @@ export default function ProductDetail({ params }: PageProps) {
                 alt={product.name} 
                 width={320} 
                 height={320} 
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain transition-opacity duration-300"
+                key={`${product.id}-${selectedImageIndex}`}
               />
             ) : (
               <div className="text-gray-400">No image available</div>
@@ -208,6 +237,31 @@ export default function ProductDetail({ params }: PageProps) {
                   />
                 </button>
               ))}
+            </div>
+          )}
+          
+          {/* T-shirt specific information for desktop - 商品写真の下に表示（デスクトップのみ） */}
+          {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
+                  <p><strong>Fabric composition:</strong></p>
+                  <ul className="ml-4 space-y-1">
+                    <li>• Solid colors are 100% ring-spun cotton</li>
+                    <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
+                    <li>• Dark Heather is 65% polyester, 35% cotton</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Size Chart for desktop - 商品写真の下に表示（デスクトップのみ） */}
+          {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <SizeChart />
             </div>
           )}
         </div>
@@ -239,6 +293,10 @@ export default function ProductDetail({ params }: PageProps) {
           {product.description && (
             <p className="text-sm text-gray-700 leading-6 max-w-prose">{product.description}</p>
           )}
+          
+          
+          
+          
           {product.colors && product.colors.length > 0 && (
             <div className="mt-4">
               <p className="text-sm font-medium text-gray-700 mb-2">Available Colors:</p>
@@ -246,7 +304,10 @@ export default function ProductDetail({ params }: PageProps) {
                 {product.colors.map((color, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => {
+                      setSelectedColor(color)
+                      // Image switching is handled by the useEffect above
+                    }}
                     className={`w-8 h-8 rounded-full shadow-sm cursor-pointer hover:scale-110 transition-transform ${
                       selectedColor === color ? 'ring-4 ring-blue-500 scale-110' : ''
                     } ${color.toLowerCase() === 'white' ? 'border-2 border-gray-300' : ''}`}
@@ -462,6 +523,43 @@ export default function ProductDetail({ params }: PageProps) {
               <Image src="/truck.png" alt="Truck" width={20} height={20} className="w-5 h-5" />
               <span className="text-gray-600 text-sm">Free Shipping</span>
             </div>
+            
+            {/* Made-to-Order, Less Waste Text */}
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              {/* <h3 className="text-sm font-semibold text-gray-900 mb-2">Made-to-Order, Less Waste</h3> */}
+              <p className="text-xs text-gray-700 leading-relaxed">
+                Our products are made just for you. Please allow several days for production and several days for shipping (US: 7-9 days, UK: 4-7 days, International: 1–3 weeks).
+              </p>
+              <p className="text-xs text-gray-700 leading-relaxed mt-2">
+                Thank you for choosing a sustainable option that avoids mass production and waste.
+              </p>
+            </div>
+            
+            {/* T-shirt specific information for mobile - Made-to-Orderの下に表示 */}
+            {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
+              <div className="mt-6 md:hidden">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
+                    <p><strong>Fabric composition:</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>• 100% ring-spun cotton</li>
+                      <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
+                      <li>• Dark Heather is 65% polyester, 35% cotton</li>
+                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Size Chart for mobile - Made-to-Orderの下に表示 */}
+            {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
+              <div className="mt-6 md:hidden">
+                <SizeChart />
+              </div>
+            )}
           </div>
         </div>
       </div>

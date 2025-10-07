@@ -43,9 +43,9 @@ export default function BrandPage({ params }: PageProps) {
       filtered = filtered.filter(p => isNewProduct(p.created_at))
     }
     
-    // Filter by category
+    // Filter by category (using type field)
     if (selectedCategory !== 'All') {
-      filtered = filtered.filter(p => p.category === selectedCategory)
+      filtered = filtered.filter(p => p.type === selectedCategory)
     }
     
     // Filter by gender
@@ -165,13 +165,13 @@ export default function BrandPage({ params }: PageProps) {
               
               {/* Category Filter */}
               <div className="mt-4 flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Filter by category:</label>
+                <label className="text-sm font-medium text-gray-700">Filter by type:</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
                 >
-                  <option value="All">All Categories</option>
+                  <option value="All">All Types</option>
                   <option value="T-Shirt">T-Shirt</option>
                   <option value="Hoodie">Hoodie</option>
                   <option value="Sweatshirt">Sweatshirt</option>
@@ -262,7 +262,7 @@ export default function BrandPage({ params }: PageProps) {
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                          {p.category}
+                          {p.type}
                         </span>
                       </div>
                     </div>

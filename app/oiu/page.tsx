@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, getCategoryTypeMapping } from '@/lib/data'
+import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, updateProductVisibility, getCategoryTypeMapping } from '@/lib/data'
 import { uploadImage } from '@/lib/cloudinary-client'
 
 export default function AdminPage() {
@@ -10,18 +10,42 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'brands' | 'products'>('products')
+  const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands'>('ai-brands')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
-  const [createdMessage, setCreatedMessage] = useState<'Created!' | ''>('')
+  const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | ''>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [productVisibility, setProductVisibility] = useState<{[key: string]: boolean}>({})
+
+  // AI Products form states
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [selectedProductType, setSelectedProductType] = useState('')
+  const [selectedColors, setSelectedColors] = useState<string[]>([])
+  const [quantity, setQuantity] = useState(1)
+
+  // Predefined color options
+  const colorOptions = [
+    { name: 'Black', value: '#0e0e0e' },
+    { name: 'White', value: '#ffffff' },
+    { name: 'Navy', value: '#0f1830' },
+    { name: 'Grey', value: '#d1d2d6' },
+    { name: 'Dark Heather', value: '#424848' },
+    { name: 'Red', value: '#FF1B2B' },
+    { name: 'Blue', value: '#2665CC' },
+    { name: 'Sand', value: '#d8c5a9' },
+    { name: 'Natural', value: '#fff6ea' },
+    { name: 'Military Green', value: '#686f54' }
+  ]
 
   // Form states
   const [newBrand, setNewBrand] = useState({ 
     name: '', 
     icon: '', 
     background_image: '', 
-    description: '' 
+    description: '',
+    category: 'Casual'
   })
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -54,7 +78,7 @@ export default function AdminPage() {
     loadData()
   }, [])
 
-  // Filter products by category and gender
+  // Filter products by category, gender, and search query
   useEffect(() => {
     let filtered = products
     
@@ -66,8 +90,15 @@ export default function AdminPage() {
       filtered = filtered.filter(product => product.gender === selectedGender)
     }
     
+    // 検索クエリフィルター
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    
     setFilteredProducts(filtered)
-  }, [products, selectedCategory, selectedGender])
+  }, [products, selectedCategory, selectedGender, searchQuery])
 
   const loadData = async () => {
     setLoading(true)
@@ -78,6 +109,13 @@ export default function AdminPage() {
       ])
       setBrands(brandsData)
       setProducts(productsData)
+      
+      // 商品の可視性状態を初期化
+      const visibilityMap: {[key: string]: boolean} = {}
+      productsData.forEach(product => {
+        visibilityMap[product.id] = product.is_visible
+      })
+      setProductVisibility(visibilityMap)
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -153,10 +191,15 @@ export default function AdminPage() {
   const handleCreateBrand = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const brand = await createBrand(newBrand)
+      const brand = await createBrand({
+        ...newBrand,
+        design_concept: null,
+        target_audience: null,
+        logo_design: null
+      })
       if (brand) {
         setBrands(prev => [...prev, brand])
-        setNewBrand({ name: '', icon: '', background_image: '', description: '' })
+        setNewBrand({ name: '', icon: '', background_image: '', description: '', category: 'Casual' })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)
@@ -185,7 +228,8 @@ export default function AdminPage() {
       console.log('Creating product with:', newProduct)
       const product = await createProduct({
         ...newProduct,
-        price: Number(newProduct.price)
+        price: Number(newProduct.price),
+        is_visible: true
       })
       if (product) {
         setProducts(prev => [...prev, product])
@@ -218,11 +262,155 @@ export default function AdminPage() {
       const success = await deleteProduct(productId)
       if (success) {
         setProducts(prev => prev.filter(p => p.id !== productId))
-        alert('Product deleted successfully!')
+        setCreatedMessage('Product deleted successfully!')
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 2000)
       }
     } catch (error) {
       console.error('Error deleting product:', error)
       alert('Failed to delete product')
+    }
+  }
+
+  const handleToggleVisibility = async (productId: string) => {
+    const currentVisibility = productVisibility[productId]
+    const newVisibility = !currentVisibility
+    
+    try {
+      const success = await updateProductVisibility(productId, newVisibility)
+      if (success) {
+        // ローカルstateを更新
+        setProductVisibility(prev => ({
+          ...prev,
+          [productId]: newVisibility
+        }))
+        
+        // 商品リストも更新
+        setProducts(prev => prev.map(product => 
+          product.id === productId 
+            ? { ...product, is_visible: newVisibility }
+            : product
+        ))
+        
+        setCreatedMessage(newVisibility ? 'Product is now visible!' : 'Product is now hidden!')
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 2000)
+      }
+    } catch (error) {
+      console.error('Error updating product visibility:', error)
+      alert('Failed to update product visibility')
+    }
+  }
+
+  // Color selection functions
+  const handleColorToggle = (colorName: string) => {
+    setSelectedColors(prev => 
+      prev.includes(colorName) 
+        ? prev.filter(color => color !== colorName)
+        : [...prev, colorName]
+    )
+  }
+
+  const handleRandomColors = () => {
+    // Always include Black and White
+    const fixedColors = ['Black', 'White']
+    
+    // Get other colors (excluding Black and White)
+    const otherColors = colorOptions.filter(color => 
+      color.name !== 'Black' && color.name !== 'White'
+    )
+    
+    // Randomly select 2 additional colors
+    const shuffled = otherColors.sort(() => 0.5 - Math.random())
+    const randomColors = shuffled.slice(0, 2).map(color => color.name)
+    
+    setSelectedColors([...fixedColors, ...randomColors])
+  }
+
+  const handleGenerateAIProducts = async () => {
+    if (!selectedBrand || !selectedProductType || selectedColors.length === 0) {
+      alert('Please select a brand, product type, and at least one color.')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const response = await fetch('/api/generate-ai-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          brandId: selectedBrand,
+          productType: selectedProductType,
+          colors: selectedColors,
+          quantity: quantity
+        }),
+        signal: AbortSignal.timeout(300000), // 5 minutes timeout
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate AI products')
+      }
+
+      const result = await response.json()
+      
+      if (result.success && result.products) {
+        // Refresh products list
+        await loadData()
+        setCreatedMessage('AI Products Generated!')
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 3000)
+        
+        // Reset form
+        setSelectedBrand('')
+        setSelectedProductType('')
+        setSelectedColors([])
+        setQuantity(1)
+      } else {
+        throw new Error('Failed to generate products')
+      }
+    } catch (error) {
+      console.error('Error generating AI products:', error)
+      alert('Failed to generate AI products. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleGenerateAIBrand = async () => {
+    setIsGenerating(true)
+    try {
+      const selectedStyle = (document.querySelector('input[name="brandStyle"]:checked') as HTMLInputElement)?.value || 'street'
+      
+      const response = await fetch('/api/generate-ai-brand', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brandStyle: selectedStyle }),
+        signal: AbortSignal.timeout(120000), // 2分のタイムアウト
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate AI brand')
+      }
+
+      const result = await response.json()
+      
+      if (result.success && result.brand) {
+        setBrands(prev => [...prev, result.brand])
+        setCreatedMessage('AI Brand Generated!')
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 3000)
+      } else {
+        throw new Error('Failed to generate brand')
+      }
+    } catch (error) {
+      console.error('Error generating AI brand:', error)
+      alert('Failed to generate AI brand. Please try again.')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -250,21 +438,30 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600">Manage brands and products</p>
           </div>
 
           {/* Tabs */}
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6">
               <button
-                onClick={() => setActiveTab('products')}
+                onClick={() => setActiveTab('ai-brands')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'products'
+                  activeTab === 'ai-brands'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Products ({products.length})
+                AI Brands
+              </button>
+              <button
+                onClick={() => setActiveTab('ai-products')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'ai-products'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                AI Products
               </button>
               <button
                 onClick={() => setActiveTab('brands')}
@@ -275,6 +472,16 @@ export default function AdminPage() {
                 }`}
               >
                 Brands ({brands.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('products')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'products'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Products ({products.length})
               </button>
             </nav>
           </div>
@@ -515,6 +722,22 @@ export default function AdminPage() {
 
                 {/* Products List */}
                 <div>
+                  {/* Search Bar */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+                        <input
+                          type="text"
+                          placeholder="Search by product name..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">All Products ({filteredProducts.length})</h2>
                     <div className="flex items-center gap-4">
@@ -574,7 +797,7 @@ export default function AdminPage() {
                           )}
                           <h3 className="font-semibold text-gray-900">{product.name}</h3>
                           <p className="text-sm text-gray-600">Brand: {brand?.name}</p>
-                          <p className="text-sm text-gray-600">Category: {product.category}</p>
+                          <p className="text-sm text-gray-600">Type: {product.type}</p>
                           <p className="text-sm text-gray-600">Gender: {product.gender}</p>
                           {product.colors && product.colors.length > 0 && (
                             <div className="mt-1">
@@ -604,12 +827,24 @@ export default function AdminPage() {
                           {product.description && (
                             <p className="text-sm text-gray-500 mt-2">{product.description}</p>
                           )}
-                          <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="mt-3 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
-                          >
-                            Delete
-                          </button>
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              onClick={() => handleToggleVisibility(product.id)}
+                              className={`px-3 py-1 rounded text-sm ${
+                                productVisibility[product.id] 
+                                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                                  : 'bg-green-500 text-white hover:bg-green-600'
+                              }`}
+                            >
+                              {productVisibility[product.id] ? 'HIDE' : 'SHOW'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       )
                     })}
@@ -655,6 +890,26 @@ export default function AdminPage() {
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Brand Category</label>
+                      <select
+                        value={newBrand.category}
+                        onChange={(e) => setNewBrand(prev => ({ ...prev, category: e.target.value }))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      >
+                        <option value="Streetwear">Streetwear</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Mode / Avant-Garde">Mode / Avant-Garde</option>
+                        <option value="Luxury / High-End">Luxury / High-End</option>
+                        <option value="Sports / Outdoor">Sports / Outdoor</option>
+                        <option value="Traditional / Preppy">Traditional / Preppy</option>
+                        <option value="Feminine / Girly">Feminine / Girly</option>
+                        <option value="Workwear / Military">Workwear / Military</option>
+                        <option value="Sustainable / Ethical">Sustainable / Ethical</option>
+                      </select>
                     </div>
 
                     <div>
@@ -715,11 +970,161 @@ export default function AdminPage() {
                             <Image src={brand.background_image} alt={`${brand.name} background`} width={800} height={96} className="w-full h-24 object-cover rounded" />
                           </div>
                         )}
+                        {brand.category && (
+                          <p className="text-sm text-blue-600 font-medium mb-2">Category: {brand.category}</p>
+                        )}
                         {brand.description && (
                           <p className="text-sm text-gray-600 break-words">{brand.description}</p>
                         )}
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'ai-products' && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
+                  <h2 className="text-lg font-semibold mb-6 text-purple-800">🤖 AI Product Generator</h2>
+                  
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* Brand Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Select Brand</label>
+                        <select 
+                          value={selectedBrand}
+                          onChange={(e) => setSelectedBrand(e.target.value)}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Choose a brand</option>
+                          {brands.map(brand => (
+                            <option key={brand.id} value={brand.id}>{brand.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {/* Product Type Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Product Type</label>
+                        <select 
+                          value={selectedProductType}
+                          onChange={(e) => setSelectedProductType(e.target.value)}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Choose type</option>
+                          <option value="T-Shirt">T-Shirt</option>
+                          <option value="Hoodie">Hoodie</option>
+                          <option value="Sweatshirt">Sweatshirt</option>
+                          <option value="Jacket">Jacket</option>
+                          <option value="Pants">Pants</option>
+                          <option value="Shorts">Shorts</option>
+                          <option value="Hat">Hat</option>
+                          <option value="Accessories">Accessories</option>
+                        </select>
+                      </div>
+                      
+                      {/* Color Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Colors</label>
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-2">
+                            {colorOptions.map((color) => (
+                              <label key={color.name} className="flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedColors.includes(color.name)}
+                                  onChange={() => handleColorToggle(color.name)}
+                                  className="mr-2 text-purple-600 focus:ring-purple-500"
+                                />
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="w-4 h-4 rounded border border-gray-300"
+                                    style={{ backgroundColor: color.value }}
+                                  ></div>
+                                  <span className="text-sm text-gray-700">{color.name}</span>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRandomColors}
+                            className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md transition-colors"
+                          >
+                            Random
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Quantity Input */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max="10" 
+                          value={quantity}
+                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Generate Button */}
+                    <div className="mt-6 flex justify-center">
+                      <button 
+                        onClick={handleGenerateAIProducts}
+                        disabled={isGenerating}
+                        className="bg-purple-600 text-white px-8 py-3 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isGenerating ? 'Generating Products...' : 'Generate Products'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'ai-brands' && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                  <h2 className="text-lg font-semibold mb-6 text-indigo-800">🚀 AI Brands</h2>
+                  
+                  {/* Brand Style Selection and Generate Button */}
+                  <div className="bg-white p-8 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-semibold mb-6 text-gray-900">🎯 Generate AI Brand</h3>
+                    <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                      <div className="flex gap-6">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="brandStyle"
+                            value="street"
+                            className="mr-3 text-indigo-600 focus:ring-indigo-500 w-5 h-5"
+                            defaultChecked
+                          />
+                          <span className="text-lg font-medium text-gray-700">Street</span>
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="brandStyle"
+                            value="casual"
+                            className="mr-3 text-indigo-600 focus:ring-indigo-500 w-5 h-5"
+                          />
+                          <span className="text-lg font-medium text-gray-700">Casual</span>
+                        </label>
+                      </div>
+                      <button 
+                        onClick={handleGenerateAIBrand}
+                        disabled={isGenerating}
+                        className="bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isGenerating ? 'Generating...' : 'Generate Brand'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

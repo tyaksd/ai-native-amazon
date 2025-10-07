@@ -6,6 +6,10 @@ export type Brand = {
   icon: string;
   background_image: string | null;
   description: string | null;
+  category: string | null;
+  design_concept: string | null;
+  target_audience: string | null;
+  logo_design: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -22,6 +26,7 @@ export type Product = {
   colors: string[];
   sizes: string[];
   gender: string;
+  is_visible: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -48,6 +53,21 @@ export async function getProducts(): Promise<Product[]> {
 
   if (error) {
     console.error('Error fetching products:', error)
+    return []
+  }
+
+  return data || []
+}
+
+export async function getVisibleProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_visible', true)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching visible products:', error)
     return []
   }
 
@@ -97,6 +117,7 @@ export async function getProductsByBrand(brandId: string): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('brand_id', brandId)
+    .eq('is_visible', true)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -112,6 +133,7 @@ export async function getProductsByCategory(category: string): Promise<Product[]
     .from('products')
     .select('*')
     .eq('category', category)
+    .eq('is_visible', true)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -127,6 +149,7 @@ export async function getProductsByType(type: string): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('type', type)
+    .eq('is_visible', true)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -142,6 +165,7 @@ export async function getProductsByGender(gender: string): Promise<Product[]> {
     .from('products')
     .select('*')
     .eq('gender', gender)
+    .eq('is_visible', true)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -170,9 +194,15 @@ export async function createBrand(brand: Omit<Brand, 'id' | 'created_at' | 'upda
 export async function createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product | null> {
   console.log('Creating product with data:', JSON.stringify(product, null, 2))
   
+  // デフォルトで公開状態にする
+  const productData = {
+    ...product,
+    is_visible: product.is_visible ?? true
+  }
+  
   const { data, error } = await supabase
     .from('products')
-    .insert([product])
+    .insert([productData])
     .select()
     .single()
 
@@ -183,7 +213,7 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
     console.error('Error details:', error.details)
     console.error('Error hint:', error.hint)
     console.error('Full error object:', JSON.stringify(error, null, 2))
-    console.error('Product data being inserted:', JSON.stringify(product, null, 2))
+    console.error('Product data being inserted:', JSON.stringify(productData, null, 2))
     return null
   }
 
@@ -215,6 +245,20 @@ export async function deleteProduct(productId: string): Promise<boolean> {
 
   if (error) {
     console.error('Error deleting product:', error)
+    return false
+  }
+
+  return true
+}
+
+export async function updateProductVisibility(productId: string, isVisible: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from('products')
+    .update({ is_visible: isVisible })
+    .eq('id', productId)
+
+  if (error) {
+    console.error('Error updating product visibility:', error)
     return false
   }
 
