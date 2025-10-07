@@ -58,7 +58,7 @@ export default function NeuralFlowCanvas({ highlight = { x: 0.7, y: 0.4 }, class
 
     // highlight line disabled per design
 
-    let t = 0
+    // let t = 0
     const loop = () => {
       ctx.fillStyle = BASE
       ctx.fillRect(0, 0, w, h)
@@ -106,7 +106,7 @@ export default function NeuralFlowCanvas({ highlight = { x: 0.7, y: 0.4 }, class
 
       drawGrain()
 
-      t++
+      // t++
       rafRef.current = requestAnimationFrame(loop)
     }
 

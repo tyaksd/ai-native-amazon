@@ -144,7 +144,7 @@ export default function ProductDetail({ params }: PageProps) {
       }
     }
     loadData()
-  }, [productId])
+  }, [productId, checkFavorites])
 
   // If there is exactly one available color, auto-select it
   useEffect(() => {

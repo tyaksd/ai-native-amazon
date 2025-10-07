@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from 'react'
-import { getBrands, getProducts, getVisibleProducts, getProductsByCategory, getProductsByType, searchProducts, searchBrands, getProductCategories, getMainCategories, getTypesByCategory, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
+import { useState, useEffect, useCallback } from 'react'
+import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
 
@@ -61,6 +61,33 @@ export default function Home() {
     loadData()
   }, [checkFavorites])
 
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults(null)
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const [productsData, brandsData] = await Promise.all([
+        searchProducts(query),
+        searchBrands(query)
+      ])
+      setSearchResults({ products: productsData, brands: brandsData })
+      
+      // Check favorites for search results
+      if (productsData.length > 0) {
+        await checkFavorites(productsData.map(p => p.id))
+      }
+    } catch (error) {
+      console.error('Error searching:', error)
+      setSearchResults(null)
+    } finally {
+      setIsSearching(false)
+    }
+  }, [checkFavorites])
+
   useEffect(() => {
     // Handle search from URL parameters
     const urlParams = new URLSearchParams(window.location.search)
@@ -77,7 +104,7 @@ export default function Home() {
       setSearchQuery('')
       setSearchResults(null)
     }
-  }, [checkFavorites])
+  }, [checkFavorites, handleSearch])
 
   // Listen for URL changes (for mobile search navigation)
   useEffect(() => {
@@ -107,7 +134,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('popstate', handleUrlChange)
     }
-  }, [searchQuery, searchResults])
+  }, [searchQuery, searchResults, handleSearch])
 
   // 追加: URLパラメータの変更をより頻繁に監視
   useEffect(() => {
@@ -184,33 +211,6 @@ export default function Home() {
     }
     loadFilteredProducts()
   }, [selectedMainCategory, selectedGender, selectedType])
-
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults(null)
-      setIsSearching(false)
-      return
-    }
-
-    setIsSearching(true)
-    try {
-      const [productsData, brandsData] = await Promise.all([
-        searchProducts(query),
-        searchBrands(query)
-      ])
-      setSearchResults({ products: productsData, brands: brandsData })
-      
-      // Check favorites for search results
-      if (productsData.length > 0) {
-        await checkFavorites(productsData.map(p => p.id))
-      }
-    } catch (error) {
-      console.error('Error searching:', error)
-      setSearchResults(null)
-    } finally {
-      setIsSearching(false)
-    }
-  }
 
   if (loading) {
     return (

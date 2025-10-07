@@ -29,7 +29,7 @@ function formatUSD(value: number) {
 export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<(Product & { quantity: number })[]>([]);
-  const [stripe, setStripe] = useState<any>(null);
+  const [stripe, setStripe] = useState<unknown>(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
 
   useEffect(() => {

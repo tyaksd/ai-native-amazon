@@ -74,12 +74,12 @@ async function generateProductName(
   targetAudience: string,
   colorList: string
 ): Promise<string> {
-  const genderContext =
-    gender === 'Men'
-      ? 'masculine, bold, strong'
-      : gender === 'Women'
-      ? 'feminine, elegant, stylish'
-      : 'unisex, versatile, inclusive'
+  // const genderContext =
+  //   gender === 'Men'
+  //     ? 'masculine, bold, strong'
+  //     : gender === 'Women'
+  //     ? 'feminine, elegant, stylish'
+  //     : 'unisex, versatile, inclusive'
 
   const prompt = `Create a product name for ${productType} from ${brandName}.
 Brand: ${brandDescription}
@@ -348,65 +348,65 @@ Include natural SEO hints: ${baseKeywords}.`
   return `${productName} is an official ${productType} from ${brandName}, created for ${targetAudience} with a street-ready attitude. The design channels the brand's ${brandConcept.toLowerCase()}—bold graphic energy with urban fashion edge—so the artwork feels expressive and built to stand out in daily rotation. Cut for a comfortable ${gender.toLowerCase()} fit, it delivers reliable durability for long wear. Easy to style with denim or cargos from day to night. Machine wash cold and tumble dry low to preserve the print and color. True-to-size with room to move through the shoulders and chest. Add this essential to your streetwear lineup now. Keywords: ${baseKeywords}.`
 }
 
-async function determineGender(
-  brandName: string,
-  productType: string,
-  brandDescription: string,
-  targetAudience: string
-): Promise<string> {
-  const prompt = `Based on the brand "${brandName}" and product type "${productType}", determine the most appropriate gender category:
-
-Brand context: ${brandDescription}
-Target audience: ${targetAudience}
-
-Options: Men, Women, Unisex, Null
-
-Return only the gender category, nothing else.`
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: prompt }],
-    max_completion_tokens: 50,
-  })
-
-  console.log('Gender determination response:', {
-    choices: response.choices,
-    usage: response.usage,
-    model: response.model
-  })
-
-  const gender = response.choices[0]?.message?.content?.trim()
-  console.log('Raw gender response:', gender)
-  
-  // If no gender was returned or response was cut off, try with a shorter prompt
-  if (!gender || response.choices[0]?.finish_reason === 'length') {
-    console.log('Gender response was empty or cut off, trying with shorter prompt...')
-    const shortPrompt = `Brand: "${brandName}" 
-    Product: ${productType}
-    Audience: ${targetAudience}
-    
-    Choose: Men, Women, Unisex, or Null`
-    
-    const retryResponse = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: shortPrompt }],
-      max_completion_tokens: 20,
-    })
-    
-    const retryGender = retryResponse.choices[0]?.message?.content?.trim()
-    if (retryGender) {
-      console.log('Retry successful, got gender:', retryGender)
-      const validRetryGender = ['Men', 'Women', 'Unisex', 'Null'].includes(retryGender) ? retryGender : 'Unisex'
-      console.log('Final gender (retry):', validRetryGender)
-      return validRetryGender
-    }
-  }
-  
-  const validGender = ['Men', 'Women', 'Unisex', 'Null'].includes(gender || '') ? (gender as string) : 'Unisex'
-  console.log('Final gender:', validGender)
-  
-  return validGender
-}
+// async function determineGender(
+//   brandName: string,
+//   productType: string,
+//   brandDescription: string,
+//   targetAudience: string
+// ): Promise<string> {
+//   const prompt = `Based on the brand "${brandName}" and product type "${productType}", determine the most appropriate gender category:
+//
+// Brand context: ${brandDescription}
+// Target audience: ${targetAudience}
+//
+// Options: Men, Women, Unisex, Null
+//
+// Return only the gender category, nothing else.`
+//
+//   const response = await openai.chat.completions.create({
+//     model: 'gpt-4o-mini',
+//     messages: [{ role: 'user', content: prompt }],
+//     max_completion_tokens: 50,
+//   })
+//
+//   console.log('Gender determination response:', {
+//     choices: response.choices,
+//     usage: response.usage,
+//     model: response.model
+//   })
+//
+//   const gender = response.choices[0]?.message?.content?.trim()
+//   console.log('Raw gender response:', gender)
+//   
+//   // If no gender was returned or response was cut off, try with a shorter prompt
+//   if (!gender || response.choices[0]?.finish_reason === 'length') {
+//     console.log('Gender response was empty or cut off, trying with shorter prompt...')
+//     const shortPrompt = `Brand: "${brandName}" 
+//     Product: ${productType}
+//     Audience: ${targetAudience}
+//     
+//     Choose: Men, Women, Unisex, or Null`
+//     
+//     const retryResponse = await openai.chat.completions.create({
+//       model: 'gpt-4o-mini',
+//       messages: [{ role: 'user', content: shortPrompt }],
+//       max_completion_tokens: 20,
+//     })
+//     
+//     const retryGender = retryResponse.choices[0]?.message?.content?.trim()
+//     if (retryGender) {
+//       console.log('Retry successful, got gender:', retryGender)
+//       const validRetryGender = ['Men', 'Women', 'Unisex', 'Null'].includes(retryGender) ? retryGender : 'Unisex'
+//       console.log('Final gender (retry):', validRetryGender)
+//       return validRetryGender
+//     }
+//   }
+//   
+//   const validGender = ['Men', 'Women', 'Unisex', 'Null'].includes(gender || '') ? (gender as string) : 'Unisex'
+//   console.log('Final gender:', validGender)
+//   
+//   return validGender
+// }
 
 function generateRandomPrice(): number {
   // Generate random price from $29.90, $35.90, $39.90
@@ -456,7 +456,7 @@ async function generateProductImages(
 ): Promise<{ productImages: string[]; designPng: string }> {
   const productImages: string[] = []
   let designPng = ''
-  let designDescription = ''
+  // let designDescription = ''
 
   // ステップ1: まず共通のデザインPNGを生成
   const genderContext =
@@ -528,8 +528,6 @@ Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background,
       size: '1024x1024',
       quality: 'high',
       n: 1,
-      // SDK の型に background がまだ無い場合があるため any キャスト
-      background: 'transparent' as any,
     })
 
     const d1 = designRes.data?.[0]
@@ -545,7 +543,7 @@ Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background,
     }
     
     // デザインの詳細説明を生成（商品写真生成時に使用）
-    designDescription = `A ${designConcept.toLowerCase()} design featuring ${genderContext.toLowerCase()} elements, created for ${targetAudience.toLowerCase()}. The design should be centered on the chest area and maintain consistent visual elements across all color variants.`
+    // designDescription = `A ${designConcept.toLowerCase()} design featuring ${genderContext.toLowerCase()} elements, created for ${targetAudience.toLowerCase()}. The design should be centered on the chest area and maintain consistent visual elements across all color variants.`
     
     console.log(`[DesignPNG] Generated common design for all colors: ${designPng}`)
   } catch (err) {
@@ -556,20 +554,20 @@ Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background,
   // ステップ2: 事前に用意したプレーンなTシャツ画像にデザインを合成
   for (const color of colors) {
     // 色名からhexコードへのマッピング
-    const colorHexMap: { [key: string]: string } = {
-      'Black': '#0e0e0e',
-      'White': '#ffffff', 
-      'Navy': '#0f1830',
-      'Grey': '#d1d2d6',
-      'Dark Heather': '#424848',
-      'Red': '#FF1B2B',
-      'Blue': '#2665CC',
-      'Sand': '#d8c5a9',
-      'Natural': '#fff6ea',
-      'Military Green': '#686f54'
-    }
+    // const colorHexMap: { [key: string]: string } = {
+    //   'Black': '#0e0e0e',
+    //   'White': '#ffffff', 
+    //   'Navy': '#0f1830',
+    //   'Grey': '#d1d2d6',
+    //   'Dark Heather': '#424848',
+    //   'Red': '#FF1B2B',
+    //   'Blue': '#2665CC',
+    //   'Sand': '#d8c5a9',
+    //   'Natural': '#fff6ea',
+    //   'Military Green': '#686f54'
+    // }
     
-    const hexColor = colorHexMap[color] || color
+    // const hexColor = colorHexMap[color] || color
 
     // 事前にCloudinaryにアップロードされたプレーンなTシャツ画像のURL
     const plainTshirtUrls: { [key: string]: string } = {
@@ -649,7 +647,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const createdProducts: any[] = []
+    const createdProducts: unknown[] = []
     const designStyles = [
       'minimalist geometric patterns',
       'bold typography and lettering',

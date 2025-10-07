@@ -6,7 +6,7 @@ export default function About() {
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const [isBlinking, setIsBlinking] = useState(false);
-  const [showSecondPage, setShowSecondPage] = useState(false);
+  const [, setShowSecondPage] = useState(false);
   
   const fullText = 'with AI and quantitative methods';
   
