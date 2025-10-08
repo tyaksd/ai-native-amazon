@@ -105,6 +105,9 @@ export default function ProductDetail({ params }: PageProps) {
   const [addedMessage, setAddedMessage] = useState('')
   const [colorImageMap, setColorImageMap] = useState<{[key: string]: number}>({})
   
+  // UUID validation regex - defined once at the top
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
 
@@ -388,7 +391,6 @@ export default function ProductDetail({ params }: PageProps) {
                   }
 
                   // Validate product ID before adding to cart
-                  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                   if (!uuidRegex.test(product.id)) {
                     console.error('Invalid product ID format:', product.id)
                     setNoticeMessage('Invalid product ID')
@@ -471,7 +473,6 @@ export default function ProductDetail({ params }: PageProps) {
                     const rawCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
                     
                     // Clean up any invalid cart items immediately
-                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                     const currentCart = rawCart.filter(item => uuidRegex.test(item.id))
                     if (currentCart.length !== rawCart.length) {
                       console.log('Cleaned up invalid cart items on page load')
@@ -495,7 +496,6 @@ export default function ProductDetail({ params }: PageProps) {
                     }
 
                     // Clean up any invalid cart items first
-                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                     const validCurrentCart = currentCart.filter(item => uuidRegex.test(item.id))
                     if (validCurrentCart.length !== currentCart.length) {
                       console.log('Removed invalid items from current cart')
@@ -516,7 +516,6 @@ export default function ProductDetail({ params }: PageProps) {
 
                     const productsData = await Promise.all(itemsSource.map(async (ci) => {
                       // Validate cart item ID format
-                      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                       if (!uuidRegex.test(ci.id)) {
                         console.error('Invalid cart item ID format:', ci.id)
                         return null
