@@ -526,7 +526,12 @@ const billingName =
 
       // ====== Printful発注処理 ======
       try {
-        console.log('Creating Printful order...')
+        console.log('=== Creating Printful order ===')
+        console.log('Order ID:', order.id)
+        console.log('Items payload:', JSON.stringify(itemsPayload, null, 2))
+        console.log('Shipping address:', JSON.stringify(shippingAddress, null, 2))
+        console.log('Customer email:', customerEmail)
+        
         if (!shippingAddress) {
           throw new Error('Shipping address is required for Printful order')
         }
@@ -544,16 +549,23 @@ const billingName =
           email: customerEmail || undefined
         }
         
+        console.log('Transformed Printful address:', JSON.stringify(printfulAddress, null, 2))
+        
+        console.log('Calling createPrintfulOrder...')
         const printfulOrder = await createPrintfulOrder(
           order.id,
           itemsPayload,
           printfulAddress,
           customerEmail || undefined
         )
-        console.log('Printful order created successfully:', printfulOrder.id)
+        
+        console.log('✅ Printful order created successfully!')
+        console.log('Printful Order ID:', printfulOrder.id)
+        console.log('Printful External ID:', printfulOrder.external_id)
         
         // Update order with Printful order ID
-        await supabaseAdmin
+        console.log('Updating order with Printful IDs...')
+        const { error: updateError } = await supabaseAdmin
           .from('orders')
           .update({ 
             printful_order_id: printfulOrder.id.toString(),
@@ -561,10 +573,20 @@ const billingName =
           })
           .eq('id', order.id)
           
+        if (updateError) {
+          console.error('Failed to update order with Printful IDs:', updateError)
+        } else {
+          console.log('✅ Order updated with Printful IDs successfully')
+        }
+          
       } catch (printfulErr) {
-        console.error('Printful order creation failed:', printfulErr)
+        console.error('❌ Printful order creation failed:', printfulErr)
+        console.error('Error details:', JSON.stringify(printfulErr, null, 2))
+        console.error('Error stack:', printfulErr instanceof Error ? printfulErr.stack : 'No stack trace')
+        
         // Don't throw error to avoid breaking the webhook
         // Log the error for manual review
+        console.log('⚠️ Continuing webhook processing despite Printful error')
       }
 
       // ====== 購入確認メール ======

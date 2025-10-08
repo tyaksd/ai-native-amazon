@@ -387,6 +387,173 @@ export function getTshirtProductId(gender: string): number {
   return TSHIRT_PRODUCTS.unisex.productId
 }
 
+// Get available T-shirt products from Printful API
+export async function getAvailableTshirtProducts(): Promise<PrintfulProduct[]> {
+  const client = getPrintfulClient()
+  
+  try {
+    const products = await client.getProducts()
+    console.log(`Fetched ${products.length} products from Printful`)
+    
+    // Filter for T-shirt products
+    const tshirtProducts = products.filter(product => {
+      const name = product.name?.toLowerCase() || ''
+      const brand = product.brand?.toLowerCase() || ''
+      const model = product.model?.toLowerCase() || ''
+      
+      return name.includes('t-shirt') || 
+             name.includes('tee') ||
+             name.includes('shirt') ||
+             name.includes('gildan') ||
+             name.includes('bella') ||
+             brand.includes('gildan') ||
+             brand.includes('bella') ||
+             model.includes('64000') ||
+             model.includes('6400')
+    })
+    
+    console.log(`Found ${tshirtProducts.length} T-shirt products`)
+    console.log('Available T-shirt products:', tshirtProducts.map(p => ({
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      model: p.model
+    })))
+    
+    return tshirtProducts
+  } catch (error) {
+    console.error('Failed to fetch products from Printful:', error)
+    throw new Error(`Failed to fetch products: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
+}
+
+// Get variant mapping for a specific product (size/color -> variant_id)
+export async function getVariantMapping(productId: number): Promise<Map<string, number>> {
+  const client = getPrintfulClient()
+  const variants = await client.getProductVariants(productId)
+  
+  const variantMap = new Map<string, number>()
+  
+  variants.forEach(variant => {
+    const key = `${variant.size}-${variant.color}`.toLowerCase()
+    variantMap.set(key, variant.id)
+  })
+  
+  console.log(`Variant mapping for product ${productId}:`, Array.from(variantMap.entries()))
+  
+  return variantMap
+}
+
+// Color mapping from Godship to Printful
+const COLOR_MAPPING: Record<string, string> = {
+  'BLUE': 'Royal',
+  'GREY': 'Sport Grey',
+  'BLACK': 'Black',
+  'WHITE': 'White',
+  'RED': 'Red',
+  'GREEN': 'Green',
+  'YELLOW': 'Yellow',
+  'ORANGE': 'Orange',
+  'PURPLE': 'Purple',
+  'PINK': 'Pink',
+  'NAVY': 'Navy',
+  'BROWN': 'Brown',
+  'BEIGE': 'Beige',
+  'KHAKI': 'Khaki',
+  'MAROON': 'Maroon',
+  'TEAL': 'Teal',
+  'LIME': 'Lime',
+  'GOLD': 'Gold',
+  'SILVER': 'Silver'
+}
+
+// Map Godship color to Printful color
+function mapColorToPrintful(godshipColor: string): string {
+  const upperColor = godshipColor.toUpperCase()
+  return COLOR_MAPPING[upperColor] || godshipColor
+}
+
+// Find the best matching variant for size and color
+export async function findBestVariant(
+  productId: number, 
+  size: string, 
+  color: string
+): Promise<PrintfulVariant | null> {
+  console.log(`Finding best variant for product ${productId}, size: ${size}, color: ${color}`)
+  
+  const client = getPrintfulClient()
+  
+  try {
+    const variants = await client.getProductVariants(productId)
+    console.log(`Found ${variants.length} variants for product ${productId}`)
+    
+    if (variants.length === 0) {
+      console.log(`❌ No variants found for product ${productId}`)
+      return null
+    }
+    
+    // Log available variants for debugging
+    console.log('Available variants:', variants.map(v => ({
+      id: v.id,
+      size: v.size,
+      color: v.color,
+      in_stock: v.in_stock
+    })))
+    
+    // Map Godship color to Printful color
+    const printfulColor = mapColorToPrintful(color)
+    console.log(`Mapped color: ${color} -> ${printfulColor}`)
+    
+    // Try exact match first with mapped color
+    let matchingVariant = variants.find(variant => 
+      variant.size.toLowerCase() === size.toLowerCase() &&
+      variant.color.toLowerCase() === printfulColor.toLowerCase()
+    )
+    
+    if (matchingVariant) {
+      console.log(`✅ Exact match found: ${matchingVariant.id} (${matchingVariant.size} ${matchingVariant.color})`)
+      return matchingVariant
+    }
+    
+    // Try original color name as fallback
+    matchingVariant = variants.find(variant => 
+      variant.size.toLowerCase() === size.toLowerCase() &&
+      variant.color.toLowerCase() === color.toLowerCase()
+    )
+    
+    if (matchingVariant) {
+      console.log(`✅ Original color match found: ${matchingVariant.id} (${matchingVariant.size} ${matchingVariant.color})`)
+      return matchingVariant
+    }
+    
+    // Try size match with any color
+    matchingVariant = variants.find(variant => 
+      variant.size.toLowerCase() === size.toLowerCase() &&
+      variant.in_stock
+    )
+    
+    if (matchingVariant) {
+      console.log(`⚠️ Size match with different color: ${matchingVariant.id} (${matchingVariant.size} ${matchingVariant.color})`)
+      return matchingVariant
+    }
+    
+    // Try any available variant
+    matchingVariant = variants.find(variant => variant.in_stock)
+    
+    if (matchingVariant) {
+      console.log(`⚠️ Using any available variant: ${matchingVariant.id} (${matchingVariant.size} ${matchingVariant.color})`)
+      return matchingVariant
+    }
+    
+    console.log(`❌ No suitable variant found for product ${productId}`)
+    return null
+    
+  } catch (error) {
+    console.error(`❌ Failed to get variants for product ${productId}:`, error)
+    throw error
+  }
+}
+
 // Find T-shirt product by name pattern
 export async function findTshirtProduct(
   gender: string,
@@ -421,16 +588,43 @@ export async function getMatchingVariant(
   size: string,
   color: string
 ): Promise<PrintfulVariant | null> {
+  console.log(`Getting variants for product ID: ${productId}, size: ${size}, color: ${color}`)
+  
   const client = getPrintfulClient()
-  const variants = await client.getProductVariants(productId)
   
-  // Find variant that matches size and color
-  const matchingVariant = variants.find(variant => 
-    variant.size.toLowerCase() === size.toLowerCase() &&
-    variant.color.toLowerCase() === color.toLowerCase()
-  )
-  
-  return matchingVariant || null
+  try {
+    const variants = await client.getProductVariants(productId)
+    console.log(`Found ${variants.length} variants for product ${productId}`)
+    console.log('Available variants:', variants.map(v => ({
+      id: v.id,
+      size: v.size,
+      color: v.color,
+      in_stock: v.in_stock
+    })))
+    
+    // Find variant that matches size and color
+    const matchingVariant = variants.find(variant => 
+      variant.size.toLowerCase() === size.toLowerCase() &&
+      variant.color.toLowerCase() === color.toLowerCase()
+    )
+    
+    if (matchingVariant) {
+      console.log(`Found matching variant: ${matchingVariant.id} (${matchingVariant.size} ${matchingVariant.color})`)
+    } else {
+      console.log(`No matching variant found for size: ${size}, color: ${color}`)
+      // Try to find any available variant as fallback
+      const availableVariant = variants.find(v => v.in_stock)
+      if (availableVariant) {
+        console.log(`Using fallback variant: ${availableVariant.id} (${availableVariant.size} ${availableVariant.color})`)
+        return availableVariant
+      }
+    }
+    
+    return matchingVariant || null
+  } catch (error) {
+    console.error(`Failed to get variants for product ${productId}:`, error)
+    throw error
+  }
 }
 
 // Calculate design position for T-shirt
@@ -539,6 +733,12 @@ export async function createPrintfulOrder(
   },
   customerEmail?: string
 ): Promise<PrintfulOrderResponse> {
+  console.log('=== createPrintfulOrder called ===')
+  console.log('Order ID:', orderId)
+  console.log('Items:', JSON.stringify(items, null, 2))
+  console.log('Shipping address:', JSON.stringify(shippingAddress, null, 2))
+  console.log('Customer email:', customerEmail)
+  
   const client = getPrintfulClient()
   
   // Get product details from database
@@ -546,10 +746,13 @@ export async function createPrintfulOrder(
     .map(item => item.product_id)
     .filter(Boolean) as string[]
   
+  console.log('Product IDs to fetch:', productIds)
+  
   if (productIds.length === 0) {
     throw new Error('No valid product IDs found in order items')
   }
   
+  console.log('Fetching products from database...')
   const { data: products, error } = await supabaseAdmin
     .from('products')
     .select(`
@@ -569,8 +772,12 @@ export async function createPrintfulOrder(
     .in('id', productIds)
   
   if (error || !products) {
+    console.error('Failed to fetch products:', error)
     throw new Error(`Failed to fetch products: ${error?.message}`)
   }
+  
+  console.log('Products fetched successfully:', products.length)
+  console.log('Product details:', JSON.stringify(products, null, 2))
   
   const printfulItems: PrintfulOrderItem[] = []
   
@@ -583,18 +790,35 @@ export async function createPrintfulOrder(
     // Determine gender and get appropriate product ID
     const gender = product.gender || 'unisex'
     
-    // Try to find the actual product in Printful
-    const printfulProduct = await findTshirtProduct(gender, client)
-    let printfulProductId = printfulProduct?.id
+    // Get available T-shirt products from Printful
+    console.log(`Finding T-shirt product for gender: ${gender}`)
+    const availableProducts = await getAvailableTshirtProducts()
     
-    // Fallback to hardcoded IDs if not found
-    if (!printfulProductId) {
-      printfulProductId = getTshirtProductId(gender)
-      console.warn(`Using fallback product ID ${printfulProductId} for gender: ${gender}`)
+    if (availableProducts.length === 0) {
+      throw new Error('No T-shirt products found in Printful')
     }
     
-    // Get matching variant
-    const variant = await getMatchingVariant(
+    // Try to find a product that matches the gender preference
+    let printfulProduct = availableProducts.find(p => {
+      const name = p.name?.toLowerCase() || ''
+      if (gender.toLowerCase() === 'women' || gender.toLowerCase() === 'female') {
+        return name.includes('women') || name.includes('bella')
+      }
+      return name.includes('unisex') || name.includes('gildan')
+    })
+    
+    // Fallback to first available product
+    if (!printfulProduct) {
+      printfulProduct = availableProducts[0]
+    }
+    
+    const printfulProductId = printfulProduct.id
+    
+    console.log(`Using Printful product: ${printfulProduct.name} (ID: ${printfulProductId})`)
+    
+    // Get matching variant using the new function
+    console.log(`Looking for variant: size=${item.size || 'M'}, color=${item.color || 'Black'}`)
+    const variant = await findBestVariant(
       printfulProductId,
       item.size || 'M',
       item.color || 'Black'
@@ -675,10 +899,15 @@ export async function createPrintfulOrder(
     items: printfulItems,
   }
   
+  console.log('Printful order data:', JSON.stringify(printfulOrder, null, 2))
+  console.log('Creating order in Printful...')
+  
   // Create order in Printful
   const printfulOrderResponse = await client.createOrder(printfulOrder)
   
-  console.log('Printful order created:', printfulOrderResponse.id)
+  console.log('✅ Printful order created successfully!')
+  console.log('Printful Order ID:', printfulOrderResponse.id)
+  console.log('Printful External ID:', printfulOrderResponse.external_id)
   
   return printfulOrderResponse
 }
