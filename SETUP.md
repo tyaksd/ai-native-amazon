@@ -60,6 +60,26 @@ CREATE POLICY "Allow public delete" ON products FOR DELETE USING (true);
    - Folder: `godship-mall` (optional)
 4. Copy your Cloud Name, API Key, and API Secret
 
+## 2.5. Stripe Setup (Required for Payments)
+
+1. Go to [stripe.com](https://stripe.com) and create a free account
+2. In your Stripe dashboard, go to Developers > API Keys
+3. Copy your:
+   - **Publishable key** (starts with `pk_test_` for test mode)
+   - **Secret key** (starts with `sk_test_` for test mode)
+4. For webhooks:
+   - Go to Developers > Webhooks
+   - Add endpoint: `https://yourdomain.com/api/stripe-webhook`
+   - Select events: `checkout.session.completed`
+   - Copy the webhook signing secret (starts with `whsec_`)
+
+## 2.6. OpenAI Setup (Required for AI Features)
+
+1. Go to [platform.openai.com](https://platform.openai.com) and create an account
+2. Go to API Keys section
+3. Create a new API key
+4. Copy the API key (starts with `sk-`)
+
 ## 3. Environment Variables
 
 Create a `.env.local` file in your project root with:
@@ -74,6 +94,14 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset_name
+
+# Stripe Configuration (Required for payments)
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+
+# OpenAI Configuration (Required for AI features)
+OPENAI_API_KEY=your_openai_api_key
 ```
 
 ## 4. Update Pages to Use Supabase
@@ -102,9 +130,37 @@ To migrate your existing mock data to Supabase:
 3. Add your existing products with the new brand IDs
 4. Update the image URLs to use Cloudinary URLs
 
+## 6. Production Deployment
+
+For production deployment (e.g., Vercel, Netlify), make sure to set all environment variables in your hosting platform:
+
+### Required Environment Variables for Production:
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+- `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`
+- `STRIPE_SECRET_KEY` (use live keys for production)
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (use live keys for production)
+- `STRIPE_WEBHOOK_SECRET`
+- `OPENAI_API_KEY`
+
+### Vercel Deployment:
+1. Connect your GitHub repository to Vercel
+2. Go to Project Settings > Environment Variables
+3. Add all the required environment variables
+4. Redeploy your application
+
+### Important Notes:
+- Use **test keys** for development and **live keys** for production
+- Make sure your Stripe webhook endpoint is configured for your production domain
+- Test the payment flow thoroughly before going live
+
 ## Notes
 
 - All images will be uploaded to Cloudinary automatically
 - The admin panel provides a simple interface for content management
 - The existing cart functionality will continue to work with the new data structure
 - Make sure to test the admin panel before removing the old mock data
+- **Critical**: Ensure all environment variables are properly configured in production

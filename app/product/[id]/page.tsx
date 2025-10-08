@@ -136,9 +136,14 @@ export default function ProductDetail({ params }: PageProps) {
           // Check favorites for current product and related products
           const allProductIds = [productData.id, ...otherBrandProducts.map(p => p.id)]
           await checkFavorites(allProductIds)
+        } else {
+          // Product not found - this could be due to invalid ID format or deleted product
+          console.error('Product not found for ID:', productId)
+          setProduct(null)
         }
       } catch (error) {
         console.error('Error loading product:', error)
+        setProduct(null)
       } finally {
         setLoading(false)
       }

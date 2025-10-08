@@ -92,24 +92,33 @@ export async function getBrandById(brandId: string): Promise<Brand | null> {
 export async function getProductById(productId: string): Promise<Product | null> {
   console.log('Fetching product with ID:', productId)
   
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', productId)
-    .single()
+  // Check if the productId is a valid UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
+  if (uuidRegex.test(productId)) {
+    // It's a valid UUID, fetch by ID
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single()
 
-  if (error) {
-    console.error('Error fetching product:', error)
-    console.error('Product ID:', productId)
-    console.error('Error message:', error.message)
-    console.error('Error code:', error.code)
-    console.error('Error details:', error.details)
-    console.error('Error hint:', error.hint)
+    if (error) {
+      console.error('Error fetching product by UUID:', error)
+      return null
+    }
+
+    console.log('Product found by UUID:', data)
+    return data
+  } else {
+    // It's not a UUID, this is likely an invalid or old product ID
+    console.error('Invalid product ID format:', productId)
+    console.error('Expected UUID format, but received:', productId)
+    
+    // Don't try to search by name for invalid IDs, as this could cause security issues
+    // Instead, return null and let the UI handle the 404 case
     return null
   }
-
-  console.log('Product found:', data)
-  return data
 }
 
 export async function getProductsByBrand(brandId: string): Promise<Product[]> {
