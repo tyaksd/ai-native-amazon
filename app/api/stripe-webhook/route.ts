@@ -272,7 +272,6 @@
 // app/api/stripe-webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { headers } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { renderOrderEmail, sendEmail } from '@/lib/mailer'
 
@@ -280,7 +279,7 @@ function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured')
   // 将来日付のバージョンは避け、安定版を使用
-  return new Stripe(key, { apiVersion: '2025-09-30.clover' as any })
+  return new Stripe(key, { apiVersion: '2025-09-30.clover' as Stripe.LatestApiVersion })
 }
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
