@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPrintfulClient, calculateDesignPosition } from '@/lib/printful'
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     const client = getPrintfulClient()
     
@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
         
         console.log('✅ Product created successfully!')
         console.log('Product ID:', createdProduct.id)
-        console.log('External ID:', createdProduct.external_id)
         
         return NextResponse.json({
           success: true,

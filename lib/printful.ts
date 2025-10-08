@@ -44,6 +44,30 @@ export interface PrintfulFile {
   visible: boolean
 }
 
+export interface PrintfulProductData {
+  sync_product: {
+    name: string
+    thumbnail?: string
+    description?: string
+  }
+  sync_variants: Array<{
+    variant_id: number
+    retail_price: string
+    files: Array<{
+      type: string
+      url: string
+      position?: {
+        area_width: number
+        area_height: number
+        width: number
+        height: number
+        top: number
+        left: number
+      }
+    }>
+  }>
+}
+
 export interface PrintfulFileWithPosition {
   id: number
   type: string
@@ -167,7 +191,7 @@ export interface PrintfulOrderResponse {
     vat: string
     total: string
   }
-  shipments: any[]
+  shipments: Array<{id: string; carrier: string; service: string; tracking_number: string; tracking_url: string; created: number; ship_date: string; shipped_at: number; reshipment: boolean; reshipment_reason: string; items: Array<{item_id: number; external_id: string; quantity: number}>}>
   gift?: {
     subject: string
     message: string
@@ -313,8 +337,8 @@ class PrintfulClient {
   }
 
   // Create product
-  async createProduct(productData: any): Promise<any> {
-    const response = await this.makeRequest<{ result: any }>(
+  async createProduct(productData: PrintfulProductData): Promise<PrintfulProduct> {
+    const response = await this.makeRequest<{ result: PrintfulProduct }>(
       '/store/products',
       {
         method: 'POST',
@@ -413,7 +437,7 @@ export async function getMatchingVariant(
 export function calculateDesignPosition(
   designWidth: number,
   designHeight: number,
-  tshirtType: 'unisex' | 'women' = 'unisex'
+  _tshirtType: 'unisex' | 'women' = 'unisex'
 ): {
   area_width: number
   area_height: number
@@ -454,7 +478,7 @@ export function calculateDesignPosition(
 }
 
 // Get image dimensions from URL
-export async function getImageDimensions(imageUrl: string): Promise<{ width: number; height: number }> {
+export async function getImageDimensions(_imageUrl: string): Promise<{ width: number; height: number }> {
   // For server-side, return default dimensions
   // In a real implementation, you might want to use a library like 'sharp' or 'jimp'
   return { width: 1000, height: 1000 }
@@ -502,7 +526,17 @@ export async function createPrintfulOrder(
     size: string | null
     color: string | null
   }>,
-  shippingAddress: any,
+  shippingAddress: {
+    name: string
+    address1: string
+    address2?: string
+    city: string
+    state_code?: string
+    country_code: string
+    zip: string
+    phone?: string
+    email?: string
+  },
   customerEmail?: string
 ): Promise<PrintfulOrderResponse> {
   const client = getPrintfulClient()
@@ -550,7 +584,7 @@ export async function createPrintfulOrder(
     const gender = product.gender || 'unisex'
     
     // Try to find the actual product in Printful
-    let printfulProduct = await findTshirtProduct(gender, client)
+    const printfulProduct = await findTshirtProduct(gender, client)
     let printfulProductId = printfulProduct?.id
     
     // Fallback to hardcoded IDs if not found
@@ -572,7 +606,7 @@ export async function createPrintfulOrder(
     }
     
     // Upload design file with position if available
-    let designFiles: PrintfulFileWithPosition[] = []
+    const designFiles: PrintfulFileWithPosition[] = []
     if (product.design_png && product.design_png.length > 0) {
       try {
         // Determine T-shirt type for position calculation
@@ -628,13 +662,13 @@ export async function createPrintfulOrder(
     external_id: orderId,
     shipping: 'STANDARD',
     recipient: {
-      name: shippingAddress.name || 'Customer',
-      address1: shippingAddress.line1 || shippingAddress.address_line_1,
-      address2: shippingAddress.line2 || shippingAddress.address_line_2,
+      name: shippingAddress.name,
+      address1: shippingAddress.address1,
+      address2: shippingAddress.address2,
       city: shippingAddress.city,
-      state_code: shippingAddress.state,
-      country_code: shippingAddress.country,
-      zip: shippingAddress.postal_code,
+      state_code: shippingAddress.state_code,
+      country_code: shippingAddress.country_code,
+      zip: shippingAddress.zip,
       phone: shippingAddress.phone,
       email: customerEmail,
     },

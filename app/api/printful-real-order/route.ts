@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPrintfulClient, calculateDesignPosition, createInsideLabelFile, getImageDimensions } from '@/lib/printful'
+import { getPrintfulClient, calculateDesignPosition } from '@/lib/printful'
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
-    const client = getPrintfulClient()
+    // const client = getPrintfulClient()
     
     // Test data for "Rebel Mark Graphic Tee"
     const testOrderData = {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         zip: '100-0001',
         email: 'test@example.com'
       },
-      items: [] as any[]
+      items: [] as Array<{variant_id: number; quantity: number; retail_price: string; name: string; files: Array<{id: number; type: string; hash: string; url: string; filename: string; mime_type: string; size: number; width: number; height: number; dpi: number; status: string; created: number; thumbnail_url: string; preview_url: string; visible: boolean; position: {area_width: number; area_height: number; width: number; height: number; top: number; left: number}}>}>
     }
     
     // Test product data

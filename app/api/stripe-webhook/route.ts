@@ -527,10 +527,27 @@ const billingName =
       // ====== Printful発注処理 ======
       try {
         console.log('Creating Printful order...')
+        if (!shippingAddress) {
+          throw new Error('Shipping address is required for Printful order')
+        }
+        
+        // Transform Stripe Address to Printful format
+        const printfulAddress = {
+          name: 'Customer', // Stripe Address doesn't have name field
+          address1: shippingAddress.line1 || '',
+          address2: shippingAddress.line2 || undefined,
+          city: shippingAddress.city || '',
+          state_code: shippingAddress.state || undefined,
+          country_code: shippingAddress.country || 'US',
+          zip: shippingAddress.postal_code || '',
+          phone: undefined,
+          email: customerEmail || undefined
+        }
+        
         const printfulOrder = await createPrintfulOrder(
           order.id,
           itemsPayload,
-          shippingAddress,
+          printfulAddress,
           customerEmail || undefined
         )
         console.log('Printful order created successfully:', printfulOrder.id)
