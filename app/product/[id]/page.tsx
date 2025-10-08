@@ -387,9 +387,27 @@ export default function ProductDetail({ params }: PageProps) {
                     return
                   }
 
+                  // Validate product ID before adding to cart
+                  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                  if (!uuidRegex.test(product.id)) {
+                    console.error('Invalid product ID format:', product.id)
+                    setNoticeMessage('Invalid product ID')
+                    setShowNotice(true)
+                    setTimeout(() => setShowNotice(false), 1200)
+                    return
+                  }
+
                   type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
                   const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
-                  const existingItem = cart.find((item) => 
+                  
+                  // Clean up any invalid cart items before processing
+                  const validCart = cart.filter(item => uuidRegex.test(item.id))
+                  if (validCart.length !== cart.length) {
+                    console.log('Removed invalid cart items')
+                    localStorage.setItem('cart', JSON.stringify(validCart))
+                  }
+                  
+                  const existingItem = validCart.find((item) => 
                     item.id === product.id && 
                     (product.sizes?.length ? (item.size || null) === (selectedSize || null) : true) &&
                     (product.colors?.length ? (item.color || null) === (selectedColor || null) : true)
@@ -397,14 +415,14 @@ export default function ProductDetail({ params }: PageProps) {
                   if (existingItem) {
                     existingItem.quantity += quantity;
                   } else {
-                    cart.push({ 
+                    validCart.push({ 
                       id: product.id, 
                       quantity: quantity,
                       size: product.sizes && product.sizes.length > 0 ? (selectedSize || null) : null,
                       color: product.colors && product.colors.length > 0 ? (selectedColor || null) : null,
                     });
                   }
-                  localStorage.setItem('cart', JSON.stringify(cart));
+                  localStorage.setItem('cart', JSON.stringify(validCart));
                   setAddedMessage(`Added ${quantity} item(s) to cart`);
                   setShowAdded(true);
                   setTimeout(() => setShowAdded(false), 1000);
@@ -450,7 +468,15 @@ export default function ProductDetail({ params }: PageProps) {
                 void (async () => {
                   try {
                     const savedCart = localStorage.getItem('cart')
-                    const currentCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
+                    const rawCart: { id: string; quantity: number }[] = savedCart ? JSON.parse(savedCart) : []
+                    
+                    // Clean up any invalid cart items immediately
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                    const currentCart = rawCart.filter(item => uuidRegex.test(item.id))
+                    if (currentCart.length !== rawCart.length) {
+                      console.log('Cleaned up invalid cart items on page load')
+                      localStorage.setItem('cart', JSON.stringify(currentCart))
+                    }
 
                     // Validate options (we add current product to cart before checkout)
                     const needsColor = product.colors && product.colors.length > 0 && !selectedColor
@@ -468,8 +494,15 @@ export default function ProductDetail({ params }: PageProps) {
                       return
                     }
 
+                    // Clean up any invalid cart items first
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                    const validCurrentCart = currentCart.filter(item => uuidRegex.test(item.id))
+                    if (validCurrentCart.length !== currentCart.length) {
+                      console.log('Removed invalid items from current cart')
+                    }
+
                     // Merge current product into cart
-                    const mergedCart = [...currentCart]
+                    const mergedCart = [...validCurrentCart]
                     const existing = mergedCart.find(ci => ci.id === product.id)
                     if (existing) {
                       existing.quantity += quantity
@@ -482,8 +515,18 @@ export default function ProductDetail({ params }: PageProps) {
                     const itemsSource = mergedCart
 
                     const productsData = await Promise.all(itemsSource.map(async (ci) => {
+                      // Validate cart item ID format
+                      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                      if (!uuidRegex.test(ci.id)) {
+                        console.error('Invalid cart item ID format:', ci.id)
+                        return null
+                      }
+                      
                       const p = ci.id === product.id ? product : await getProductById(ci.id)
-                      if (!p) return null
+                      if (!p) {
+                        console.error('Product not found for cart item:', ci.id)
+                        return null
+                      }
                       // Include size/color for the current product if selected
                       const size = ci.id === product.id ? (selectedSize || null) : null
                       const color = ci.id === product.id ? (selectedColor || null) : null

@@ -37,9 +37,19 @@ export default function Cart() {
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
         const items: CartItem[] = JSON.parse(savedCart);
-        setCartItems(items);
+        
+        // Clean up invalid cart items
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        const validItems = items.filter(item => uuidRegex.test(item.id))
+        
+        if (validItems.length !== items.length) {
+          console.log('Removed invalid cart items')
+          localStorage.setItem('cart', JSON.stringify(validItems))
+        }
+        
+        setCartItems(validItems);
         const productDetails = await Promise.all(
-          items.map(async (item) => {
+          validItems.map(async (item) => {
             const product = await getProductById(item.id);
             return product ? { ...product, quantity: item.quantity, sizes: product.sizes, colors: product.colors } : null;
           })
@@ -101,7 +111,22 @@ export default function Cart() {
     if (!stripe || !isApplePayAvailable) return;
 
     try {
-      const items = products.map((p, idx) => ({ 
+      // Validate product IDs before Apple Pay checkout
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const validProducts = products.filter(p => {
+        if (!uuidRegex.test(p.id)) {
+          console.error('Invalid product ID in Apple Pay:', p.id)
+          return false
+        }
+        return true
+      })
+      
+      if (validProducts.length === 0) {
+        console.error('No valid products for Apple Pay')
+        return
+      }
+      
+      const items = validProducts.map((p, idx) => ({ 
         id: p.id, 
         name: p.name, 
         price: p.price, 
@@ -232,7 +257,22 @@ export default function Cart() {
               onClick={() => {
                 void (async () => {
                   try {
-                    const items = products.map((p, idx) => ({ 
+                    // Validate product IDs before checkout
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                    const validProducts = products.filter(p => {
+                      if (!uuidRegex.test(p.id)) {
+                        console.error('Invalid product ID in cart:', p.id)
+                        return false
+                      }
+                      return true
+                    })
+                    
+                    if (validProducts.length === 0) {
+                      console.error('No valid products in cart')
+                      return
+                    }
+                    
+                    const items = validProducts.map((p, idx) => ({ 
                       id: p.id, 
                       name: p.name, 
                       price: p.price, 

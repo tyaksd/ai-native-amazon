@@ -84,16 +84,33 @@ export default function FavoritesPage() {
 
   const addToCart = (product: Product) => {
     try {
+      // Validate product ID before adding to cart
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (!uuidRegex.test(product.id)) {
+        console.error('Invalid product ID format:', product.id)
+        setAddedMessage('Invalid product ID')
+        setShowAdded(true)
+        setTimeout(() => setShowAdded(false), 2000)
+        return
+      }
+
       type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
       const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
       
+      // Clean up any invalid cart items before processing
+      const validCart = cart.filter(item => uuidRegex.test(item.id))
+      if (validCart.length !== cart.length) {
+        console.log('Removed invalid cart items')
+        localStorage.setItem('cart', JSON.stringify(validCart))
+      }
+      
       // Check if product already exists in cart
-      const existingItem = cart.find((item) => item.id === product.id);
+      const existingItem = validCart.find((item) => item.id === product.id);
       
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
-        cart.push({ 
+        validCart.push({ 
           id: product.id, 
           quantity: 1,
           size: null,
@@ -101,7 +118,7 @@ export default function FavoritesPage() {
         });
       }
       
-      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('cart', JSON.stringify(validCart));
       setAddedMessage(`Added ${product.name} to cart`);
       setShowAdded(true);
       setTimeout(() => setShowAdded(false), 2000);
