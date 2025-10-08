@@ -80,6 +80,14 @@ CREATE POLICY "Allow public delete" ON products FOR DELETE USING (true);
 3. Create a new API key
 4. Copy the API key (starts with `sk-`)
 
+## 2.7. Printful Setup (Required for Order Fulfillment)
+
+1. Go to [printful.com](https://printful.com) and create an account
+2. In your Printful dashboard, go to Settings > API
+3. Generate a new API key
+4. Copy the API key (starts with `key-`)
+5. Note: You'll need to set up your store and products in Printful first
+
 ## 3. Environment Variables
 
 Create a `.env.local` file in your project root with:
@@ -102,6 +110,9 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
 # OpenAI Configuration (Required for AI features)
 OPENAI_API_KEY=your_openai_api_key
+
+# Printful Configuration (Required for order fulfillment)
+PRINTFUL_API_KEY=your_printful_api_key
 ```
 
 ## 4. Update Pages to Use Supabase
@@ -145,6 +156,7 @@ For production deployment (e.g., Vercel, Netlify), make sure to set all environm
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (use live keys for production)
 - `STRIPE_WEBHOOK_SECRET`
 - `OPENAI_API_KEY`
+- `PRINTFUL_API_KEY`
 
 ### Vercel Deployment:
 1. Connect your GitHub repository to Vercel

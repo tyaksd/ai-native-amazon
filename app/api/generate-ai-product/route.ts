@@ -695,8 +695,12 @@ export async function POST(request: NextRequest) {
         )
         console.log(`[Product ${i + 1}] Product name: ${productName}`)
 
-         const price =
-           productType.toLowerCase().includes('t-shirt') ? generateRandomPrice() : 35
+         // Pricing logic: Women products fixed at $39.90, others use random selection
+         const price = productGender === 'Women' 
+           ? 39.90 
+           : productType.toLowerCase().includes('t-shirt') 
+             ? generateRandomPrice() 
+             : 35
 
         // デザインスタイルを選択（重複を避ける）
         let selectedStyle = designStyles[i % designStyles.length]

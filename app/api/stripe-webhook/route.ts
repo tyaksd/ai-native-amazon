@@ -274,12 +274,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { renderOrderEmail, sendEmail } from '@/lib/mailer'
+import { createPrintfulOrder } from '@/lib/printful'
 
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured')
   // 将来日付のバージョンは避け、安定版を使用
-  return new Stripe(key, { apiVersion: '2025-09-30.clover' as Stripe.LatestApiVersion })
+  return new Stripe(key, { apiVersion: '2025-08-27.basil' })
 }
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
@@ -289,6 +290,11 @@ export async function POST(req: NextRequest) {
   console.log('=== WEBHOOK CALLED ===')
   console.log('Request method:', req.method)
   console.log('Request headers:', Object.fromEntries(req.headers.entries()))
+  console.log('Environment check:')
+  console.log('- STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'Set' : 'Missing')
+  console.log('- STRIPE_WEBHOOK_SECRET:', process.env.STRIPE_WEBHOOK_SECRET ? 'Set' : 'Missing')
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing')
+  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing')
   
   if (!endpointSecret) {
     console.error('Webhook secret not configured')
@@ -411,6 +417,7 @@ const billingName =
         billing_name: billingName,
       })
       
+      console.log('Attempting to insert order into Supabase...')
       const { data: order, error: orderErr } = await supabaseAdmin
         .from('orders')
         .insert({
@@ -429,10 +436,12 @@ const billingName =
 
       if (orderErr || !order) {
         console.error('Order insert failed:', orderErr)
+        console.error('Order insert error details:', JSON.stringify(orderErr, null, 2))
         throw orderErr || new Error('Order insert failed')
       }
       
       console.log('Order created successfully:', order.id)
+      console.log('Order data:', JSON.stringify(order, null, 2))
 
       // ====== order_items 作成 ======
       type ItemPayload = {
@@ -501,14 +510,44 @@ const billingName =
       
       if (itemsPayload.length > 0) {
         console.log('Inserting order items...')
+        console.log('Items payload details:', JSON.stringify(itemsPayload, null, 2))
         const { error: itemsErr } = await supabaseAdmin.from('order_items').insert(itemsPayload)
         if (itemsErr) {
           console.error('Order items insert failed:', itemsErr)
+          console.error('Order items insert error details:', JSON.stringify(itemsErr, null, 2))
           throw itemsErr
         }
         console.log('Order items inserted successfully')
       } else {
         console.log('No items to insert')
+        console.log('Cart metadata:', cartMeta)
+        console.log('Line items:', lineItems)
+      }
+
+      // ====== Printful発注処理 ======
+      try {
+        console.log('Creating Printful order...')
+        const printfulOrder = await createPrintfulOrder(
+          order.id,
+          itemsPayload,
+          shippingAddress,
+          customerEmail || undefined
+        )
+        console.log('Printful order created successfully:', printfulOrder.id)
+        
+        // Update order with Printful order ID
+        await supabaseAdmin
+          .from('orders')
+          .update({ 
+            printful_order_id: printfulOrder.id.toString(),
+            printful_external_id: printfulOrder.external_id 
+          })
+          .eq('id', order.id)
+          
+      } catch (printfulErr) {
+        console.error('Printful order creation failed:', printfulErr)
+        // Don't throw error to avoid breaking the webhook
+        // Log the error for manual review
       }
 
       // ====== 購入確認メール ======
@@ -565,6 +604,7 @@ const billingName =
     const message = e instanceof Error ? e.message : 'Internal error'
     console.error('Webhook handling error:', e)
     console.error('Error stack:', e instanceof Error ? e.stack : 'No stack trace')
+    console.error('Error details:', JSON.stringify(e, null, 2))
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
