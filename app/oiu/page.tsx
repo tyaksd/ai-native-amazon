@@ -23,6 +23,7 @@ export default function AdminPage() {
   const [selectedBrand, setSelectedBrand] = useState('')
   const [selectedProductType, setSelectedProductType] = useState('')
   const [selectedColors, setSelectedColors] = useState<string[]>([])
+  const [aiProductGender, setAiProductGender] = useState('Unisex')
   const [quantity, setQuantity] = useState(1)
 
   // Predefined color options
@@ -344,6 +345,7 @@ export default function AdminPage() {
           brandId: selectedBrand,
           productType: selectedProductType,
           colors: selectedColors,
+          gender: aiProductGender,
           quantity: quantity
         }),
         signal: AbortSignal.timeout(300000), // 5 minutes timeout
@@ -366,6 +368,7 @@ export default function AdminPage() {
         setSelectedBrand('')
         setSelectedProductType('')
         setSelectedColors([])
+        setAiProductGender('Unisex')
         setQuantity(1)
       } else {
         throw new Error('Failed to generate products')
@@ -989,7 +992,7 @@ export default function AdminPage() {
                   <h2 className="text-lg font-semibold mb-6 text-purple-800">🤖 AI Product Generator</h2>
                   
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       {/* Brand Selection */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select Brand</label>
@@ -1002,6 +1005,20 @@ export default function AdminPage() {
                           {brands.map(brand => (
                             <option key={brand.id} value={brand.id}>{brand.name}</option>
                           ))}
+                        </select>
+                      </div>
+                      
+                      {/* Gender Selection */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                        <select 
+                          value={aiProductGender}
+                          onChange={(e) => setAiProductGender(e.target.value)}
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="Unisex">Unisex</option>
+                          <option value="Men">Men</option>
+                          <option value="Women">Women</option>
                         </select>
                       </div>
                       

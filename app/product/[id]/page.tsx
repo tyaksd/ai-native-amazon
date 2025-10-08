@@ -249,9 +249,10 @@ export default function ProductDetail({ params }: PageProps) {
                   <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
                   <p><strong>Fabric composition:</strong></p>
                   <ul className="ml-4 space-y-1">
-                    <li>• Solid colors are 100% ring-spun cotton</li>
-                    <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
-                    <li>• Dark Heather is 65% polyester, 35% cotton</li>
+                  <li>• 100% ring-spun cotton</li>
+                      <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
+                      <li>• Dark Heather is 65% polyester, 35% cotton</li>
+                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
                 </div>
               </div>

@@ -21,8 +21,9 @@ AIようのUI
 ブランドに変わるオリジナル意義なるブランドを作成
 
 new brandは0.08ドル
-new productは0.045ドル
-highなら0.34
+new productは0.045ドル, 45 びょう
+highなら0.17
+
 Dashboard的なやつで、売り上げ、wow/momグローすぐらふ
 2.64
 /oiu、本番環境ではパスワード、ローカルホストではなし
@@ -61,7 +62,7 @@ git push origin main -f
 
 <<<<<教訓>>>>>>>.
 データを新しく作るときはsupabase sqlコードを忘れるな
-
+2.82
 
 git add .
 git commit -m "changes"
@@ -69,4 +70,4 @@ git push origin main
 
 stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
-
+stripe trigger payment_intent.succeeded

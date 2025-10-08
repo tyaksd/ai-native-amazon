@@ -526,7 +526,7 @@ Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background,
       model: 'gpt-image-1',
       prompt: designPngPrompt,
       size: '1024x1024',
-      quality: 'high',
+      quality: 'low',
       n: 1,
     })
 
@@ -624,7 +624,7 @@ Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background,
 // ----------------------------
 export async function POST(request: NextRequest) {
   try {
-    const { brandId, productType, colors, quantity } = await request.json()
+    const { brandId, productType, colors, gender, quantity } = await request.json()
 
     if (!brandId || !productType || !colors || !Array.isArray(colors) || !quantity) {
       return NextResponse.json(
@@ -666,9 +666,9 @@ export async function POST(request: NextRequest) {
        try {
          console.log(`[Product ${i + 1}/${quantity}] Starting generation...`)
          
-         // 性別をMenとWomenで交互に選択
-         const gender = i % 2 === 0 ? 'Men' : 'Women'
-         console.log(`[Product ${i + 1}] Gender determined: ${gender}`)
+         // Use the provided gender for all products
+         const productGender = gender || 'Unisex'
+         console.log(`[Product ${i + 1}] Gender determined: ${productGender}`)
 
         console.log(`[Product ${i + 1}] Generating description...`)
         const description = await generateProductDescription(
@@ -676,7 +676,7 @@ export async function POST(request: NextRequest) {
           'Temporary Product Name', // 一時的な名前（後で更新）
           productType,
           colors,
-          gender,
+          productGender,
           brand.description || 'A unique streetwear brand',
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           brand.target_audience || 'Fashion-forward individuals'
@@ -687,7 +687,7 @@ export async function POST(request: NextRequest) {
         const productName = await generateProductName(
           brand.name,
           productType,
-          gender,
+          productGender,
           brand.description || 'A unique streetwear brand',
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           brand.target_audience || 'Young adults and fashion enthusiasts',
@@ -720,7 +720,7 @@ export async function POST(request: NextRequest) {
           brand.description || 'A unique streetwear brand',
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           brand.target_audience || 'Fashion-forward individuals',
-          gender,
+          productGender,
           selectedStyle
         )
         console.log(`[Product ${i + 1}] Generated ${productImages.length} product images, design PNG: ${designPng ? 'Yes' : 'No'}`)
@@ -738,7 +738,7 @@ export async function POST(request: NextRequest) {
             type: productType,
             colors,
             sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
-            gender,
+            gender: productGender,
             images: productImages,
             design_png: designPng ? [designPng] : null,
           })

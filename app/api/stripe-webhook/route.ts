@@ -9,7 +9,7 @@
 //   if (!key) {
 //     throw new Error('STRIPE_SECRET_KEY not configured')
 //   }
-//   return new Stripe(key, { apiVersion: '2025-08-27.basil' })
+//   return new Stripe(key, { apiVersion: '2025-09-30.clover' as any })
 // }
 // const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
 
@@ -280,33 +280,44 @@ function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured')
   // 将来日付のバージョンは避け、安定版を使用
-  return new Stripe(key, { apiVersion: '2025-08-27.basil' })
+  return new Stripe(key, { apiVersion: '2025-09-30.clover' as any })
 }
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
+  console.log('=== WEBHOOK CALLED ===')
+  console.log('Request method:', req.method)
+  console.log('Request headers:', Object.fromEntries(req.headers.entries()))
+  
   if (!endpointSecret) {
+    console.error('Webhook secret not configured')
     return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
   }
 
   // 署名検証用に「生のボディ」を取得
-  const headersList = await headers()
-  const sig = headersList.get('stripe-signature') as string
+  const sig = req.headers.get('stripe-signature') || ''
   const rawBody = await req.text()
+  
+  console.log('Stripe signature:', sig ? 'Present' : 'Missing')
+  console.log('Raw body length:', rawBody.length)
 
   let event: Stripe.Event
   try {
     const stripe = getStripe()
     event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret)
+    console.log('Event constructed successfully:', event.type)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('Webhook signature verification failed:', err)
     return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 })
   }
 
   try {
+    console.log('Webhook received:', event.type)
     if (event.type === 'checkout.session.completed') {
+      console.log('Processing checkout.session.completed event')
       const session = event.data.object as Stripe.Checkout.Session
       const stripe = getStripe()
 
@@ -389,6 +400,18 @@ const billingName =
       }
 
       // === Order を作成 ===
+      console.log('Creating order with data:', {
+        stripe_session_id: session.id,
+        total_amount: totalAmount,
+        currency,
+        is_paid: true,
+        customer_email: customerEmail,
+        shipping_address: shippingAddress,
+        shipping_name: shippingName,
+        billing_address: billingAddress,
+        billing_name: billingName,
+      })
+      
       const { data: order, error: orderErr } = await supabaseAdmin
         .from('orders')
         .insert({
@@ -397,17 +420,20 @@ const billingName =
           currency,
           is_paid: true,
           customer_email: customerEmail,
-          // ここは JSONB カラム想定（スキーマに合わせて変更可）
           shipping_address: shippingAddress,
           shipping_name: shippingName,
           billing_address: billingAddress,
           billing_name: billingName,
-
         })
         .select()
         .single()
 
-      if (orderErr || !order) throw orderErr || new Error('Order insert failed')
+      if (orderErr || !order) {
+        console.error('Order insert failed:', orderErr)
+        throw orderErr || new Error('Order insert failed')
+      }
+      
+      console.log('Order created successfully:', order.id)
 
       // ====== order_items 作成 ======
       type ItemPayload = {
@@ -471,9 +497,19 @@ const billingName =
         })
       }
 
+      console.log('Items payload:', itemsPayload)
+      console.log('Items payload length:', itemsPayload.length)
+      
       if (itemsPayload.length > 0) {
+        console.log('Inserting order items...')
         const { error: itemsErr } = await supabaseAdmin.from('order_items').insert(itemsPayload)
-        if (itemsErr) throw itemsErr
+        if (itemsErr) {
+          console.error('Order items insert failed:', itemsErr)
+          throw itemsErr
+        }
+        console.log('Order items inserted successfully')
+      } else {
+        console.log('No items to insert')
       }
 
       // ====== 購入確認メール ======
@@ -524,10 +560,12 @@ const billingName =
       }
     }
 
+    console.log('Webhook processing completed successfully')
     return NextResponse.json({ received: true })
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Internal error'
     console.error('Webhook handling error:', e)
+    console.error('Error stack:', e instanceof Error ? e.stack : 'No stack trace')
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

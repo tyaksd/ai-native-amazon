@@ -147,8 +147,6 @@ export async function POST(req: NextRequest) {
       billing_address_collection: 'required',
       shipping_address_collection: { allowed_countries: ALLOWED_COUNTRIES },
 
-  
-
       line_items: items.map((it) => ({
         quantity: it.quantity,
         price_data: {
