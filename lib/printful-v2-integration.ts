@@ -3,49 +3,6 @@ import { getPrintfulV2Client } from './printful-v2'
 import { supabaseAdmin } from './supabase-admin'
 import { calculateDesignPosition } from './printful'
 
-// Import existing types from the original printful.ts
-interface PrintfulProduct {
-  id: number
-  name: string
-  type: string
-  brand: string
-  model: string
-  image: string
-  variant_count: number
-  currency: string
-  price: string
-  in_stock: boolean
-}
-
-interface PrintfulVariant {
-  id: number
-  product_id: number
-  name: string
-  size: string
-  color: string
-  color_code: string
-  image: string
-  price: string
-  in_stock: boolean
-}
-
-interface PrintfulFile {
-  id: number
-  type: string
-  hash: string
-  url: string
-  filename: string
-  mime_type: string
-  size: number
-  width: number
-  height: number
-  dpi: number
-  status: string
-  created: number
-  thumbnail_url: string
-  preview_url: string
-  visible: boolean
-}
 
 export interface EnhancedPrintfulOrderItem {
   variant_id: number
@@ -85,11 +42,70 @@ export interface EnhancedPrintfulOrderResponse {
   shipping: string
   created: number
   updated: number
-  recipient: any
-  items: any[]
-  costs: any
-  retail_costs: any
-  shipments: any[]
+  recipient: {
+    name: string
+    address1: string
+    address2?: string
+    city: string
+    state_code?: string
+    country_code: string
+    zip: string
+    phone?: string
+    email?: string
+  }
+  items: Array<{
+    variant_id: number
+    quantity: number
+    name: string
+    files: Array<{
+      id: number
+      type: string
+      url: string
+      position?: {
+        area_width: number
+        area_height: number
+        width: number
+        height: number
+        top: number
+        left: number
+      }
+    }>
+  }>
+  costs: {
+    currency: string
+    subtotal: string
+    discount: string
+    shipping: string
+    digitization: string
+    additional_fee: string
+    fulfillment_fee: string
+    tax: string
+    vat: string
+    total: string
+  }
+  retail_costs: {
+    currency: string
+    subtotal: string
+    discount: string
+    shipping: string
+    tax: string
+    total: string
+  }
+  shipments: Array<{
+    id: number
+    carrier: string
+    service: string
+    tracking_number: string
+    tracking_url: string
+    created: number
+    ship_date: string
+    shipped_at: number
+    reshipment: boolean
+    items: Array<{
+      item_id: number
+      quantity: number
+    }>
+  }>
 }
 
 /**
@@ -294,7 +310,11 @@ export async function generateProductMockups(
 ): Promise<{
   taskKey: string
   status: string
-  mockups?: any[]
+  mockups?: Array<{
+    placement: string
+    image_url: string
+    variant_ids: number[]
+  }>
   error?: string
 }> {
   console.log('=== Generating Product Mockups ===')
@@ -322,7 +342,12 @@ export async function generateProductMockups(
     )
 
     console.log('Mockup task created:', mockupTask.task_key)
-    return mockupTask
+    return {
+      taskKey: mockupTask.task_key,
+      status: mockupTask.status,
+      mockups: mockupTask.mockups,
+      error: mockupTask.error
+    }
 
   } catch (error) {
     console.error('Mockup generation failed:', error)
@@ -336,9 +361,19 @@ export async function generateProductMockups(
 export async function getMockupTaskResult(taskKey: string): Promise<{
   taskKey: string
   status: string
-  mockups?: any[]
+  mockups?: Array<{
+    placement: string
+    image_url: string
+    variant_ids: number[]
+  }>
   error?: string
 }> {
   const client = getPrintfulV2Client()
-  return await client.getMockupTaskResult(taskKey)
+  const result = await client.getMockupTaskResult(taskKey)
+  return {
+    taskKey: result.task_key,
+    status: result.status,
+    mockups: result.mockups,
+    error: result.error
+  }
 }

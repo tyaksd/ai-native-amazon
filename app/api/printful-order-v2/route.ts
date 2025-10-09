@@ -36,7 +36,7 @@ export async function POST(req: Request) {
             city: shippingAddress.city,
             zip: shippingAddress.zip
           },
-          items: items.map((item: any) => ({
+          items: items.map((item: { variant_id: number; quantity: number }) => ({
             variant_id: item.variant_id,
             quantity: item.quantity
           }))
@@ -79,7 +79,24 @@ export async function POST(req: Request) {
         phone: shippingAddress.phone,
         email: customerEmail || shippingAddress.email
       },
-      items: items.map((item: any) => ({
+      items: items.map((item: { 
+        variant_id: number; 
+        quantity: number; 
+        name: string; 
+        files?: Array<{ 
+          id: number; 
+          type: string; 
+          url: string; 
+          position?: {
+            area_width: number;
+            area_height: number;
+            width: number;
+            height: number;
+            top: number;
+            left: number;
+          }
+        }> 
+      }) => ({
         variant_id: item.variant_id,
         quantity: item.quantity,
         name: item.name,

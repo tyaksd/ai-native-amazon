@@ -46,7 +46,7 @@ export async function GET() {
             brand: product.brand,
             model: product.model
           },
-          variants: variants.slice(0, 3).map(v => ({ // Limit to first 3 variants
+          variants: variants?.slice(0, 3).map(v => ({ // Limit to first 3 variants
             id: v.id,
             name: v.name,
             size: v.size,
@@ -67,8 +67,8 @@ export async function GET() {
       tshirtProducts: tshirtProducts.length,
       variantsInfo,
       recommendedVariants: variantsInfo
-        .flatMap(info => info.variants)
-        .filter(v => v.in_stock)
+        .flatMap(info => info.variants || [])
+        .filter(v => v?.in_stock)
         .slice(0, 10)
     })
     

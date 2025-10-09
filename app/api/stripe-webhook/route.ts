@@ -274,7 +274,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { renderOrderEmail, sendEmail } from '@/lib/mailer'
-import { createPrintfulOrder } from '@/lib/printful'
 
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY

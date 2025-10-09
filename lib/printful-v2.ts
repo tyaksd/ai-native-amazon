@@ -169,7 +169,17 @@ export class PrintfulV2Client {
     options: string[]
   }> {
     const techniqueParam = technique ? `?technique=${technique}` : ''
-    const response = await this.makeRequest(
+    const response = await this.makeRequest<{
+      product_id: number
+      available_placements: Record<string, string>
+      printfiles: PrintfileInfo[]
+      variant_printfiles: Array<{
+        variant_id: number
+        placements: Record<string, number>
+      }>
+      option_groups: string[]
+      options: string[]
+    }>(
       `/mockup-generator/printfiles/${productId}${techniqueParam}`
     )
     return response.result
@@ -199,7 +209,22 @@ export class PrintfulV2Client {
     }>
   }> {
     const techniqueParam = technique ? `?technique=${technique}` : ''
-    const response = await this.makeRequest(
+    const response = await this.makeRequest<{
+      version: number
+      variant_mapping: Array<{
+        variant_id: number
+        templates: Array<{
+          placement: string
+          template_id: number
+        }>
+      }>
+      templates: LayoutTemplate[]
+      min_dpi: number
+      conflicting_placements: Array<{
+        placement: string
+        conflicts: string[]
+      }>
+    }>(
       `/mockup-generator/templates/${productId}${techniqueParam}`
     )
     return response.result
@@ -224,7 +249,18 @@ export class PrintfulV2Client {
     in_stock: boolean
   }>> {
     const q = search ? `?search=${encodeURIComponent(search)}` : ''
-    const response = await this.makeRequest<Array<any>>(`/catalog/products${q}`)
+    const response = await this.makeRequest<Array<{
+      id: number
+      name: string
+      type: string
+      brand: string
+      model: string
+      image: string
+      variant_count: number
+      currency: string
+      price: string
+      in_stock: boolean
+    }>>(`/catalog/products${q}`)
     return response.result || []
   }
 
@@ -233,7 +269,18 @@ export class PrintfulV2Client {
    * GET /catalog/products/{id}
    */
   async getCatalogProduct(productId: number): Promise<{
-    product?: any
+    product?: {
+      id: number
+      name: string
+      type: string
+      brand: string
+      model: string
+      image: string
+      variant_count: number
+      currency: string
+      price: string
+      in_stock: boolean
+    }
     variants?: Array<{
       id: number
       product_id: number
@@ -271,7 +318,23 @@ export class PrintfulV2Client {
     preview_url: string
     visible: boolean
   }> {
-    const response = await this.makeRequest('/files', {
+    const response = await this.makeRequest<{
+      id: number
+      type: string
+      hash: string
+      url: string
+      filename: string
+      mime_type: string
+      size: number
+      width: number
+      height: number
+      dpi: number
+      status: string
+      created: number
+      thumbnail_url: string
+      preview_url: string
+      visible: boolean
+    }>('/files', {
       method: 'POST',
       body: JSON.stringify({ url: fileUrl, filename })
     })
@@ -282,8 +345,150 @@ export class PrintfulV2Client {
    * Get order by external ID
    * GET /orders/@{external_id}
    */
-  async getOrder(externalId: string): Promise<any> {
-    const response = await this.makeRequest(`/orders/@${externalId}`)
+  async getOrder(externalId: string): Promise<{
+    id: number
+    external_id: string
+    status: string
+    shipping: string
+    created: number
+    updated: number
+    recipient: {
+      name: string
+      address1: string
+      address2?: string
+      city: string
+      state_code?: string
+      country_code: string
+      zip: string
+      phone?: string
+      email?: string
+    }
+    items: Array<{
+      variant_id: number
+      quantity: number
+      name: string
+      files: Array<{
+        id: number
+        type: string
+        url: string
+        position?: {
+          area_width: number
+          area_height: number
+          width: number
+          height: number
+          top: number
+          left: number
+        }
+      }>
+    }>
+    costs: {
+      currency: string
+      subtotal: string
+      discount: string
+      shipping: string
+      digitization: string
+      additional_fee: string
+      fulfillment_fee: string
+      tax: string
+      vat: string
+      total: string
+    }
+    retail_costs: {
+      currency: string
+      subtotal: string
+      discount: string
+      shipping: string
+      tax: string
+      total: string
+    }
+    shipments: Array<{
+      id: number
+      carrier: string
+      service: string
+      tracking_number: string
+      tracking_url: string
+      created: number
+      ship_date: string
+      shipped_at: number
+      reshipment: boolean
+      items: Array<{
+        item_id: number
+        quantity: number
+      }>
+    }>
+  }> {
+    const response = await this.makeRequest<{
+      id: number
+      external_id: string
+      status: string
+      shipping: string
+      created: number
+      updated: number
+      recipient: {
+        name: string
+        address1: string
+        address2?: string
+        city: string
+        state_code?: string
+        country_code: string
+        zip: string
+        phone?: string
+        email?: string
+      }
+      items: Array<{
+        variant_id: number
+        quantity: number
+        name: string
+        files: Array<{
+          id: number
+          type: string
+          url: string
+          position?: {
+            area_width: number
+            area_height: number
+            width: number
+            height: number
+            top: number
+            left: number
+          }
+        }>
+      }>
+      costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        digitization: string
+        additional_fee: string
+        fulfillment_fee: string
+        tax: string
+        vat: string
+        total: string
+      }
+      retail_costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        tax: string
+        total: string
+      }
+      shipments: Array<{
+        id: number
+        carrier: string
+        service: string
+        tracking_number: string
+        tracking_url: string
+        created: number
+        ship_date: string
+        shipped_at: number
+        reshipment: boolean
+        items: Array<{
+          item_id: number
+          quantity: number
+        }>
+      }>
+    }>(`/orders/@${externalId}`)
     return response.result
   }
 
@@ -322,7 +527,13 @@ export class PrintfulV2Client {
     variants: number
     synced: number
   }> {
-    const response = await this.makeRequest(
+    const response = await this.makeRequest<{
+      id: number
+      external_id: string
+      name: string
+      variants: number
+      synced: number
+    }>(
       '/sync-products',
       {
         method: 'POST',
@@ -362,7 +573,20 @@ export class PrintfulV2Client {
     const query = queryParams.toString()
     const endpoint = query ? `/sync-products?${query}` : '/sync-products'
     
-    const response = await this.makeRequest(endpoint)
+    const response = await this.makeRequest<{
+      items: Array<{
+        id: number
+        external_id: string
+        name: string
+        variants: number
+        synced: number
+      }>
+      paging: {
+        total: number
+        offset: number
+        limit: number
+      }
+    }>(endpoint)
     return response.result
   }
 
@@ -411,13 +635,80 @@ export class PrintfulV2Client {
     shipping: string
     created: number
     updated: number
-    recipient: any
-    items: any[]
-    costs: any
-    retail_costs: any
-    shipments: any[]
-    gift: any
-    packing_slip: any
+    recipient: {
+      name: string
+      address1: string
+      address2?: string
+      city: string
+      state_code?: string
+      country_code: string
+      zip: string
+      phone?: string
+      email?: string
+    }
+    items: Array<{
+      variant_id: number
+      quantity: number
+      name: string
+      files: Array<{
+        id: number
+        type: string
+        url: string
+        position?: {
+          area_width: number
+          area_height: number
+          width: number
+          height: number
+          top: number
+          left: number
+        }
+      }>
+    }>
+    costs: {
+      currency: string
+      subtotal: string
+      discount: string
+      shipping: string
+      digitization: string
+      additional_fee: string
+      fulfillment_fee: string
+      tax: string
+      vat: string
+      total: string
+    }
+    retail_costs: {
+      currency: string
+      subtotal: string
+      discount: string
+      shipping: string
+      tax: string
+      total: string
+    }
+    shipments: Array<{
+      id: number
+      carrier: string
+      service: string
+      tracking_number: string
+      tracking_url: string
+      created: number
+      ship_date: string
+      shipped_at: number
+      reshipment: boolean
+      items: Array<{
+        item_id: number
+        quantity: number
+      }>
+    }>
+    gift: {
+      subject: string
+      message: string
+    }
+    packing_slip: {
+      email: string
+      phone: string
+      message: string
+      logo_url?: string
+    }
   }> {
     // Enhanced validation
     if (!order.external_id) {
@@ -442,7 +733,88 @@ export class PrintfulV2Client {
       throw new Error('items array is required and cannot be empty')
     }
 
-    const response = await this.makeRequest(
+    const response = await this.makeRequest<{
+      id: number
+      external_id: string
+      status: string
+      shipping: string
+      created: number
+      updated: number
+      recipient: {
+        name: string
+        address1: string
+        address2?: string
+        city: string
+        state_code?: string
+        country_code: string
+        zip: string
+        phone?: string
+        email?: string
+      }
+      items: Array<{
+        variant_id: number
+        quantity: number
+        name: string
+        files: Array<{
+          id: number
+          type: string
+          url: string
+          position?: {
+            area_width: number
+            area_height: number
+            width: number
+            height: number
+            top: number
+            left: number
+          }
+        }>
+      }>
+      costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        digitization: string
+        additional_fee: string
+        fulfillment_fee: string
+        tax: string
+        vat: string
+        total: string
+      }
+      retail_costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        tax: string
+        total: string
+      }
+      shipments: Array<{
+        id: number
+        carrier: string
+        service: string
+        tracking_number: string
+        tracking_url: string
+        created: number
+        ship_date: string
+        shipped_at: number
+        reshipment: boolean
+        items: Array<{
+          item_id: number
+          quantity: number
+        }>
+      }>
+      gift: {
+        subject: string
+        message: string
+      }
+      packing_slip: {
+        email: string
+        phone: string
+        message: string
+        logo_url?: string
+      }
+    }>(
       '/orders',
       {
         method: 'POST',
@@ -489,7 +861,28 @@ export class PrintfulV2Client {
       total: string
     }
   }> {
-    const response = await this.makeRequest(
+    const response = await this.makeRequest<{
+      costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        digitization: string
+        additional_fee: string
+        fulfillment_fee: string
+        tax: string
+        vat: string
+        total: string
+      }
+      retail_costs: {
+        currency: string
+        subtotal: string
+        discount: string
+        shipping: string
+        tax: string
+        total: string
+      }
+    }>(
       '/orders/estimate-costs',
       {
         method: 'POST',
@@ -509,25 +902,4 @@ export function getPrintfulV2Client(): PrintfulV2Client {
   return new PrintfulV2Client(apiKey)
 }
 
-// Utility function for retry logic
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: { retries: number; baseDelayMs: number } = { retries: 3, baseDelayMs: 300 }
-): Promise<T> {
-  let lastError: Error
-  
-  for (let i = 0; i <= options.retries; i++) {
-    try {
-      return await fn()
-    } catch (error) {
-      lastError = error as Error
-      if (i === options.retries) break
-      
-      const delay = options.baseDelayMs * Math.pow(2, i)
-      await new Promise(resolve => setTimeout(resolve, delay))
-    }
-  }
-  
-  throw lastError!
-}
 
