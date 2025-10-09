@@ -2,6 +2,8 @@
 import { getPrintfulV2Client } from './printful-v2'
 import { supabaseAdmin } from './supabase-admin'
 import { calculateDesignPosition } from './printful'
+import { getVariantMapping, upsertVariantMapping, VariantMappingInput } from './printful-variant-mapping'
+import { PrintfulCatalogClient } from './printful-catalog'
 
 
 export interface EnhancedPrintfulOrderItem {
@@ -168,7 +170,7 @@ export async function createEnhancedPrintfulOrder(
   const products = Array.isArray(productsRaw) ? productsRaw : []
   const printfulItems: EnhancedPrintfulOrderItem[] = []
 
-  // Process each item
+  // Process each item with cache-first approach
   for (const item of items) {
     if (!item.product_id) continue
 
@@ -178,98 +180,118 @@ export async function createEnhancedPrintfulOrder(
       continue
     }
 
-    // Find appropriate variant based on gender and size/color
-    const gender = product.gender || 'unisex'
-    const searchTerm = gender === 'women' ? 'Bella + Canvas 6400' : 'Gildan 64000'
-    
-    try {
-      const catalogProducts = await client.getCatalogProducts(searchTerm)
-      const tshirtProduct = catalogProducts?.find(p => 
-        p.name?.toLowerCase().includes('t-shirt') || 
-        p.name?.toLowerCase().includes('tee')
-      )
+    console.log(`Processing item: ${item.product_name} (${item.size}, ${item.color})`)
 
-      if (!tshirtProduct) {
-        console.warn(`No T-shirt product found for gender: ${gender}`)
-        continue
-      }
+    // Step 1: Try to get variant mapping from database (cache-first)
+    let matchingVariant = await getVariantMapping(
+      item.product_id,
+      item.size,
+      item.color
+    )
 
-      const productDetails = await client.getCatalogProduct(tshirtProduct.id)
-      const variants = productDetails?.variants || []
+    if (matchingVariant) {
+      console.log(`✅ Found cached variant mapping: ${matchingVariant.printful_variant_id}`)
+    } else {
+      console.log(`❌ No cached mapping found, attempting API lookup...`)
       
-      if (!variants || variants.length === 0) {
-        console.warn(`No variants found for product: ${tshirtProduct.id}`)
-        continue
-      }
-
-      // Find matching variant by size and color with better matching logic
-      let matchingVariant = variants?.find(v => 
-        v.size === item.size && 
-        v.color === item.color
-      )
-
-      // If exact match not found, try case-insensitive matching
-      if (!matchingVariant) {
-        matchingVariant = variants?.find(v => 
-          v.size?.toLowerCase() === item.size?.toLowerCase() && 
-          v.color?.toLowerCase() === item.color?.toLowerCase()
-        )
-      }
-
-      // If still not found, try partial matching for color
-      if (!matchingVariant) {
-        matchingVariant = variants?.find(v => 
-          v.size === item.size && 
-          v.color?.toLowerCase().includes(item.color?.toLowerCase() || '')
-        )
-      }
-
-      if (!matchingVariant) {
-        console.warn(`No matching variant found for size: ${item.size}, color: ${item.color}`)
-        console.warn(`Available variants:`, variants?.map(v => ({ size: v.size, color: v.color, id: v.id })))
-        continue
-      }
-
-      // Upload design files with proper positioning
-      const designFiles = []
-      if (product.design_png && product.design_png.length > 0) {
-        for (const designUrl of product.design_png) {
-          try {
-            const uploadedFile = await client.uploadFile(designUrl, `${product.name}_design.png`)
-            
-            // Calculate proper position for 1024x1024 PNG
-            // プリントエリアの中央に配置し、横幅をプリントエリアの75%にする
-            const position = calculateDesignPosition(1024, 1024)
-            
-            designFiles.push({
-              id: uploadedFile.id,
-              type: 'default',
-              url: uploadedFile.url,
-              position: {
-                area_width: position.area_width,
-                area_height: position.area_height,
-                width: position.width,
-                height: position.height,
-                top: position.top,
-                left: position.left
-              }
-            })
-          } catch (error) {
-            console.error(`Failed to upload design file: ${designUrl}`, error)
+        // Step 2: Fallback to dynamic catalog lookup
+        try {
+          console.log(`❌ No cached mapping found, attempting dynamic catalog lookup...`)
+          
+          // カタログクライアントを使用してGildan 64000を検索
+          const catalogClient = new PrintfulCatalogClient(process.env.PRINTFUL_API_KEY!)
+          const gildanProduct = await catalogClient.findGildan64000()
+          
+          if (!gildanProduct) {
+            console.warn(`Gildan 64000 not found in Printful catalog`)
+            continue
           }
+
+          console.log(`Found Gildan 64000: ${gildanProduct.name} (ID: ${gildanProduct.id})`)
+
+          // 動的にvariant IDを取得
+          const variantId = await catalogClient.getVariantId(
+            gildanProduct.id, 
+            item.size, 
+            item.color
+          )
+
+          if (!variantId) {
+            console.warn(`No matching variant found for size: ${item.size}, color: ${item.color}`)
+            continue
+          }
+
+          console.log(`✅ Found dynamic variant: ${item.size} ${item.color} -> ${variantId}`)
+
+          // Cache the mapping for future use
+          const mappingInput: VariantMappingInput = {
+            product_id: item.product_id,
+            size: item.size,
+            color: item.color,
+            printful_variant_id: variantId,
+            printful_product_id: gildanProduct.id
+          }
+
+          await upsertVariantMapping(mappingInput)
+          console.log(`✅ Cached new dynamic variant mapping: ${variantId}`)
+
+          matchingVariant = {
+            id: '', // Will be set by database
+            product_id: item.product_id,
+            size: item.size,
+            color: item.color,
+            printful_variant_id: variantId,
+            printful_product_id: gildanProduct.id,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+
+        } catch (apiError) {
+          console.error(`❌ Dynamic catalog lookup failed for product ${item.product_id}:`, apiError)
+          console.warn(`Skipping item due to API error - consider pre-populating mappings`)
+          continue
+        }
+    }
+
+    // Upload design files with proper positioning
+    const designFiles = []
+    if (product.design_png && product.design_png.length > 0) {
+      for (const designUrl of product.design_png) {
+        try {
+          const uploadedFile = await client.uploadFile(designUrl, `${product.name}_design.png`)
+          
+          // Calculate proper position for 1024x1024 PNG
+          // プリントエリアの中央に配置し、横幅をプリントエリアの75%にする
+          const position = calculateDesignPosition(1024, 1024)
+          
+          designFiles.push({
+            id: uploadedFile.id,
+            type: 'default',
+            url: uploadedFile.url,
+            position: {
+              area_width: position.area_width,
+              area_height: position.area_height,
+              width: position.width,
+              height: position.height,
+              top: position.top,
+              left: position.left
+            }
+          })
+        } catch (error) {
+          console.error(`Failed to upload design file: ${designUrl}`, error)
         }
       }
-
-      printfulItems.push({
-        variant_id: matchingVariant.id,
-        quantity: item.quantity,
-        name: item.product_name,
-        files: designFiles
-      })
-
-    } catch (error) {
-      console.error(`Failed to process product ${product.id}:`, error)
     }
+
+    printfulItems.push({
+      variant_id: matchingVariant.printful_variant_id,
+      quantity: item.quantity,
+      name: item.product_name,
+      files: designFiles
+    })
+
+  } catch (error) {
+    console.error(`Failed to process product ${item.product_id}:`, error)
   }
 
   if (printfulItems.length === 0) {

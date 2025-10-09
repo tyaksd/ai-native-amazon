@@ -1,0 +1,26 @@
+{
+  "payment_intent": {
+    "id": "pi_test_1234567890",
+    "object": "payment_intent",
+    "amount": 2999,
+    "currency": "usd",
+    "status": "succeeded",
+    "metadata": {
+      "product_id": "c3a7bf96-b5ff-49f5-a9e7-2892d0d51916",
+      "size": "M",
+      "color": "BLACK",
+      "quantity": "1"
+    },
+    "shipping": {
+      "name": "Test Customer",
+      "address": {
+        "line1": "123 Test Street",
+        "city": "Tokyo",
+        "state": "Tokyo",
+        "country": "JP",
+        "postal_code": "100-0001"
+      }
+    },
+    "receipt_email": "test@example.com"
+  }
+}
