@@ -930,7 +930,6 @@
   
 //   return printfulOrderResponse
 // }
-
 import { supabaseAdmin } from './supabase-admin'
 
 // ===== Types =====
@@ -951,12 +950,17 @@ export interface PrintfulVariant {
   id: number
   product_id: number
   name: string
-  size: string
-  color: string
-  color_code: string
-  image: string
-  price: string
-  in_stock: boolean
+  size?: string
+  color?: string
+  color_code?: string
+  image?: string
+  price?: string
+  in_stock?: boolean
+  // APIの揺れ対策（将来のスキーマ変化など）
+  options?: {
+    size?: string
+    color?: string
+  }
 }
 
 export interface PrintfulFile {
@@ -1137,7 +1141,7 @@ async function withRetry<T>(
     retryOn = (err: Error | unknown) => {
       const msg = String((err as Error)?.message || '')
       // 5xxやネットワーク系
-      return / 5\d\d /.test(msg) || /ECONN|ETIMEDOUT|fetch failed/i.test(msg)
+      return /\s5\d\d\s/.test(msg) || /ECONN|ETIMEDOUT|fetch failed/i.test(msg)
     },
   }: {
     retries?: number
@@ -1174,10 +1178,7 @@ class PrintfulClient {
     this.apiKey = apiKey
   }
 
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
     const response = await fetch(url, {
       ...options,
@@ -1187,52 +1188,49 @@ class PrintfulClient {
         ...options.headers,
       },
     })
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      // X-Request-Id を拾っておくとサポートに投げやすい
-      const reqId = response.headers.get('x-request-id')
-      const tail = reqId ? ` (x-request-id=${reqId})` : ''
-      throw new Error(
-        `Printful API error: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}${tail}`
-      )
+    const reqId = response.headers.get('x-request-id')
+    const tail = reqId ? ` (x-request-id=${reqId})` : ''
+    let body: any = null
+    try {
+      body = await response.json()
+    } catch {
+      // noop（HTMLエラーなど）
     }
-    return response.json()
+    if (!response.ok) {
+      throw new Error(`Printful API error: ${response.status} ${response.statusText}. ${JSON.stringify(body)}${tail}`)
+    }
+    return body as T
   }
 
-  // ---------- Catalog API（正） ----------
-  // 検索（brand/modelでヒットさせる） ← 500対策でリトライ
+  // ---------- Catalog API ----------
   async getCatalogProducts(search?: string): Promise<PrintfulProduct[]> {
     const q = search ? `?search=${encodeURIComponent(search)}` : ''
     const res = await withRetry(
       () => this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`),
       { retries: 3, baseDelayMs: 300 }
     )
-    // Ensure we always return an array
-    return Array.isArray(res.result) ? res.result : []
+    const list = Array.isArray(res?.result) ? res.result : []
+    if (!Array.isArray(res?.result)) {
+      console.warn('Catalog search returned non-array result:', res)
+    }
+    return list
   }
 
-  // 1件取得（variants[] を含む） ← 軽くリトライ
-  async getCatalogProduct(productId: number): Promise<{ product: PrintfulProduct; variants: PrintfulVariant[] }> {
+  async getCatalogProduct(productId: number): Promise<{ product?: PrintfulProduct; variants?: PrintfulVariant[] }> {
     const res = await withRetry(
-      () => this.makeRequest<{ result: { product: PrintfulProduct; variants: PrintfulVariant[] } }>(
+      () => this.makeRequest<{ result: { product?: PrintfulProduct; variants?: PrintfulVariant[] } }>(
         `/catalog/products/${productId}`
       ),
       { retries: 2, baseDelayMs: 300 }
     )
-    return res.result
+    return res?.result ?? {}
   }
 
   // ---------- Files ----------
   async uploadFile(fileUrl: string, filename: string): Promise<PrintfulFile> {
     const response = await this.makeRequest<{ result: PrintfulFile }>(
       '/files',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          url: fileUrl,
-          filename,
-        }),
-      }
+      { method: 'POST', body: JSON.stringify({ url: fileUrl, filename }) }
     )
     return response.result
   }
@@ -1241,10 +1239,7 @@ class PrintfulClient {
   async createOrder(order: PrintfulOrder): Promise<PrintfulOrderResponse> {
     const response = await this.makeRequest<{ result: PrintfulOrderResponse }>(
       '/orders',
-      {
-        method: 'POST',
-        body: JSON.stringify(order),
-      }
+      { method: 'POST', body: JSON.stringify(order) }
     )
     return response.result
   }
@@ -1263,10 +1258,6 @@ class PrintfulClient {
     )
     return response.result
   }
-
-  // ---------- （参考）Store API：使わない ----------
-  // ※ /products・/products/:id/variants は使わない（404の元）
-  // ※ /store/products は事前にSync Productを作る運用のときのみ使用
 }
 
 // Instance
@@ -1298,19 +1289,18 @@ const COLOR_MAPPING: Record<string, string> = {
   'GOLD': 'Gold',
   'SILVER': 'Silver',
   'DARK HEATHER': 'Dark Heather',
-  // よく使う追加表記ゆれ
   'DARK GREY': 'Dark Grey Heather',
   'HEATHER BLACK': 'Black Heather',
 }
-function mapColorToPrintful(godshipColor: string): string {
-  const upperColor = (godshipColor || '').toUpperCase()
-  return COLOR_MAPPING[upperColor] || godshipColor
+function mapColorToPrintful(godshipColor: string | null | undefined): string {
+  const upperColor = String(godshipColor || '').toUpperCase()
+  return COLOR_MAPPING[upperColor] || String(godshipColor || '')
 }
 
 // ===== Catalog helpers =====
 const CATALOG_FALLBACK_IDS = {
   unisex: 12, // Gildan 64000 Unisex Softstyle T-Shirt
-  men: 12,    // men も unisex を使用
+  men: 12,
   women: 360, // Bella + Canvas 6400 Women's Relaxed T-Shirt
 } as const
 
@@ -1323,38 +1313,42 @@ async function resolveCatalogProductIdByGender(client: PrintfulClient, gender: s
     return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
   }
 
-  // 検索は try/catch（500想定）
   try {
-    const query = isWomen ? '6400' : '64000' // 短いクエリの方が安定する
+    const query = isWomen ? '6400' : '64000'
     const list = await client.getCatalogProducts(query)
 
-    // Ensure list is an array
-    if (!Array.isArray(list)) {
-      console.warn('Catalog search returned non-array result:', typeof list, list)
-      throw new Error('Catalog search returned invalid result')
-    }
-
-    // brand/modelを優先して最も合うものを選ぶ
+    const normalized = Array.isArray(list) ? list : []
     const pick =
-      list.find(p =>
+      normalized.find(p =>
         (isWomen
-          ? (String(p.brand).toLowerCase().includes('bella') && String(p.model).toLowerCase().includes('6400'))
-          : (String(p.brand).toLowerCase().includes('gildan') && String(p.model).toLowerCase().includes('64000'))
+          ? (String(p.brand || '').toLowerCase().includes('bella') && String(p.model || '').toLowerCase().includes('6400'))
+          : (String(p.brand || '').toLowerCase().includes('gildan') && String(p.model || '').toLowerCase().includes('64000'))
         )
-      ) || list[0]
+      ) || normalized[0]
 
     if (pick?.id) return Number(pick.id)
+    console.warn('resolveCatalogProductIdByGender: could not pick, using fallback. listLen=', normalized.length)
   } catch (e) {
     console.warn('Catalog search failed, using fallback IDs. Error:', e)
   }
-
-  // フォールバック（必ず返す）
   return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
 }
 
 async function getCatalogVariants(client: PrintfulClient, productId: number) {
-  const { variants } = await client.getCatalogProduct(productId)
-  return variants as Array<{ id: number; size: string; color: string; in_stock: boolean }>
+  const res = await client.getCatalogProduct(productId)
+  const raw = (res?.variants ?? []) as unknown
+  const variants = Array.isArray(raw) ? raw : []
+  // 最低限の正規化
+  return variants.map(v => {
+    const size = (v.size || v.options?.size || '').toString()
+    const color = (v.color || v.options?.color || '').toString()
+    return {
+      id: Number(v.id),
+      size,
+      color,
+      in_stock: Boolean((v as any).in_stock ?? true), // 欠損時はtrue寄せ（上位で在庫確認するなら適宜調整）
+    }
+  }) as Array<{ id: number; size: string; color: string; in_stock: boolean }>
 }
 
 export async function findBestVariantCatalog(
@@ -1364,9 +1358,14 @@ export async function findBestVariantCatalog(
   color: string
 ) {
   const variants = await getCatalogVariants(client, productId)
-  const wantSize = (size || '').toLowerCase()
-  const wantColorA = (mapColorToPrintful(color || '') || '').toLowerCase()
-  const wantColorB = (color || '').toLowerCase()
+  if (!Array.isArray(variants) || variants.length === 0) {
+    console.warn('findBestVariantCatalog: variants empty for productId=', productId)
+    return null
+  }
+
+  const wantSize = String(size || '').toLowerCase()
+  const wantColorA = String(mapColorToPrintful(color || '') || '').toLowerCase()
+  const wantColorB = String(color || '').toLowerCase()
 
   return (
     variants.find(v => v.size?.toLowerCase() === wantSize && v.color?.toLowerCase() === wantColorA) ||
@@ -1397,7 +1396,7 @@ export function calculateDesignPosition(
   const finalWidth = designWidth || 1024
   const finalHeight = designHeight || 1024
 
-  // 「print areaに対して幅75%」
+  // print areaに対して幅75%
   const targetWidth = Math.round(area_width * 0.75) // 3375px
   const scaleFactor = targetWidth / finalWidth
   const scaledWidth = Math.round(finalWidth * scaleFactor)
@@ -1406,38 +1405,23 @@ export function calculateDesignPosition(
   const left = Math.round((area_width - scaledWidth) / 2)
   const top = Math.round((area_height - scaledHeight) / 2)
 
-  return {
-    area_width,
-    area_height,
-    width: scaledWidth,
-    height: scaledHeight,
-    top,
-    left,
-  }
+  return { area_width, area_height, width: scaledWidth, height: scaledHeight, top, left }
 }
 
 // 画像サイズ取得（必要ならsharp等に差し替え）
 export async function getImageDimensions(_imageUrl: string): Promise<{ width: number; height: number }> {
+  // TODO: 実装差し替え可
   return { width: 1024, height: 1024 }
 }
 
-// Inside label（任意：今回のエラーとは無関係）
+// Inside label（任意）
 export async function createInsideLabelFile(
   brandLogoUrl: string,
   brandName: string,
   client: PrintfulClient
 ): Promise<PrintfulFileWithPosition> {
-  // /files アップロード時は position/placement 指定は不要（無視される）
   const base = await client.uploadFile(brandLogoUrl, `${brandName}_inside_label_1.3.png`)
-  // position は注文時の files[] で指定する
-  const position = {
-    area_width: 450,
-    area_height: 450,
-    width: 400,
-    height: 100,
-    top: 175,
-    left: 25,
-  }
+  const position = { area_width: 450, area_height: 450, width: 400, height: 100, top: 175, left: 25 }
   return { ...base, placement: 'label_inside', position }
 }
 
@@ -1504,11 +1488,12 @@ export async function createPrintfulOrder(
   for (const item of items) {
     if (!item.product_id) continue
     const product = products.find(p => p.id === item.product_id)
-    if (!product) continue
+    if (!product) {
+      console.warn('Product not found in DB for id:', item.product_id)
+      continue
+    }
 
-    const gender = product.gender || 'unisex'
-
-    // Catalogで product_id を決める（Gildan 64000 or Bella+Canvas 6400）
+    const gender: string = product.gender || 'unisex'
     const catalogProductId = await resolveCatalogProductIdByGender(client, gender)
     console.log(`Using Catalog productId: ${catalogProductId}`)
 
@@ -1523,52 +1508,59 @@ export async function createPrintfulOrder(
 
     // デザイン画像アップロード
     const designFiles: PrintfulFileWithPosition[] = []
-    if (product.design_png && product.design_png.length > 0) {
-      try {
-        const designUrl = product.design_png[0]
+    try {
+      // design_png が string | string[] の両対応
+      const designPngRaw = (product as any).design_png as string | string[] | null | undefined
+      const designList = Array.isArray(designPngRaw)
+        ? designPngRaw
+        : (designPngRaw ? [designPngRaw] : [])
+
+      if (designList.length > 0) {
+        const designUrl = designList[0]
         const { width: dw, height: dh } = await getImageDimensions(designUrl)
         const pos = calculateDesignPosition(dw, dh, (gender.toLowerCase() === 'women' ? 'women' : 'unisex'))
-
         const uploaded = await client.uploadFile(designUrl, `${product.name}_design.png`)
 
-        // 注文に添付：placement/position はここで指定（front_large）
         designFiles.push({
           ...uploaded,
           placement: 'front_large',
           position: pos,
         })
-
-        // 任意：内ラベル（テンプレの有無はPrintful側の設定に依存）
-        const productWithBrands = product as typeof product & { brands?: { icon: string; name: string } }
-        if (productWithBrands.brands?.icon) {
-          try {
-            await createInsideLabelFile(productWithBrands.brands.icon, productWithBrands.brands.name, client)
-            // 実際に同梱する場合だけ push
-            // designFiles.push(insideLabel)
-          } catch (e) {
-            console.error(`Failed to create inside label for product ${product.id}:`, e)
-          }
-        }
-      } catch (e) {
-        console.error(`Failed to upload design file for product ${product.id}:`, e)
       }
+    } catch (e) {
+      console.error(`Failed to upload design file for product ${product.id}:`, e)
+    }
+
+    // 内ラベル（任意）
+    try {
+      const brand = (product as any).brands as { icon?: string; name?: string } | undefined
+      if (brand?.icon && brand?.name) {
+        // 実際に同梱する場合は push する
+        // const insideLabel = await createInsideLabelFile(brand.icon, brand.name, client)
+        // designFiles.push(insideLabel)
+        // 今はログのみ
+        console.log('Inside label available but not attached (feature off by default).')
+      }
+    } catch (e) {
+      console.error(`Failed to create inside label for product ${product.id}:`, e)
     }
 
     printfulItems.push({
       variant_id: variant.id,
       quantity: item.quantity,
-      retail_price: '0.00', // 価格は自社側で管理する想定なら省略も可
+      // 注文に課金する価格は自社側管理でOK。Printful側のretail_priceは省略可能
+      // retail_price: '0.00',
       name: item.product_name,
       files: designFiles,
     })
   }
 
   if (printfulItems.length === 0) {
-    throw new Error('No valid items found for Printful order')
+    throw new Error('No valid items found for Printful order (no matched variants or missing products)')
   }
 
   // city が空だと将来の検証で弾かれる場合があるためフォールバック
-  const safeCity = shippingAddress.city || ' '
+  const safeCity = shippingAddress.city && shippingAddress.city.trim().length > 0 ? shippingAddress.city : ' '
 
   const printfulOrder: PrintfulOrder = {
     external_id: orderId,
