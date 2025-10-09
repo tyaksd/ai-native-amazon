@@ -30,9 +30,9 @@ export async function GET() {
         
         // Get variants for the selected product using catalog API
         const { variants } = await client.getCatalogProduct(selectedProduct.id)
-        console.log(`Found ${variants.length} variants`)
+        console.log(`Found ${variants?.length || 0} variants`)
         
-        if (variants.length > 0) {
+        if (variants && variants.length > 0) {
           const selectedVariant = variants[0]
           console.log(`Selected variant: ${selectedVariant.name} - ${selectedVariant.size} ${selectedVariant.color}`)
           
