@@ -550,12 +550,12 @@ const billingName =
         
         // Transform Stripe Address to Printful format
         const printfulAddress = {
-          name: 'Customer', // Stripe Address doesn't have name field
+          name: shippingName || 'Customer', // Use actual customer name
           address1: shippingAddress.line1 || '',
           address2: shippingAddress.line2 || undefined,
-          city: shippingAddress.city || '',
-          state_code: shippingAddress.state || undefined,
-          country_code: shippingAddress.country || 'US',
+          city: shippingAddress.city || 'Tokyo', // Default to Tokyo if empty
+          state_code: shippingAddress.state === '東京都' ? 'Tokyo' : shippingAddress.state || undefined,
+          country_code: shippingAddress.country || 'JP',
           zip: shippingAddress.postal_code || '',
           phone: undefined,
           email: customerEmail || undefined

@@ -172,7 +172,7 @@ export async function createEnhancedPrintfulOrder(
   for (const item of items) {
     if (!item.product_id) continue
 
-    const product = products.find(p => p.id === item.product_id)
+    const product = products?.find(p => p.id === item.product_id)
     if (!product) {
       console.warn(`Product not found: ${item.product_id}`)
       continue
@@ -184,7 +184,7 @@ export async function createEnhancedPrintfulOrder(
     
     try {
       const catalogProducts = await client.getCatalogProducts(searchTerm)
-      const tshirtProduct = catalogProducts.find(p => 
+      const tshirtProduct = catalogProducts?.find(p => 
         p.name?.toLowerCase().includes('t-shirt') || 
         p.name?.toLowerCase().includes('tee')
       )
@@ -194,20 +194,39 @@ export async function createEnhancedPrintfulOrder(
         continue
       }
 
-      const { variants } = await client.getCatalogProduct(tshirtProduct.id)
+      const productDetails = await client.getCatalogProduct(tshirtProduct.id)
+      const variants = productDetails?.variants || []
+      
       if (!variants || variants.length === 0) {
         console.warn(`No variants found for product: ${tshirtProduct.id}`)
         continue
       }
 
-      // Find matching variant by size and color
-      const matchingVariant = variants.find(v => 
+      // Find matching variant by size and color with better matching logic
+      let matchingVariant = variants?.find(v => 
         v.size === item.size && 
         v.color === item.color
       )
 
+      // If exact match not found, try case-insensitive matching
+      if (!matchingVariant) {
+        matchingVariant = variants?.find(v => 
+          v.size?.toLowerCase() === item.size?.toLowerCase() && 
+          v.color?.toLowerCase() === item.color?.toLowerCase()
+        )
+      }
+
+      // If still not found, try partial matching for color
+      if (!matchingVariant) {
+        matchingVariant = variants?.find(v => 
+          v.size === item.size && 
+          v.color?.toLowerCase().includes(item.color?.toLowerCase() || '')
+        )
+      }
+
       if (!matchingVariant) {
         console.warn(`No matching variant found for size: ${item.size}, color: ${item.color}`)
+        console.warn(`Available variants:`, variants?.map(v => ({ size: v.size, color: v.color, id: v.id })))
         continue
       }
 
