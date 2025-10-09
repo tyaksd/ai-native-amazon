@@ -96,10 +96,6 @@ export function renderOrderEmail(params: {
 
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Fira Sans','Droid Sans','Helvetica Neue',sans-serif;line-height:1.6;max-width:600px;margin:0 auto;">
-      // <!-- Godship Logo -->
-      // <div style="text-align:center;margin-bottom:4px;padding:4px 0;border-bottom:1px solid #e5e7eb;">
-      //   <img src="https://godship.io/godship-logo2.png" alt="Godship" style="height:200px;width:auto;">
-      // </div>
       
       <h2 style="margin:0 0 12px;color:#111827;">Thank you for your order!</h2>
       <p style="margin:0 0 16px;color:#6b7280;">We appreciate your purchase. This email confirms we received your payment.</p>

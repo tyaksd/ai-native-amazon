@@ -956,7 +956,6 @@ export interface PrintfulVariant {
   image?: string
   price?: string
   in_stock?: boolean
-  // APIの揺れ対策（将来のスキーマ変化など）
   options?: {
     size?: string
     color?: string
@@ -1113,7 +1112,19 @@ export interface PrintfulOrderResponse {
     vat: string
     total: string
   }
-  shipments: Array<{id: string; carrier: string; service: string; tracking_number: string; tracking_url: string; created: number; ship_date: string; shipped_at: number; reshipment: boolean; reshipment_reason: string; items: Array<{item_id: number; external_id: string; quantity: number}>}>
+  shipments: Array<{
+    id: string
+    carrier: string
+    service: string
+    tracking_number: string
+    tracking_url: string
+    created: number
+    ship_date: string
+    shipped_at: number
+    reshipment: boolean
+    reshipment_reason: string
+    items: Array<{ item_id: number; external_id: string; quantity: number }>
+  }>
   gift?: {
     subject: string
     message: string
@@ -1138,9 +1149,8 @@ async function withRetry<T>(
     baseDelayMs = 300,
     factor = 2,
     jitter = true,
-    retryOn = (err: Error | unknown) => {
+    retryOn = (err: unknown) => {
       const msg = String((err as Error)?.message || '')
-      // 5xxやネットワーク系
       return /\s5\d\d\s/.test(msg) || /ECONN|ETIMEDOUT|fetch failed/i.test(msg)
     },
   }: {
@@ -1148,11 +1158,11 @@ async function withRetry<T>(
     baseDelayMs?: number
     factor?: number
     jitter?: boolean
-    retryOn?: (err: Error | unknown) => boolean
+    retryOn?: (err: unknown) => boolean
   } = {}
 ): Promise<T> {
   let attempt = 0
-  let lastErr: Error | unknown
+  let lastErr: unknown
   while (attempt <= retries) {
     try {
       return await fn()
@@ -1188,15 +1198,15 @@ class PrintfulClient {
         ...options.headers,
       },
     })
-    const reqId = response.headers.get('x-request-id')
-    const tail = reqId ? ` (x-request-id=${reqId})` : ''
-    let body: any = null
+    const reqId = response.headers.get('x-request-id') ?? undefined
+    let body: unknown = null
     try {
       body = await response.json()
     } catch {
-      // noop（HTMLエラーなど）
+      /* ignore non-JSON bodies */
     }
     if (!response.ok) {
+      const tail = reqId ? ` (x-request-id=${reqId})` : ''
       throw new Error(`Printful API error: ${response.status} ${response.statusText}. ${JSON.stringify(body)}${tail}`)
     }
     return body as T
@@ -1206,11 +1216,13 @@ class PrintfulClient {
   async getCatalogProducts(search?: string): Promise<PrintfulProduct[]> {
     const q = search ? `?search=${encodeURIComponent(search)}` : ''
     const res = await withRetry(
-      () => this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`),
+      () => this.makeRequest<{ result: unknown }>(`/catalog/products${q}`),
       { retries: 3, baseDelayMs: 300 }
     )
-    const list = Array.isArray(res?.result) ? res.result : []
-    if (!Array.isArray(res?.result)) {
+    const list = (res && typeof res === 'object' && Array.isArray((res as { result: unknown }).result))
+      ? (res as { result: PrintfulProduct[] }).result
+      : []
+    if (!Array.isArray(list)) {
       console.warn('Catalog search returned non-array result:', res)
     }
     return list
@@ -1293,8 +1305,8 @@ const COLOR_MAPPING: Record<string, string> = {
   'HEATHER BLACK': 'Black Heather',
 }
 function mapColorToPrintful(godshipColor: string | null | undefined): string {
-  const upperColor = String(godshipColor || '').toUpperCase()
-  return COLOR_MAPPING[upperColor] || String(godshipColor || '')
+  const upperColor = String(godshipColor ?? '').toUpperCase()
+  return COLOR_MAPPING[upperColor] || String(godshipColor ?? '')
 }
 
 // ===== Catalog helpers =====
@@ -1308,7 +1320,6 @@ async function resolveCatalogProductIdByGender(client: PrintfulClient, gender: s
   const g = (gender || '').toLowerCase()
   const isWomen = g === 'women' || g === 'female'
 
-  // 強制フォールバック（障害時切替用）
   if (process.env.PRINTFUL_BYPASS_SEARCH === 'true') {
     return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
   }
@@ -1334,21 +1345,23 @@ async function resolveCatalogProductIdByGender(client: PrintfulClient, gender: s
   return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
 }
 
-async function getCatalogVariants(client: PrintfulClient, productId: number) {
+type VariantNormalized = { id: number; size: string; color: string; in_stock: boolean }
+
+function toBoolean(value: unknown, defaultValue: boolean): boolean {
+  return typeof value === 'boolean' ? value : defaultValue
+}
+
+async function getCatalogVariants(client: PrintfulClient, productId: number): Promise<VariantNormalized[]> {
   const res = await client.getCatalogProduct(productId)
-  const raw = (res?.variants ?? []) as unknown
+  const raw = res?.variants ?? []
   const variants = Array.isArray(raw) ? raw : []
-  // 最低限の正規化
-  return variants.map(v => {
-    const size = (v.size || v.options?.size || '').toString()
-    const color = (v.color || v.options?.color || '').toString()
-    return {
-      id: Number(v.id),
-      size,
-      color,
-      in_stock: Boolean((v as any).in_stock ?? true), // 欠損時はtrue寄せ（上位で在庫確認するなら適宜調整）
-    }
-  }) as Array<{ id: number; size: string; color: string; in_stock: boolean }>
+  return variants.map((v): VariantNormalized => {
+    const idNum = Number((v as { id: unknown }).id)
+    const size = String((v.size ?? v.options?.size ?? '') || '')
+    const color = String((v.color ?? v.options?.color ?? '') || '')
+    const inStock = toBoolean((v as { in_stock?: unknown }).in_stock, true)
+    return { id: idNum, size, color, in_stock: inStock }
+  })
 }
 
 export async function findBestVariantCatalog(
@@ -1379,8 +1392,7 @@ export async function findBestVariantCatalog(
 // ===== Positioning (75% center in front_large) =====
 export function calculateDesignPosition(
   designWidth: number,
-  designHeight: number,
-  _tshirtType: 'unisex' | 'women' = 'unisex'
+  designHeight: number
 ): {
   area_width: number
   area_height: number
@@ -1396,7 +1408,6 @@ export function calculateDesignPosition(
   const finalWidth = designWidth || 1024
   const finalHeight = designHeight || 1024
 
-  // print areaに対して幅75%
   const targetWidth = Math.round(area_width * 0.75) // 3375px
   const scaleFactor = targetWidth / finalWidth
   const scaledWidth = Math.round(finalWidth * scaleFactor)
@@ -1409,8 +1420,8 @@ export function calculateDesignPosition(
 }
 
 // 画像サイズ取得（必要ならsharp等に差し替え）
-export async function getImageDimensions(_imageUrl: string): Promise<{ width: number; height: number }> {
-  // TODO: 実装差し替え可
+export async function getImageDimensions(): Promise<{ width: number; height: number }> {
+  // 実運用では実サイズを取得する処理に差し替え
   return { width: 1024, height: 1024 }
 }
 
@@ -1423,6 +1434,19 @@ export async function createInsideLabelFile(
   const base = await client.uploadFile(brandLogoUrl, `${brandName}_inside_label_1.3.png`)
   const position = { area_width: 450, area_height: 450, width: 400, height: 100, top: 175, left: 25 }
   return { ...base, placement: 'label_inside', position }
+}
+
+// ===== DB Product typing =====
+type DBBrand = { id: string; name?: string | null; icon?: string | null }
+type DBProduct = {
+  id: string
+  name: string
+  gender?: string | null
+  design_png?: string | string[] | null
+  colors?: string[] | null
+  sizes?: string[] | null
+  brand_id?: string | null
+  brands?: DBBrand | null
 }
 
 // ===== Main: create order =====
@@ -1457,10 +1481,10 @@ export async function createPrintfulOrder(
   const client = getPrintfulClient()
 
   // DBから自社商品の設計情報を取得
-  const productIds = items.map(i => i.product_id).filter(Boolean) as string[]
+  const productIds = items.map(i => i.product_id).filter((v): v is string => Boolean(v))
   if (productIds.length === 0) throw new Error('No valid product IDs found in order items')
 
-  const { data: products, error } = await supabaseAdmin
+  const { data: productsRaw, error } = await supabaseAdmin
     .from('products')
     .select(`
       id,
@@ -1478,10 +1502,11 @@ export async function createPrintfulOrder(
     `)
     .in('id', productIds)
 
-  if (error || !products) {
+  if (error) {
     console.error('Failed to fetch products:', error)
     throw new Error(`Failed to fetch products: ${error?.message}`)
   }
+  const products: DBProduct[] = Array.isArray(productsRaw) ? (productsRaw as unknown as DBProduct[]) : []
 
   const printfulItems: PrintfulOrderItem[] = []
 
@@ -1509,16 +1534,15 @@ export async function createPrintfulOrder(
     // デザイン画像アップロード
     const designFiles: PrintfulFileWithPosition[] = []
     try {
-      // design_png が string | string[] の両対応
-      const designPngRaw = (product as any).design_png as string | string[] | null | undefined
+      const designPngRaw = product.design_png
       const designList = Array.isArray(designPngRaw)
         ? designPngRaw
         : (designPngRaw ? [designPngRaw] : [])
 
       if (designList.length > 0) {
         const designUrl = designList[0]
-        const { width: dw, height: dh } = await getImageDimensions(designUrl)
-        const pos = calculateDesignPosition(dw, dh, (gender.toLowerCase() === 'women' ? 'women' : 'unisex'))
+        const { width: dw, height: dh } = await getImageDimensions()
+        const pos = calculateDesignPosition(dw, dh)
         const uploaded = await client.uploadFile(designUrl, `${product.name}_design.png`)
 
         designFiles.push({
@@ -1533,12 +1557,11 @@ export async function createPrintfulOrder(
 
     // 内ラベル（任意）
     try {
-      const brand = (product as any).brands as { icon?: string; name?: string } | undefined
+      const brand = product.brands
       if (brand?.icon && brand?.name) {
-        // 実際に同梱する場合は push する
+        // 実際に同梱する場合は以下を有効化
         // const insideLabel = await createInsideLabelFile(brand.icon, brand.name, client)
         // designFiles.push(insideLabel)
-        // 今はログのみ
         console.log('Inside label available but not attached (feature off by default).')
       }
     } catch (e) {
@@ -1548,8 +1571,6 @@ export async function createPrintfulOrder(
     printfulItems.push({
       variant_id: variant.id,
       quantity: item.quantity,
-      // 注文に課金する価格は自社側管理でOK。Printful側のretail_priceは省略可能
-      // retail_price: '0.00',
       name: item.product_name,
       files: designFiles,
     })
@@ -1559,7 +1580,7 @@ export async function createPrintfulOrder(
     throw new Error('No valid items found for Printful order (no matched variants or missing products)')
   }
 
-  // city が空だと将来の検証で弾かれる場合があるためフォールバック
+  // city 空対策
   const safeCity = shippingAddress.city && shippingAddress.city.trim().length > 0 ? shippingAddress.city : ' '
 
   const printfulOrder: PrintfulOrder = {
