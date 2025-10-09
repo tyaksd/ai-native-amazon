@@ -1134,8 +1134,8 @@ async function withRetry<T>(
     baseDelayMs = 300,
     factor = 2,
     jitter = true,
-    retryOn = (err: any) => {
-      const msg = String(err?.message || '')
+    retryOn = (err: Error | unknown) => {
+      const msg = String((err as Error)?.message || '')
       // 5xxやネットワーク系
       return / 5\d\d /.test(msg) || /ECONN|ETIMEDOUT|fetch failed/i.test(msg)
     },
@@ -1144,11 +1144,11 @@ async function withRetry<T>(
     baseDelayMs?: number
     factor?: number
     jitter?: boolean
-    retryOn?: (err: any) => boolean
+    retryOn?: (err: Error | unknown) => boolean
   } = {}
 ): Promise<T> {
   let attempt = 0
-  let lastErr: any
+  let lastErr: Error | unknown
   while (attempt <= retries) {
     try {
       return await fn()
@@ -1532,9 +1532,10 @@ export async function createPrintfulOrder(
         })
 
         // 任意：内ラベル（テンプレの有無はPrintful側の設定に依存）
-        if ((product as any).brands?.icon) {
+        const productWithBrands = product as typeof product & { brands?: { icon: string; name: string } }
+        if (productWithBrands.brands?.icon) {
           try {
-            const insideLabel = await createInsideLabelFile((product as any).brands.icon, (product as any).brands.name, client)
+            await createInsideLabelFile(productWithBrands.brands.icon, productWithBrands.brands.name, client)
             // 実際に同梱する場合だけ push
             // designFiles.push(insideLabel)
           } catch (e) {
