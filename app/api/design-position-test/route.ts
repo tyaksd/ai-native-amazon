@@ -40,8 +40,7 @@ export async function GET() {
     const results = testCases.map(testCase => {
       const position = calculateDesignPosition(
         testCase.width, 
-        testCase.height, 
-        testCase.tshirtType
+        testCase.height
       )
       
       return {
