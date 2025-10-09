@@ -1122,6 +1122,49 @@ export interface PrintfulOrderResponse {
   }
 }
 
+// ===== Retry Utils =====
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  {
+    retries = 3,
+    baseDelayMs = 300,
+    factor = 2,
+    jitter = true,
+    retryOn = (err: any) => {
+      const msg = String(err?.message || '')
+      // 5xxやネットワーク系
+      return / 5\d\d /.test(msg) || /ECONN|ETIMEDOUT|fetch failed/i.test(msg)
+    },
+  }: {
+    retries?: number
+    baseDelayMs?: number
+    factor?: number
+    jitter?: boolean
+    retryOn?: (err: any) => boolean
+  } = {}
+): Promise<T> {
+  let attempt = 0
+  let lastErr: any
+  while (attempt <= retries) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastErr = err
+      if (!retryOn(err) || attempt === retries) break
+      const delay =
+        baseDelayMs * Math.pow(factor, attempt) *
+        (jitter ? (0.7 + Math.random() * 0.6) : 1)
+      await sleep(delay)
+      attempt++
+    }
+  }
+  throw lastErr
+}
+
 // ===== Client =====
 class PrintfulClient {
   private apiKey: string
@@ -1146,25 +1189,34 @@ class PrintfulClient {
     })
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      // X-Request-Id を拾っておくとサポートに投げやすい
+      const reqId = response.headers.get('x-request-id')
+      const tail = reqId ? ` (x-request-id=${reqId})` : ''
       throw new Error(
-        `Printful API error: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}`
+        `Printful API error: ${response.status} ${response.statusText}. ${JSON.stringify(errorData)}${tail}`
       )
     }
     return response.json()
   }
 
   // ---------- Catalog API（正） ----------
-  // 検索（brand/modelでヒットさせる）
+  // 検索（brand/modelでヒットさせる） ← 500対策でリトライ
   async getCatalogProducts(search?: string): Promise<PrintfulProduct[]> {
     const q = search ? `?search=${encodeURIComponent(search)}` : ''
-    const res = await this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`)
-    return res.result
+    const res = await withRetry(
+      () => this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`),
+      { retries: 3, baseDelayMs: 300 }
+    )
+    return res.result || []
   }
 
-  // 1件取得（variants[] を含む）
+  // 1件取得（variants[] を含む） ← 軽くリトライ
   async getCatalogProduct(productId: number): Promise<{ product: PrintfulProduct; variants: PrintfulVariant[] }> {
-    const res = await this.makeRequest<{ result: { product: PrintfulProduct; variants: PrintfulVariant[] } }>(
-      `/catalog/products/${productId}`
+    const res = await withRetry(
+      () => this.makeRequest<{ result: { product: PrintfulProduct; variants: PrintfulVariant[] } }>(
+        `/catalog/products/${productId}`
+      ),
+      { retries: 2, baseDelayMs: 300 }
     )
     return res.result
   }
@@ -1177,7 +1229,7 @@ class PrintfulClient {
         method: 'POST',
         body: JSON.stringify({
           url: fileUrl,
-          filename: filename,
+          filename,
         }),
       }
     )
@@ -1255,24 +1307,42 @@ function mapColorToPrintful(godshipColor: string): string {
 }
 
 // ===== Catalog helpers =====
+const CATALOG_FALLBACK_IDS = {
+  unisex: 12, // Gildan 64000 Unisex Softstyle T-Shirt
+  men: 12,    // men も unisex を使用
+  women: 360, // Bella + Canvas 6400 Women's Relaxed T-Shirt
+} as const
+
 async function resolveCatalogProductIdByGender(client: PrintfulClient, gender: string): Promise<number> {
   const g = (gender || '').toLowerCase()
   const isWomen = g === 'women' || g === 'female'
 
-  const query = isWomen ? 'Bella + Canvas 6400' : 'Gildan 64000'
-  const list = await client.getCatalogProducts(query)
+  // 強制フォールバック（障害時切替用）
+  if (process.env.PRINTFUL_BYPASS_SEARCH === 'true') {
+    return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
+  }
 
-  // brand/modelを優先して最も合うものを選ぶ
-  const pick =
-    list.find(p =>
-      (isWomen
-        ? (String(p.brand).toLowerCase().includes('bella') && String(p.model).toLowerCase().includes('6400'))
-        : (String(p.brand).toLowerCase().includes('gildan') && String(p.model).toLowerCase().includes('64000'))
-      )
-    ) || list[0]
+  // 検索は try/catch（500想定）
+  try {
+    const query = isWomen ? '6400' : '64000' // 短いクエリの方が安定する
+    const list = await client.getCatalogProducts(query)
 
-  if (!pick) throw new Error(`Catalog product not found for query: ${query}`)
-  return pick.id as number
+    // brand/modelを優先して最も合うものを選ぶ
+    const pick =
+      list.find(p =>
+        (isWomen
+          ? (String(p.brand).toLowerCase().includes('bella') && String(p.model).toLowerCase().includes('6400'))
+          : (String(p.brand).toLowerCase().includes('gildan') && String(p.model).toLowerCase().includes('64000'))
+        )
+      ) || list[0]
+
+    if (pick?.id) return Number(pick.id)
+  } catch (e) {
+    console.warn('Catalog search failed, using fallback IDs. Error:', e)
+  }
+
+  // フォールバック（必ず返す）
+  return isWomen ? CATALOG_FALLBACK_IDS.women : CATALOG_FALLBACK_IDS.unisex
 }
 
 async function getCatalogVariants(client: PrintfulClient, productId: number) {
@@ -1317,11 +1387,10 @@ export function calculateDesignPosition(
   const area_width = 4500
   const area_height = 5400
 
-  // 元画像の想定（1024×1024）
   const finalWidth = designWidth || 1024
   const finalHeight = designHeight || 1024
 
-  // 面積ベースではなく「print areaに対して幅75%」で統一
+  // 「print areaに対して幅75%」
   const targetWidth = Math.round(area_width * 0.75) // 3375px
   const scaleFactor = targetWidth / finalWidth
   const scaledWidth = Math.round(finalWidth * scaleFactor)
@@ -1351,9 +1420,9 @@ export async function createInsideLabelFile(
   brandName: string,
   client: PrintfulClient
 ): Promise<PrintfulFileWithPosition> {
-  // 注意：/files アップロードに position/placement は不要（＆無効）
+  // /files アップロード時は position/placement 指定は不要（無視される）
   const base = await client.uploadFile(brandLogoUrl, `${brandName}_inside_label_1.3.png`)
-  // position は注文時に渡す（ここでは返却用に保持だけ）
+  // position は注文時の files[] で指定する
   const position = {
     area_width: 450,
     area_height: 450,
@@ -1463,10 +1532,10 @@ export async function createPrintfulOrder(
         })
 
         // 任意：内ラベル（テンプレの有無はPrintful側の設定に依存）
-        if (product.brands?.[0]?.icon) {
+        if ((product as any).brands?.icon) {
           try {
-            await createInsideLabelFile(product.brands[0].icon, product.brands[0].name, client)
-            // 実際に使うかはSKU運用次第。使うなら push
+            const insideLabel = await createInsideLabelFile((product as any).brands.icon, (product as any).brands.name, client)
+            // 実際に同梱する場合だけ push
             // designFiles.push(insideLabel)
           } catch (e) {
             console.error(`Failed to create inside label for product ${product.id}:`, e)
@@ -1517,4 +1586,3 @@ export async function createPrintfulOrder(
   console.log('✅ Printful order created successfully!', res.id, res.external_id)
   return res
 }
-
