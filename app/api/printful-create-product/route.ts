@@ -12,7 +12,7 @@ export async function POST() {
     const designUrl = 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759828276/Rebel%20Mark%20Graphic%20Tee-design.png'
     
     // Calculate design position
-    const designPosition = calculateDesignPosition(1000, 1000, 'unisex')
+    const designPosition = calculateDesignPosition(1000, 1000)
     console.log('Design position:', designPosition)
     
     // Create product data in Printful API format
