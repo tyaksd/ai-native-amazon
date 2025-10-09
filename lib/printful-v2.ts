@@ -1,7 +1,6 @@
 // Printful API v2 Enhanced Client
 // Based on https://developers.printful.com/docs/#tag/Products-API
 
-import { withRetry } from './utils'
 
 // Enhanced types based on API v2 documentation
 export interface PrintfulV2Error {
@@ -531,3 +530,4 @@ async function withRetry<T>(
   
   throw lastError!
 }
+
