@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPrintfulClient, findTshirtProduct } from '@/lib/printful'
+import { getPrintfulClient } from '@/lib/printful'
 
 export async function GET(_req: NextRequest) {
   try {
     const client = getPrintfulClient()
     
-    // Test getting all products
-    console.log('Fetching all products from Printful...')
-    const products = await client.getProducts()
-    console.log(`Found ${products.length} products`)
+    // Test getting catalog products
+    console.log('Fetching catalog products from Printful...')
+    const unisexProducts = await client.getCatalogProducts('Gildan 64000')
+    const womenProducts = await client.getCatalogProducts('Bella + Canvas 6400')
+    console.log(`Found ${unisexProducts.length} unisex products, ${womenProducts.length} women products`)
     
     // Test finding T-shirt products
     console.log('Testing T-shirt product search...')
-    const unisexProduct = await findTshirtProduct('unisex', client)
-    const womenProduct = await findTshirtProduct('women', client)
-    const menProduct = await findTshirtProduct('men', client)
+    const unisexProduct = unisexProducts[0] || null
+    const womenProduct = womenProducts[0] || null
+    const menProduct = unisexProducts[0] || null
     
     return NextResponse.json({
       success: true,
-      totalProducts: products.length,
+      totalProducts: unisexProducts.length + womenProducts.length,
       tshirtProducts: {
         unisex: unisexProduct ? {
           id: unisexProduct.id,
@@ -39,7 +40,7 @@ export async function GET(_req: NextRequest) {
           model: menProduct.model
         } : null,
       },
-      allProducts: products.slice(0, 10).map(p => ({
+      allProducts: [...unisexProducts, ...womenProducts].slice(0, 10).map(p => ({
         id: p.id,
         name: p.name,
         brand: p.brand,

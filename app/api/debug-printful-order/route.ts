@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPrintfulOrder, getAvailableTshirtProducts, findBestVariant } from '@/lib/printful'
+import { createPrintfulOrder, getPrintfulClient, findBestVariantCatalog } from '@/lib/printful'
 
 export async function POST(_req: NextRequest) {
   try {
     console.log('=== Debug Printful Order Creation ===')
     
-    // First, check available T-shirt products
+    // First, check available T-shirt products using catalog API
     console.log('Checking available T-shirt products...')
-    const availableProducts = await getAvailableTshirtProducts()
+    const client = getPrintfulClient()
+    const availableProducts = await client.getCatalogProducts('Gildan 64000')
     
     if (availableProducts.length === 0) {
       return NextResponse.json({
@@ -52,7 +53,7 @@ export async function POST(_req: NextRequest) {
       const testProduct = availableProducts[0]
       console.log(`Testing variant finding for product: ${testProduct.name} (ID: ${testProduct.id})`)
       
-      const testVariant = await findBestVariant(testProduct.id, 'M', 'Black')
+      const testVariant = await findBestVariantCatalog(client, testProduct.id, 'M', 'Black')
       if (testVariant) {
         console.log(`✅ Found test variant: ${testVariant.id} (${testVariant.size} ${testVariant.color})`)
       } else {

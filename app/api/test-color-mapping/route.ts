@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAvailableTshirtProducts, findBestVariant } from '@/lib/printful'
+import { getPrintfulClient, findBestVariantCatalog } from '@/lib/printful'
 
 export async function GET(_req: NextRequest) {
   try {
     console.log('=== Testing Color Mapping ===')
     
-    // Get available products
-    const availableProducts = await getAvailableTshirtProducts()
+    // Get available products using catalog API
+    const client = getPrintfulClient()
+    const availableProducts = await client.getCatalogProducts('Gildan 64000')
     
     if (availableProducts.length === 0) {
       return NextResponse.json({
@@ -32,7 +33,7 @@ export async function GET(_req: NextRequest) {
     for (const testColor of testColors) {
       console.log(`\nTesting color: ${testColor.godship} -> ${testColor.expected}`)
       
-      const variant = await findBestVariant(testProduct.id, 'M', testColor.godship)
+      const variant = await findBestVariantCatalog(client, testProduct.id, 'M', testColor.godship)
       
       results.push({
         godshipColor: testColor.godship,
