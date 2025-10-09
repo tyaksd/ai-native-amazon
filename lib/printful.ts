@@ -1207,7 +1207,8 @@ class PrintfulClient {
       () => this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`),
       { retries: 3, baseDelayMs: 300 }
     )
-    return res.result || []
+    // Ensure we always return an array
+    return Array.isArray(res.result) ? res.result : []
   }
 
   // 1件取得（variants[] を含む） ← 軽くリトライ
@@ -1326,6 +1327,12 @@ async function resolveCatalogProductIdByGender(client: PrintfulClient, gender: s
   try {
     const query = isWomen ? '6400' : '64000' // 短いクエリの方が安定する
     const list = await client.getCatalogProducts(query)
+
+    // Ensure list is an array
+    if (!Array.isArray(list)) {
+      console.warn('Catalog search returned non-array result:', typeof list, list)
+      throw new Error('Catalog search returned invalid result')
+    }
 
     // brand/modelを優先して最も合うものを選ぶ
     const pick =

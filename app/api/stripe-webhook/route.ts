@@ -417,6 +417,19 @@ const billingName =
         billing_name: billingName,
       })
       
+      // Check if order already exists to prevent duplicates
+      console.log('Checking for existing order...')
+      const { data: existingOrder } = await supabaseAdmin
+        .from('orders')
+        .select('id')
+        .eq('stripe_session_id', session.id)
+        .single()
+
+      if (existingOrder) {
+        console.log('Order already exists, skipping duplicate processing')
+        return NextResponse.json({ received: true, message: 'Order already processed' })
+      }
+
       console.log('Attempting to insert order into Supabase...')
       const { data: order, error: orderErr } = await supabaseAdmin
         .from('orders')
