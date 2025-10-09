@@ -9,7 +9,7 @@ export async function POST() {
     
     // Design information
     const designUrl = 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759828276/Rebel%20Mark%20Graphic%20Tee-design.png'
-    const designPosition = calculateDesignPosition(1000, 1000, 'unisex')
+    const designPosition = calculateDesignPosition(1000, 1000)
     
     console.log('Design position:', designPosition)
     

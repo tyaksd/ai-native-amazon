@@ -15,8 +15,8 @@ export async function POST() {
     console.log('Original image dimensions:', dimensions)
     
     // Calculate positions for different T-shirt types
-    const unisexPosition = calculateDesignPosition(dimensions.width, dimensions.height, 'unisex')
-    const womenPosition = calculateDesignPosition(dimensions.width, dimensions.height, 'women')
+    const unisexPosition = calculateDesignPosition(dimensions.width, dimensions.height)
+    const womenPosition = calculateDesignPosition(dimensions.width, dimensions.height)
     
     console.log('Unisex T-shirt position:', unisexPosition)
     console.log('Women T-shirt position:', womenPosition)

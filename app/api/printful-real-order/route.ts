@@ -36,7 +36,7 @@ export async function POST() {
     console.log('WARNING: This will create an actual order in Printful!')
     
     // Calculate design position
-    const designPosition = calculateDesignPosition(1000, 1000, 'unisex')
+    const designPosition = calculateDesignPosition(1000, 1000)
     console.log('Design position:', designPosition)
     
     // Create mock files (in real implementation, these would be uploaded to Printful)

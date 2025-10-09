@@ -37,13 +37,13 @@ export async function POST() {
     
     // Test 1: Test design position calculation
     console.log('\n1. Testing design position calculation...')
-    const designPosition = calculateDesignPosition(1000, 1000, 'unisex')
+    const designPosition = calculateDesignPosition(1000, 1000)
     console.log('Design position:', designPosition)
     
     // Test 2: Test image dimensions
     console.log('\n2. Testing image dimensions...')
     try {
-      const dimensions = await getImageDimensions(testProduct.design_png[0])
+      const dimensions = await getImageDimensions()
       console.log('Image dimensions:', dimensions)
     } catch (error) {
       console.log('Image dimensions test failed:', error instanceof Error ? error.message : 'Unknown error')
