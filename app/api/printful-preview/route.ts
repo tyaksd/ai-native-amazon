@@ -11,7 +11,7 @@ export async function POST() {
     console.log('Testing design positioning and sizing...')
     
     // Get actual image dimensions
-    const dimensions = await getImageDimensions(designUrl)
+    const dimensions = await getImageDimensions()
     console.log('Original image dimensions:', dimensions)
     
     // Calculate positions for different T-shirt types

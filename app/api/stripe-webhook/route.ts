@@ -564,12 +564,17 @@ const billingName =
         
         console.log('Transformed Printful address:', JSON.stringify(printfulAddress, null, 2))
         
-        console.log('Calling createPrintfulOrder...')
-        const printfulOrder = await createPrintfulOrder(
+        console.log('Calling createEnhancedPrintfulOrder (API v2)...')
+        const { createEnhancedPrintfulOrder } = await import('@/lib/printful-v2-integration')
+        const printfulOrder = await createEnhancedPrintfulOrder(
           order.id,
           itemsPayload,
           printfulAddress,
-          customerEmail || undefined
+          customerEmail || undefined,
+          {
+            estimateCosts: false, // 本番環境ではfalseに設定
+            useMockups: true // モックアップ生成を有効化
+          }
         )
         
         console.log('✅ Printful order created successfully!')
