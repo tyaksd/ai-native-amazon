@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getPrintfulClient, calculateDesignPosition, getImageDimensions } from '@/lib/printful'
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     const client = getPrintfulClient()
     
@@ -25,10 +25,11 @@ export async function POST(_req: NextRequest) {
     console.log('Uploading design file to Printful for preview...')
     
     try {
-      const designFile = await client.uploadFileWithPosition(
+      // Note: uploadFileWithPosition method is not available in the new PrintfulClient
+      // Using uploadFile method instead (position will be handled during order creation)
+      const designFile = await client.uploadFile(
         designUrl,
-        'rebel_mark_design_preview.png',
-        unisexPosition
+        'rebel_mark_design_preview.png'
       )
       
       console.log('Design file uploaded:', designFile.id)
@@ -44,7 +45,7 @@ export async function POST(_req: NextRequest) {
         uploadedFile: {
           id: designFile.id,
           url: designFile.url,
-          position: designFile.position
+          position: unisexPosition // Use the calculated position instead
         },
         previewUrl: designFile.preview_url,
         instructions: [

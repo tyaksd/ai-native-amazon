@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     // Printful Mockup Generator の使用方法を説明
     const instructions = {

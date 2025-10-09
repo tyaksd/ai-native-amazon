@@ -1155,15 +1155,15 @@ class PrintfulClient {
 
   // ---------- Catalog API（正） ----------
   // 検索（brand/modelでヒットさせる）
-  async getCatalogProducts(search?: string): Promise<any[]> {
+  async getCatalogProducts(search?: string): Promise<PrintfulProduct[]> {
     const q = search ? `?search=${encodeURIComponent(search)}` : ''
-    const res = await this.makeRequest<{ result: any[] }>(`/catalog/products${q}`)
+    const res = await this.makeRequest<{ result: PrintfulProduct[] }>(`/catalog/products${q}`)
     return res.result
   }
 
   // 1件取得（variants[] を含む）
-  async getCatalogProduct(productId: number): Promise<{ product: any; variants: any[] }> {
-    const res = await this.makeRequest<{ result: { product: any; variants: any[] } }>(
+  async getCatalogProduct(productId: number): Promise<{ product: PrintfulProduct; variants: PrintfulVariant[] }> {
+    const res = await this.makeRequest<{ result: { product: PrintfulProduct; variants: PrintfulVariant[] } }>(
       `/catalog/products/${productId}`
     )
     return res.result
@@ -1465,7 +1465,7 @@ export async function createPrintfulOrder(
         // 任意：内ラベル（テンプレの有無はPrintful側の設定に依存）
         if (product.brands?.[0]?.icon) {
           try {
-            const insideLabel = await createInsideLabelFile(product.brands[0].icon, product.brands[0].name, client)
+            await createInsideLabelFile(product.brands[0].icon, product.brands[0].name, client)
             // 実際に使うかはSKU運用次第。使うなら push
             // designFiles.push(insideLabel)
           } catch (e) {

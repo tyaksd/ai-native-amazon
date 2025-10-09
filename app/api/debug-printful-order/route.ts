@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createPrintfulOrder, getPrintfulClient, findBestVariantCatalog } from '@/lib/printful'
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     console.log('=== Debug Printful Order Creation ===')
     

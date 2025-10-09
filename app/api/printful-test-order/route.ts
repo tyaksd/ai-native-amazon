@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getPrintfulClient, calculateDesignPosition, getImageDimensions } from '@/lib/printful'
+import { NextResponse } from 'next/server'
+import { calculateDesignPosition, getImageDimensions } from '@/lib/printful'
 
-export async function POST(_req: NextRequest) {
+export async function POST() {
   try {
     // const client = getPrintfulClient()
     

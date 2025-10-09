@@ -1,18 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getPrintfulClient } from '@/lib/printful'
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const client = getPrintfulClient()
     
     console.log('Getting available T-shirt variants...')
     
-    // Get all products
-    const products = await client.getProducts()
-    console.log(`Found ${products.length} products`)
+    // Get catalog products
+    const unisexProducts = await client.getCatalogProducts('Gildan 64000')
+    const womenProducts = await client.getCatalogProducts('Bella + Canvas 6400')
+    const allProducts = [...unisexProducts, ...womenProducts]
+    console.log(`Found ${allProducts.length} products`)
     
     // Filter for T-shirt products
-    const tshirtProducts = products.filter(p => {
+    const tshirtProducts = allProducts.filter(p => {
       const name = p.name?.toLowerCase() || ''
       const brand = p.brand?.toLowerCase() || ''
       const model = p.model?.toLowerCase() || ''
@@ -35,7 +37,7 @@ export async function GET(_req: NextRequest) {
     for (const product of tshirtProducts.slice(0, 5)) { // Limit to first 5 products
       try {
         console.log(`Getting variants for product: ${product.name} (ID: ${product.id})`)
-        const variants = await client.getProductVariants(product.id)
+        const { variants } = await client.getCatalogProduct(product.id)
         
         variantsInfo.push({
           product: {
@@ -61,7 +63,7 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Available T-shirt variants',
-      totalProducts: products.length,
+      totalProducts: allProducts.length,
       tshirtProducts: tshirtProducts.length,
       variantsInfo,
       recommendedVariants: variantsInfo

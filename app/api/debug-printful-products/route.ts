@@ -1,20 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getPrintfulClient } from '@/lib/printful'
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     console.log('=== Debug Printful Products ===')
     
     const client = getPrintfulClient()
     
-    // Get all products
-    console.log('Fetching all products from Printful...')
-    const products = await client.getProducts()
+    // Get catalog products using search
+    console.log('Fetching catalog products from Printful...')
+    const unisexProducts = await client.getCatalogProducts('Gildan 64000')
+    const womenProducts = await client.getCatalogProducts('Bella + Canvas 6400')
+    const allProducts = [...unisexProducts, ...womenProducts]
     
-    console.log(`Found ${products.length} total products`)
+    console.log(`Found ${allProducts.length} total products`)
     
     // Filter for T-shirt products
-    const tshirtProducts = products.filter(product => {
+    const tshirtProducts = allProducts.filter(product => {
       const name = product.name?.toLowerCase() || ''
       return name.includes('t-shirt') || 
              name.includes('tee') ||
@@ -31,7 +33,7 @@ export async function GET(_req: NextRequest) {
     for (const product of tshirtProducts.slice(0, 3)) { // Test first 3 products
       try {
         console.log(`\nTesting product: ${product.name} (ID: ${product.id})`)
-        const variants = await client.getProductVariants(product.id)
+        const { variants } = await client.getCatalogProduct(product.id)
         
         productDetails.push({
           product: {
@@ -71,11 +73,11 @@ export async function GET(_req: NextRequest) {
       success: true,
       message: 'Printful products debug completed',
       summary: {
-        totalProducts: products.length,
+        totalProducts: allProducts.length,
         tshirtProducts: tshirtProducts.length,
         testedProducts: productDetails.length
       },
-      allProducts: products.slice(0, 10).map(p => ({
+      allProducts: allProducts.slice(0, 10).map(p => ({
         id: p.id,
         name: p.name,
         brand: p.brand,

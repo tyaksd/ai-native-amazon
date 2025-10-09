@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getPrintfulClient } from '@/lib/printful'
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const client = getPrintfulClient()
     
@@ -13,9 +13,10 @@ export async function GET(_req: NextRequest) {
     
     // Try to get file details (this might not be available in all Printful API versions)
     try {
-      // Get all products to find T-shirt products
-      const products = await client.getProducts()
-      const tshirtProducts = products.filter(p => 
+      // Get catalog products to find T-shirt products
+      const unisexProducts = await client.getCatalogProducts('Gildan 64000')
+      const womenProducts = await client.getCatalogProducts('Bella + Canvas 6400')
+      const tshirtProducts = [...unisexProducts, ...womenProducts].filter(p => 
         p.name?.toLowerCase().includes('t-shirt') || 
         p.name?.toLowerCase().includes('tee') ||
         p.name?.toLowerCase().includes('shirt')
@@ -27,8 +28,8 @@ export async function GET(_req: NextRequest) {
         const selectedProduct = tshirtProducts[0]
         console.log(`Selected product: ${selectedProduct.name} (ID: ${selectedProduct.id})`)
         
-        // Get variants for the selected product
-        const variants = await client.getProductVariants(selectedProduct.id)
+        // Get variants for the selected product using catalog API
+        const { variants } = await client.getCatalogProduct(selectedProduct.id)
         console.log(`Found ${variants.length} variants`)
         
         if (variants.length > 0) {
