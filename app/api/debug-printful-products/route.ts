@@ -42,17 +42,17 @@ export async function GET() {
             brand: product.brand,
             model: product.model
           },
-          variants: variants.slice(0, 5).map(v => ({ // First 5 variants
+          variants: variants?.slice(0, 5).map(v => ({ // First 5 variants
             id: v.id,
             size: v.size,
             color: v.color,
             in_stock: v.in_stock,
             price: v.price
-          })),
-          totalVariants: variants.length
+          })) || [],
+          totalVariants: variants?.length || 0
         })
         
-        console.log(`✅ Product ${product.id} has ${variants.length} variants`)
+        console.log(`✅ Product ${product.id} has ${variants?.length || 0} variants`)
         
       } catch (error) {
         console.error(`❌ Failed to get variants for product ${product.id}:`, error)
