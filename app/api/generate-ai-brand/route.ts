@@ -72,18 +72,22 @@ For street brands, use bold, edgy, graffiti-inspired fonts with urban aesthetics
 For casual brands, use clean, friendly, approachable fonts with comfortable aesthetics. 
 The text should be the main focus, positioned centrally with generous white space around it.
 
-— Background Image —
-Describe a striking header background that embodies the brand’s atmosphere.
-Go beyond generic street settings; explore:
-  - cyberpunk cityscapes
-  - brutalist interiors
-  - foggy alleys
-  - abandoned malls
-  - digital art spaces
-  - neon spiritual temples
-  - dystopian arcades
-  - surreal fashion runways in virtual space
-The image should immerse the viewer in the world of the brand, and **must be described as a high-resolution, visually sharp, and professionally detailed scene suitable for large-scale display or e-commerce use.**
+- Background Image —
+Describe a striking header background that embodies the brand’s atmosphere and emotional tone.
+The scene should visually translate the brand concept into space, light, and texture, rather than rely on typical street settings.
+The image must feel like an immersive world where the brand lives — poetic, cinematic, and conceptually aligned with its design DNA.
+Go beyond repetition of neon, darkness, or city imagery.
+Explore diverse environments that reflect contrasting moods and philosophies, such as:
+-futuristic or utopian landscapes filled with light and clarity
+-quiet minimal spaces with soft daylight and architectural purit
+-organic environments blending nature, mist, or sand with fashion surrealism
+-dreamlike rooms filled with texture, reflection, or nostalgic warmth
+-abstract digital spaces expressing geometry, rhythm, or movement
+-post-industrial or decayed textures symbolizing rebirth and transformation
+-spiritual or symbolic compositions evoking calm, silence, or transcendence
+The image should be high-resolution, visually sharp, and production-ready — suitable for use as a large-scale e-commerce header.
+It must directly reflect the essence of the specific brand concept, not a generic “streetwear” tone.
+
 
 Please provide the response in the following JSON format:
 {

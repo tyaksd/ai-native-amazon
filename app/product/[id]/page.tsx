@@ -186,7 +186,7 @@ export default function ProductDetail({ params }: PageProps) {
   }
 
   return (
-    <div className="px-1 pt-0 pb-6 bg-white -mt-4 relative  sm:px-10">
+    <div className=" pt-0 pb-0 bg-white -mt-4 relative ">
       {/* Copied Banner */}
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-pulse">
@@ -285,10 +285,15 @@ export default function ProductDetail({ params }: PageProps) {
               />
             </div>
             <div className="text-xl mb-2 text-gray-900">{formatUSD(product.price)}</div>
-            <div className="mb-4">
+            <div className="mb-4 flex flex-wrap gap-2">
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 {product.type}
               </span>
+              {product.gender && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  {product.gender}
+                </span>
+              )}
             </div>
           </div>
           {brand && (
@@ -573,10 +578,13 @@ export default function ProductDetail({ params }: PageProps) {
             </div>
             
             {/* Made-to-Order, Less Waste Text */}
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               {/* <h3 className="text-sm font-semibold text-gray-900 mb-2">Made-to-Order, Less Waste</h3> */}
               <p className="text-xs text-gray-700 leading-relaxed">
                 Our products are made just for you. Please allow several days for production and several days for shipping (US: 7-9 days, UK: 4-7 days, International: 1–3 weeks).
+              </p>
+              <p className="text-xs text-gray-700 leading-relaxed mt-2">
+                You will receive an email confirmation once your order is confirmed, and we'll keep you updated throughout the production and shipping process.
               </p>
               <p className="text-xs text-gray-700 leading-relaxed mt-2">
                 Thank you for choosing a sustainable option that avoids mass production and waste.
@@ -613,7 +621,19 @@ export default function ProductDetail({ params }: PageProps) {
       </div>
       
       {/* 同じブランドの他の商品セクション */}
-      <ProductCarousel products={brandProducts} title="More from this brand" />
+      <div 
+        className="mt-4"
+        style={{
+          backgroundImage: brand?.background_image ? `url(${brand.background_image})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+          <ProductCarousel products={brandProducts} title="More from this brand" brandId={brand?.id} />
+        </div>
+      </div>
     </div>
   );
 }

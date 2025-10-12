@@ -1,3 +1,7 @@
+今printfulがないから、printfulに注文送信と、printuflが発送したのチェックボックスのデータまたは/lkj
+
+国によって値段変える、そのアクセスもとをmiddlewareで判定
+
 チェックアウトされたらprintfulにアップロードして、画像位置調整して発注するシステム
 printfulの発送されたかを、orderにtrue, falseで保存.　Printfulに依存するが、オーダーの未発送、配達中、配達済みのステータス表示>printfulまち
 
@@ -31,6 +35,9 @@ womenのとき。選べるカラーが異なる
 分析ツール(Shopify マルパクリ、それをダッシュボードで見れる)
 
 キャンペーン新規作成と実行
+
+dynamic pricing
+
 
 <＜ルール＞＞
 カラーは全部大文字で

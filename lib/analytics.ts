@@ -131,6 +131,28 @@ class AnalyticsClient {
     return `session_${timestamp}_${randomStr}`
   }
 
+  private isLocalhost(): boolean {
+    if (typeof window === 'undefined') return false
+    
+    // Check environment variable first
+    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DISABLE_ANALYTICS === 'true') {
+      return true
+    }
+    
+    const hostname = window.location.hostname
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.endsWith('.local') ||
+      window.location.port === '3000' ||
+      window.location.port === '3001' ||
+      window.location.port === '8080'
+    )
+  }
+
   private getDeviceInfo() {
     if (typeof window === 'undefined') {
       return {
@@ -225,6 +247,13 @@ class AnalyticsClient {
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return
+
+    // Skip analytics on localhost/development
+    if (this.isLocalhost()) {
+      console.log('Analytics disabled on localhost')
+      this.isInitialized = true
+      return
+    }
 
     try {
       const deviceInfo = this.getDeviceInfo()
@@ -427,6 +456,8 @@ class AnalyticsClient {
 
   // Public methods for manual tracking
   trackSearch(searchQuery: string, searchType?: 'product' | 'brand' | 'general', filtersApplied?: Record<string, unknown>, resultsCount?: number): void {
+    if (this.isLocalhost()) return
+
     const searchData: SearchData = {
       sessionId: this.sessionId,
       searchQuery,
@@ -451,6 +482,8 @@ class AnalyticsClient {
       timeOnProduct?: number
     }
   ): void {
+    if (this.isLocalhost()) return
+
     const productInteractionData: ProductInteractionData = {
       sessionId: this.sessionId,
       productId,
@@ -462,6 +495,8 @@ class AnalyticsClient {
   }
 
   trackSearchResultClick(resultId: string, resultType: 'product' | 'brand', searchQuery: string, searchDuration?: number): void {
+    if (this.isLocalhost()) return
+
     const searchData: SearchData = {
       sessionId: this.sessionId,
       searchQuery,
@@ -480,6 +515,8 @@ class AnalyticsClient {
 
   // Track page navigation
   trackPageNavigation(toPage: string, navigationType?: 'direct' | 'back' | 'forward' | 'link_click' | 'form_submit'): void {
+    if (this.isLocalhost()) return
+
     const navigationData: NavigationData = {
       sessionId: this.sessionId,
       fromPage: this.currentPage,

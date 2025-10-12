@@ -82,7 +82,7 @@ export default function RootLayout({
             </div>
             <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-700">
               <MobileSearch />
-              <Link href="/favorites" aria-label="Favorites" className="p-1">
+              <Link href="/favorites" aria-label="Favorites" className="=p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -99,7 +99,7 @@ export default function RootLayout({
         <main className="mx-auto max-w-7xl">
           {children}
         </main>
-        <footer className="mt-16 bg-black text-white">
+        <footer className="mt-0 bg-black text-white">
           <div className="mx-auto max-w-7xl px-3 sm:px-3">
             <NewsletterSignup />
           </div>

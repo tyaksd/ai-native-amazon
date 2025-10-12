@@ -14,9 +14,10 @@ function formatUSD(value: number) {
 type ProductCarouselProps = {
   products: Product[];
   title?: string;
+  brandId?: string;
 };
 
-export default function ProductCarousel({ products, title = "You might also like" }: ProductCarouselProps) {
+export default function ProductCarousel({ products, title = "You might also like", brandId }: ProductCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef<boolean>(false);
   const isDraggingRef = useRef<boolean>(false);
@@ -162,8 +163,18 @@ export default function ProductCarousel({ products, title = "You might also like
   if (products.length === 0) return null;
 
   return (
-    <div className="mt-12">
-      <h2 className="text-xl font-semibold tracking-tight mb-6 text-gray-900">{title}</h2>
+    <div className="mt-1">
+      <div className="flex items-center gap-4 mb-6 ml-3 mt-4 pt-4">
+        <h2 className="text-xl font-semibold tracking-tight text-white">{title}</h2>
+        {brandId && (
+          <Link 
+            href={`/${brandId}`}
+            className="text-white hover:text-gray-200 text-sm font-medium underline"
+          >
+            brand page
+          </Link>
+        )}
+      </div>
       <div className="relative overflow-hidden">
         <div
           ref={scrollContainerRef}
@@ -210,7 +221,7 @@ export default function ProductCarousel({ products, title = "You might also like
                 <div className="flex items-center justify-between gap-3">
                   <Link 
                     href={`/product/${product.id}`} 
-                    className="block font-medium text-gray-900 truncate hover:underline"
+                    className="block font-medium text-white truncate hover:underline"
                     onClick={(e) => {
                       // ドラッグ中でない場合のみナビゲーションを許可
                       if (isDraggingRef.current) {
@@ -221,7 +232,7 @@ export default function ProductCarousel({ products, title = "You might also like
                     {product.name}
                   </Link>
                 </div>
-                <div className="text-sm text-gray-700">{formatUSD(product.price)}</div>
+                <div className="text-sm text-white">{formatUSD(product.price)}</div>
               </div>
             </div>
           ))}
@@ -259,7 +270,7 @@ export default function ProductCarousel({ products, title = "You might also like
                 <div className="flex items-center justify-between gap-3">
                   <Link 
                     href={`/product/${product.id}`} 
-                    className="block font-medium text-gray-900 truncate hover:underline"
+                    className="block font-medium text-white truncate hover:underline"
                     onClick={(e) => {
                       // ドラッグ中でない場合のみナビゲーションを許可
                       if (isDraggingRef.current) {
@@ -270,7 +281,7 @@ export default function ProductCarousel({ products, title = "You might also like
                     {product.name}
                   </Link>
                 </div>
-                <div className="text-sm text-gray-700">{formatUSD(product.price)}</div>
+                <div className="text-sm text-white">{formatUSD(product.price)}</div>
               </div>
             </div>
           ))}
