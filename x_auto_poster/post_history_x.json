@@ -1,0 +1,15 @@
+{
+  "posts": [
+    {
+      "tweet_id": "1976461344003194890",
+      "text": "X auto posting system test post 🚀",
+      "media_paths": [],
+      "timestamp": "2025-10-10T10:34:40.140646",
+      "date": "2025-10-10"
+    }
+  ],
+  "daily_count": {
+    "2025-10-10": 1
+  },
+  "last_post_time": "2025-10-10T10:34:40.140646"
+}

@@ -7,7 +7,6 @@ import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from
 import ProductCarousel from "@/app/components/ProductCarousel";
 import FavoriteButton from "@/app/components/FavoriteButton";
 import SizeChart from "@/app/components/SizeChart";
-import ShareButton from "@/app/components/ShareButton";
 import { useFavorites } from "@/lib/useFavorites";
 
 function formatUSD(value: number) {
@@ -438,12 +437,31 @@ export default function ProductDetail({ params }: PageProps) {
                 </svg>
                 <span className="hidden sm:inline">Add to Cart</span>
               </button>
-              <ShareButton 
-                productUrl={window.location.href}
-                productName={product.name}
-                productImage={product.images?.[0]}
-                className="flex-[2]"
-              />
+              <button 
+                onClick={() => {
+                  const productUrl = window.location.href;
+                  navigator.clipboard.writeText(productUrl).then(() => {
+                    setShowCopied(true);
+                    setTimeout(() => setShowCopied(false), 1000);
+                  }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = productUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    setShowCopied(true);
+                    setTimeout(() => setShowCopied(false), 1000);
+                  });
+                }}
+                className="flex items-center justify-center p-3 sm:p-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex-[2]"
+                title="Copy link"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+              </button>
             </div>
             
             {/* Checkout button */}

@@ -103,50 +103,51 @@ export default function BrandPage({ params }: PageProps) {
   }
 
   return (
-    <div className="bg-white">
-      {/* Hero Banner */}
-      <div className="relative h-35 md:h-48 bg-gradient-to-r from-gray-100 to-gray-200">
-        {brand.background_image && (
+    <div className="relative min-h-screen">
+      {/* Background Image for entire page */}
+      {brand.background_image && (
+        <div className="fixed inset-0 z-0">
           <Image 
             src={brand.background_image} 
             alt={`${brand.name} background`} 
             fill 
             className="object-cover" 
           />
-        )}
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative h-full flex items-end justify-start">
-          <div className="transform translate-y-8 translate-x-8">
-            <div className="w-20 h-20 bg-white/90 rounded-lg shadow-lg overflow-hidden">
-              <Image 
-                src={brand.icon} 
-                alt={brand.name} 
-                fill
-                className="object-cover rounded"
-              />
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
+      )}
+      
+      {/* Brand Logo Space */}
+      <div className="relative z-10 h-20 flex items-end justify-start px-3">
+        <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
+          <Image 
+            src={brand.icon} 
+            alt={brand.name} 
+            width={100}
+            height={100}
+            className="object-cover rounded"
+          />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-8  ">
+      <div className="relative z-10 max-w-7xl mx-auto py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Brand Info */}
-          <div className="lg:col-span-2 ">
-            <div className="mb-8 mt-8 px-3">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">{brand.name} products</h2>
+          <div className="lg:col-span-2">
+            <div className=" mt-4 px-3">
+              <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">{brand.name} products</h2>
             </div>
 
             {/* Category Navigation */}
             <div className="mb-8 px-3">
-              <div className="flex flex-wrap gap-2 border-b border-gray-200">
+              <div className="flex flex-wrap gap-2 border-b border-white/30">
                 <button
                   onClick={() => setSelectedTab('all')}
                   className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                     selectedTab === 'all'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      ? 'border-white text-white'
+                      : 'border-transparent text-white/70 hover:text-white'
                   }`}
                 >
                   All Products
@@ -155,8 +156,8 @@ export default function BrandPage({ params }: PageProps) {
                   onClick={() => setSelectedTab('new')}
                   className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                     selectedTab === 'new'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      ? 'border-white text-white'
+                      : 'border-transparent text-white/70 hover:text-white'
                   }`}
                 >
                   New
@@ -165,11 +166,11 @@ export default function BrandPage({ params }: PageProps) {
               
               {/* Category Filter */}
               <div className="mt-4 flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Filter by type:</label>
+                <label className="text-sm font-medium text-white">Filter by type:</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
                 >
                   <option value="All">All Types</option>
                   <option value="T-Shirt">T-Shirt</option>
@@ -188,11 +189,11 @@ export default function BrandPage({ params }: PageProps) {
               {/* Gender Filter */}
               {selectedCategory !== 'All' && (
                 <div className="mt-4 flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700">Filter by gender:</label>
+                  <label className="text-sm font-medium text-white">Filter by gender:</label>
                   <select
                     value={selectedGender}
                     onChange={(e) => setSelectedGender(e.target.value)}
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
                   >
                     <option value="All">All Genders</option>
                     <option value="Men">Men</option>
@@ -205,11 +206,11 @@ export default function BrandPage({ params }: PageProps) {
               {/* Type Filter */}
               {selectedCategory !== 'All' && selectedGender !== 'All' && (
                 <div className="mt-4 flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700">Filter by type:</label>
+                  <label className="text-sm font-medium text-white">Filter by type:</label>
                   <select
                     value={selectedType}
                     onChange={(e) => setSelectedType(e.target.value)}
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
                   >
                     <option value="All">All Types</option>
                     <option value="T-Shirt">T-Shirt</option>
@@ -229,7 +230,7 @@ export default function BrandPage({ params }: PageProps) {
 
             {/* Products Grid */}
             {displayedItems.length === 0 ? (
-              <div className="text-gray-600 text-center py-12">No products available for this brand.</div>
+              <div className="text-white text-center py-12 drop-shadow-lg">No products available for this brand.</div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
                 {displayedItems.map((p) => (
@@ -258,10 +259,10 @@ export default function BrandPage({ params }: PageProps) {
                       />
                     </div>
                     <div className="mt-3 ml-2">
-                      <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
+                      <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
                       <div className="flex items-center justify-between mt-1">
-                        <p className="text-sm text-gray-600">{formatUSD(p.price)}</p>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                        <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
                           {p.type}
                         </span>
                       </div>
@@ -274,9 +275,9 @@ export default function BrandPage({ params }: PageProps) {
 
           {/* Right Column - About Brand */}
           <div className="lg:col-span-1 px-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-8">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 sticky top-8 shadow-xl">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden flex-shrink-0 border border-white/30">
                   <Image 
                     src={brand.icon} 
                     alt={brand.name} 
@@ -286,10 +287,10 @@ export default function BrandPage({ params }: PageProps) {
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">About {brand.name}</h3>
+                  <h3 className="font-semibold text-white drop-shadow-lg">About {brand.name}</h3>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mb-4 break-words">
+              <p className="text-sm text-white/90 mb-4 break-words drop-shadow-md">
                 {brand.description || `${brand.name}: Extraordinary Design Since 2020. Handcrafted with precision, ${brand.name} channels years of artistry into contemporary fashion and lifestyle products.`}
               </p>
             </div>

@@ -1,0 +1,31 @@
+# X自動投稿システム用の依存関係
+
+# X API v2用ライブラリ
+tweepy==4.14.0
+
+# スケジューラー用
+schedule==1.2.0
+
+# 環境変数管理
+python-dotenv==1.0.0
+
+# ログ管理
+loguru==0.7.2
+
+# 画像処理（必要に応じて）
+Pillow==10.1.0
+
+# HTTP リクエスト
+requests==2.31.0
+
+# JSON操作
+jsonschema==4.20.0
+
+# 日時操作
+python-dateutil==2.8.2
+
+# 設定管理
+pydantic==2.5.2
+
+# 非同期処理（オプション）
+asyncio

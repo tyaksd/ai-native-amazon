@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
+import analytics from '@/lib/analytics'
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -39,6 +40,9 @@ export default function Home() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Initialize analytics
+        await analytics.initialize()
+        
         const [productsData, brandsData, mainCategoriesData] = await Promise.all([
           getVisibleProducts(),
           getBrands(),
@@ -69,12 +73,26 @@ export default function Home() {
     }
 
     setIsSearching(true)
+    const searchStartTime = Date.now()
+    
     try {
       const [productsData, brandsData] = await Promise.all([
         searchProducts(query),
         searchBrands(query)
       ])
       setSearchResults({ products: productsData, brands: brandsData })
+      
+      // Track search behavior
+      analytics.trackSearch(
+        query,
+        'general',
+        {
+          mainCategory: selectedMainCategory,
+          gender: selectedGender,
+          type: selectedType
+        },
+        productsData.length + brandsData.length
+      )
       
       // Check favorites for search results
       if (productsData.length > 0) {
@@ -86,7 +104,7 @@ export default function Home() {
     } finally {
       setIsSearching(false)
     }
-  }, [checkFavorites])
+  }, [checkFavorites, selectedMainCategory, selectedGender, selectedType])
 
   useEffect(() => {
     // Handle search from URL parameters
@@ -250,8 +268,20 @@ export default function Home() {
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">Brands</h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                  {searchResults.brands.map((brand) => (
-                    <Link key={brand.id} href={`/${brand.id}`} className="group block">
+                  {searchResults.brands.map((brand, index) => (
+                    <Link 
+                      key={brand.id} 
+                      href={`/${brand.id}`} 
+                      className="group block"
+                      onClick={() => {
+                        // Track search result click
+                        analytics.trackSearchResultClick(
+                          brand.id,
+                          'brand',
+                          searchQuery
+                        )
+                      }}
+                    >
                       <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
@@ -282,9 +312,33 @@ export default function Home() {
               <div>
                 <h3 className="text-lg font-medium mb-4">Products</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
-                  {searchResults.products.map((p) => (
+                  {searchResults.products.map((p, index) => (
                     <div key={p.id} className="group relative">
-                      <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                      <Link 
+                        href={`/${p.brand_id}/${p.id}`} 
+                        className="block"
+                        onClick={() => {
+                          // Track search result click
+                          analytics.trackSearchResultClick(
+                            p.id,
+                            'product',
+                            searchQuery
+                          )
+                          // Also track as product interaction
+                          analytics.trackProductInteraction(
+                            p.id,
+                            'click',
+                            {
+                              brandId: p.brand_id,
+                              productName: p.name,
+                              productPrice: p.price,
+                              productCategory: p.category,
+                              productType: p.type,
+                              positionInList: index + 1
+                            }
+                          )
+                        }}
+                      >
                         {p.images && p.images.length > 0 ? (
                           <div className="aspect-square overflow-hidden">
                             <Image src={p.images[0]} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
@@ -304,10 +358,45 @@ export default function Home() {
                       </div>
                       <div className="pt-2 ml-2">
                         <div className="flex items-center justify-between gap-3">
-                          <Link href={`/${p.brand_id}/${p.id}`} className="block font-medium text-gray-900 truncate hover:underline">
+                          <Link 
+                            href={`/${p.brand_id}/${p.id}`} 
+                            className="block font-medium text-gray-900 truncate hover:underline"
+                            onClick={() => {
+                              // Track search result click
+                              analytics.trackSearchResultClick(
+                                p.id,
+                                'product',
+                                searchQuery
+                              )
+                              // Also track as product interaction
+                              analytics.trackProductInteraction(
+                                p.id,
+                                'click',
+                                {
+                                  brandId: p.brand_id,
+                                  productName: p.name,
+                                  productPrice: p.price,
+                                  productCategory: p.category,
+                                  productType: p.type,
+                                  positionInList: index + 1
+                                }
+                              )
+                            }}
+                          >
                             {p.name}
                           </Link>
-                          <Link href={`/${p.brand_id}`} className="shrink-0 opacity-80 hover:opacity-100 mr-2">
+                          <Link 
+                            href={`/${p.brand_id}`} 
+                            className="shrink-0 opacity-80 hover:opacity-100 mr-2"
+                            onClick={() => {
+                              // Track brand click from search results
+                              analytics.trackSearchResultClick(
+                                p.brand_id,
+                                'brand',
+                                searchQuery
+                              )
+                            }}
+                          >
                             <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                           </Link>
                         </div>
@@ -349,7 +438,11 @@ export default function Home() {
                   {["All", ...mainCategories].map((c) => (
                     <button 
                       key={c} 
-                      onClick={() => setSelectedMainCategory(c)}
+                      onClick={() => {
+                        setSelectedMainCategory(c)
+                        // Track filter usage
+                        analytics.trackSearch('', 'filter', { mainCategory: c })
+                      }}
                       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                         selectedMainCategory === c 
                           ? 'border-black bg-black text-white' 
@@ -369,7 +462,14 @@ export default function Home() {
                     {["All", ...genders].map((c) => (
                       <button 
                         key={c} 
-                        onClick={() => setSelectedGender(c)}
+                        onClick={() => {
+                          setSelectedGender(c)
+                          // Track filter usage
+                          analytics.trackSearch('', 'filter', { 
+                            mainCategory: selectedMainCategory,
+                            gender: c 
+                          })
+                        }}
                         className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                           selectedGender === c 
                             ? 'border-black bg-black text-white' 
@@ -390,7 +490,15 @@ export default function Home() {
                     {["All", ...types].map((c) => (
                       <button 
                         key={c} 
-                        onClick={() => setSelectedType(c)}
+                        onClick={() => {
+                          setSelectedType(c)
+                          // Track filter usage
+                          analytics.trackSearch('', 'filter', { 
+                            mainCategory: selectedMainCategory,
+                            gender: selectedGender,
+                            type: c 
+                          })
+                        }}
                         className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                           selectedType === c 
                             ? 'border-black bg-black text-white' 
@@ -405,9 +513,27 @@ export default function Home() {
               )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
-              {products.map((p) => (
+              {products.map((p, index) => (
                 <div key={p.id} className="group relative">
-                  <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                  <Link 
+                    href={`/${p.brand_id}/${p.id}`} 
+                    className="block"
+                    onClick={() => {
+                      // Track product click
+                      analytics.trackProductInteraction(
+                        p.id,
+                        'click',
+                        {
+                          brandId: p.brand_id,
+                          productName: p.name,
+                          productPrice: p.price,
+                          productCategory: p.category,
+                          productType: p.type,
+                          positionInList: index + 1
+                        }
+                      )
+                    }}
+                  >
                     {p.images && p.images.length > 0 ? (
                       <div className="aspect-square overflow-hidden">
                         <Image src={p.images[0]} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
@@ -427,10 +553,46 @@ export default function Home() {
                   </div>
                   <div className="pt-2 ml-2">
                     <div className="flex items-center justify-between gap-3">
-                      <Link href={`/${p.brand_id}/${p.id}`} className="block font-medium text-gray-900 truncate hover:underline">
+                      <Link 
+                        href={`/${p.brand_id}/${p.id}`} 
+                        className="block font-medium text-gray-900 truncate hover:underline"
+                        onClick={() => {
+                          // Track product name click
+                          analytics.trackProductInteraction(
+                            p.id,
+                            'click',
+                            {
+                              brandId: p.brand_id,
+                              productName: p.name,
+                              productPrice: p.price,
+                              productCategory: p.category,
+                              productType: p.type,
+                              positionInList: index + 1
+                            }
+                          )
+                        }}
+                      >
                         {p.name}
                       </Link>
-                      <Link href={`/${p.brand_id}`} className="shrink-0 opacity-80 hover:opacity-100 mr-2">
+                      <Link 
+                        href={`/${p.brand_id}`} 
+                        className="shrink-0 opacity-80 hover:opacity-100 mr-2"
+                        onClick={() => {
+                          // Track brand click
+                          analytics.trackProductInteraction(
+                            p.brand_id,
+                            'click',
+                            {
+                              brandId: p.brand_id,
+                              productName: p.name,
+                              productPrice: p.price,
+                              productCategory: p.category,
+                              productType: p.type,
+                              positionInList: index + 1
+                            }
+                          )
+                        }}
+                      >
                         <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                       </Link>
                     </div>

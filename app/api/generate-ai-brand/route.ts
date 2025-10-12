@@ -19,44 +19,83 @@ export async function POST(request: NextRequest) {
 
     // Generate brand content using GPT-5 mini
     console.log('Generating brand content with GPT-5 mini...')
-    const prompt = `Role and Task: "Act as a creative ${brandStyle} brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new ${brandStyle} brand that will launch on an e‑commerce platform."
+    const prompt = `Role and Task: "Act as an avant-garde street fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new streetwear brand launching on an e-commerce platform."
 
-IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include specific community activities, funding programs, workshops, or social impact initiatives that would require real-world implementation.
+IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
 
-Incorporate winning patterns and conditions:
+— Diversity Directive —
+Every brand you generate must represent a *different subculture, emotion, or visual philosophy.* 
+Explore contrasting tones: futuristic vs nostalgic, digital vs analog, luxury street vs underground DIY, poetic vs aggressive, local vs global, Eastern vs Western, dystopian vs utopian, etc.
+Each brand should feel as if it belongs to a *unique micro-universe* within street culture.
 
-Brand Name: Give it an original name that is easy to remember and does not overlap with existing brands. Choose a word sound that suggests the brand's aesthetic and style. The name should be catchy and shareable, suitable for limited drops and collaboration strategies. ${brandStyle === 'casual' ? 'For casual brands, explore extremely diverse naming approaches: nature-inspired (Forest, Meadow, Ocean, River, Stone, Leaf), lifestyle concepts (Cozy, Comfort, Harmony, Bliss, Serene), abstract concepts (Zen, Flow, Balance, Pure, Essence), vintage-inspired (Heritage, Classic, Timeless, Vintage), modern minimal (Simple, Clean, Pure, Basic), artistic (Canvas, Palette, Muse, Studio), wellness (Wellness, Vital, Fresh, Renew), travel (Wander, Journey, Explore, Nomad), food-inspired (Honey, Spice, Sage, Olive), color-based (Azure, Sage, Rust, Pearl), emotion-based (Joy, Peace, Calm, Bliss), or creative word combinations. Each name should reflect a completely different casual lifestyle niche.' : ''}
+— Brand Name —
+Invent an original, memorable word or phrase that captures the brand’s distinct tone and emotion.
+Avoid generic streetwear words like “urban”, “graffiti”, or “vibe.”
+Draw from unexpected sources: 
+  - subcultures (cyberpunk, vaporwave, skater, retro-futurism, glitch, 90s nostalgia, neo-tokyo, artcore)
+  - languages (mix English, Japanese, Latin, or invented syllables)
+  - emotion or philosophy (rage, calm, decay, rebirth, silence, freedom)
+  - material or texture (steel, ash, neon, dust, void, chrome)
+The name should feel *fresh, ownable, and globally distinctive.*
 
-Brand Concept: Base it on a compelling visual narrative or cultural aesthetic. Focus on style, attitude, and visual identity rather than specific social programs or community activities. ${brandStyle === 'casual' ? 'For casual brands, explore extremely diverse concepts across all lifestyle niches: minimalist Scandinavian style, bohemian lifestyle, vintage-inspired comfort, modern athleisure, sustainable fashion, cozy home lifestyle, outdoor adventure, artistic expression, wellness-focused aesthetics, urban professional casual, beach lifestyle, mountain retreat, coffee culture, book lover aesthetic, pet-friendly lifestyle, eco-conscious living, meditation and mindfulness, travel-inspired, food culture, music lover, gardening lifestyle, craft and DIY, photography enthusiast, yoga and fitness, vintage collector, modern family, student lifestyle, creative professional, home chef, nature enthusiast, city explorer, or any other specific casual lifestyle niche. Each brand should have a completely distinct personality and unique selling proposition that stands out from generic casual brands.' : ''}
+— Brand Concept —
+Write a detailed and emotionally resonant description of around **70 words** that captures the brand’s worldview, visual philosophy, and emotional tone.
+It should describe how the brand *feels* — its rhythm, aesthetic, and underlying story — not just what it sells.
+Blend poetic abstraction with visual precision.
+Examples of archetypes: “Rebellion through silence,” “Digital melancholy,” “Post-industrial elegance,” “Youth in decay,” “Neon resilience,” “Mechanical spirituality.”
+Avoid clichés and create a fresh, vivid image that feels cinematic and conceptually bold.
 
-Design Concept: ${brandStyle === 'street' 
-  ? 'Emphasize bold graphics, urban aesthetics, street culture elements, and edgy visual identity. Focus on graffiti-inspired patterns, bold typography, and street art motifs that create strong brand recognition in urban environments.'
-  : 'Explore extremely diverse casual design approaches across all lifestyle niches: minimalist Scandinavian aesthetics, bohemian patterns, vintage-inspired graphics, modern geometric designs, nature-inspired motifs, artistic illustrations, wellness-focused visual elements, urban professional graphics, beach lifestyle visuals, mountain retreat aesthetics, coffee culture imagery, book lover designs, pet-friendly graphics, eco-conscious visuals, meditation and mindfulness imagery, travel-inspired graphics, food culture visuals, music lover aesthetics, gardening lifestyle graphics, craft and DIY visuals, photography enthusiast designs, yoga and fitness graphics, vintage collector aesthetics, modern family visuals, student lifestyle graphics, creative professional designs, home chef aesthetics, nature enthusiast visuals, city explorer graphics, or any other specific casual lifestyle visual language. Each brand should have a completely unique design language that reflects its specific concept and target lifestyle.'
-}
+— Design Concept —
+Describe the visual DNA of the brand: color schemes, shapes, typography, and motifs.
+Blend unexpected design schools (brutalism × calligraphy, street punk × minimalism, cyberwave × traditional textile, etc.)
+Encourage unusual materials, hybrid inspirations, and experimental layout approaches.
+Focus on originality and sensory impact.
 
-Target Audience: ${brandStyle === 'street'
-  ? 'Identify streetwear enthusiasts, urban youth, skateboarders, hip-hop culture followers, and fashion-forward individuals who embrace edgy, bold street style and urban aesthetics.'
-  : 'Identify extremely diverse casual lifestyle communities across all niches: minimalist enthusiasts, bohemian lifestyle followers, vintage fashion lovers, outdoor adventure seekers, wellness-focused individuals, home comfort seekers, artistic souls, sustainable fashion advocates, urban professionals, beach lifestyle enthusiasts, mountain retreat lovers, coffee culture followers, book lovers, pet owners, eco-conscious consumers, meditation practitioners, travel enthusiasts, food culture lovers, music enthusiasts, gardening hobbyists, craft and DIY enthusiasts, photography lovers, yoga practitioners, vintage collectors, modern families, students, creative professionals, home chefs, nature enthusiasts, city explorers, or any other specific casual lifestyle community. Each brand should target a completely specific niche within the broad casual lifestyle spectrum.'
-}
+— Target Audience —
+Define the subculture or mindset of the audience. 
+They can be: experimental fashion followers, digital natives, art students, skaters, club culture, underground creators, or philosophical outsiders.
+Each audience description must sound culturally distinct and emotionally resonant.
 
-Logo Design: Create a simple, iconic symbol that reflects the brand's visual identity and can adapt to collaborations. Focus on visual elements, shapes, and typography.　Generate a minimalist logo image with the emblem or symbol positioned precisely at the center of the canvas. Avoid any extraneous objects, backgrounds, or text; focus solely on the primary logo shape. Use crisp lines and balanced proportions so that the design remains clear when scaled down. The style should resemble vector art with high contrast and a limited color palette. The logo color should be the most representative color that reflects the brand concept - not necessarily black or white, but the color that best embodies the brand's identity and aesthetic. Leave generous white space around the logo to emphasize its central placement and ensure the overall composition feels uncluttered.
+— Logo Design —
+Create a simple, iconic symbol that reflects the brand's visual identity and can adapt to collaborations. 
+Focus on visual elements, shapes, and typography. 
+Generate a minimalist logo image with the emblem or symbol positioned precisely at the center of the canvas. 
+Avoid any extraneous objects, backgrounds, or text; focus solely on the primary logo shape. 
+Use crisp lines and balanced proportions so that the design remains clear when scaled down. 
+The style should resemble vector art with high contrast and a limited color palette. 
+The logo color should be the most representative color that reflects the brand concept — not necessarily black or white, but the color that best embodies the brand's identity and aesthetic. 
+Leave generous white space around the logo to emphasize its central placement and ensure the overall composition feels uncluttered.
 
-IMPORTANT: There is a 70% chance the logo should be text-based rather than a symbol/icon. If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept. For street brands, use bold, edgy, graffiti-inspired fonts with urban aesthetics. For casual brands, use clean, friendly, approachable fonts with comfortable aesthetics. The text should be the main focus, positioned centrally with generous white space around it.
+IMPORTANT: There is a 70% chance the logo should be text-based rather than a symbol/icon. 
+If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept. 
+For street brands, use bold, edgy, graffiti-inspired fonts with urban aesthetics. 
+For casual brands, use clean, friendly, approachable fonts with comfortable aesthetics. 
+The text should be the main focus, positioned centrally with generous white space around it.
 
-Background Image: ${brandStyle === 'street'
-  ? 'Describe a header image that visually conveys urban street aesthetic with graffiti walls, cityscapes, urban textures, and street culture elements. Focus on bold colors, urban palettes, and edgy mood that represents street fashion.'
-  : 'Describe extremely diverse casual lifestyle backgrounds across all niches: minimalist Scandinavian interiors, bohemian outdoor settings, vintage-inspired cozy spaces, modern wellness environments, artistic studio spaces, nature retreats, sustainable lifestyle scenes, urban professional workspaces, beach lifestyle settings, mountain retreat environments, coffee shop atmospheres, book lover spaces, pet-friendly environments, eco-conscious settings, meditation and mindfulness spaces, travel-inspired locations, food culture scenes, music lover environments, gardening spaces, craft and DIY workshops, photography studios, yoga and fitness spaces, vintage collector rooms, modern family homes, student living spaces, creative professional studios, home chef kitchens, nature enthusiast settings, city explorer locations, or any other specific casual lifestyle background. Each background should reflect the specific brand concept and create a completely unique visual atmosphere that distinguishes it from all other casual brands.'
-}
+— Background Image —
+Describe a striking header background that embodies the brand’s atmosphere.
+Go beyond generic street settings; explore:
+  - cyberpunk cityscapes
+  - brutalist interiors
+  - foggy alleys
+  - abandoned malls
+  - digital art spaces
+  - neon spiritual temples
+  - dystopian arcades
+  - surreal fashion runways in virtual space
+The image should immerse the viewer in the world of the brand, and **must be described as a high-resolution, visually sharp, and professionally detailed scene suitable for large-scale display or e-commerce use.**
 
 Please provide the response in the following JSON format:
 {
   "name": "Brand Name",
-  "description": "Brand Concept/Description",
+  "description": "Brand Concept/Description (~70 words)",
   "design_concept": "Design Concept",
   "target_audience": "Target Audience",
   "logo_design": "Logo Design Description",
   "background_image_description": "Background Image Description"
 }`
+
+
 
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
@@ -108,7 +147,7 @@ Please provide the response in the following JSON format:
         model: "gpt-image-1",
         prompt: brandContent.background_image_description + ", realistic photography, authentic street photography, natural lighting, real urban environment, no AI art style, professional fashion photography, authentic, genuine, 1024x1792, high quality",
         size: "1536x1024",
-        quality: "medium",
+        quality: "low",
         n: 1,
       })
       console.log('Background image generated successfully')

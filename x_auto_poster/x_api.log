@@ -1,0 +1,24 @@
+2025-10-10 10:33:31 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:33:31 | ERROR | User info retrieval error: 'NoneType' object has no attribute 'get'
+2025-10-10 10:33:31 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:33:32 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:33:32 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:34:39 | ERROR | User info retrieval error: 'NoneType' object has no attribute 'get'
+2025-10-10 10:34:39 | INFO | Today's posts: 0/10
+2025-10-10 10:34:40 | INFO | Post successful: 1976461344003194890
+2025-10-10 10:34:40 | INFO | Post history updated: 2025-10-10 (1/10)
+2025-10-10 10:34:40 | INFO | Test post successful: https://twitter.com/i/web/status/1976461344003194890
+2025-10-10 10:34:54 | INFO | Waiting for post interval: 59.8 minutes remaining
+2025-10-10 10:34:55 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:34:55 | ERROR | User info retrieval error: 'NoneType' object has no attribute 'get'
+2025-10-10 10:34:57 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:34:57 | INFO | X API authentication successful: @GodshipAI
+2025-10-10 10:35:08 | ERROR | User info retrieval error: 'NoneType' object has no attribute 'get'
+2025-10-10 10:35:08 | INFO | Today's posts: 1/10
+2025-10-10 10:35:08 | INFO | Waiting for post interval: 0.5 minutes remaining
+2025-10-10 10:35:08 | INFO | Test post skipped (restricted or outside hours)
+2025-10-10 10:35:44 | ERROR | User info retrieval error: 'NoneType' object has no attribute 'get'
+2025-10-10 10:35:44 | INFO | Today's posts: 1/10
+2025-10-10 10:35:44 | ERROR | Post error: 403 Forbidden
+You are not allowed to create a Tweet with duplicate content.
+2025-10-10 10:35:44 | INFO | Test post skipped (restricted or outside hours)
