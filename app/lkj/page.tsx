@@ -351,7 +351,8 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
 
-                      {/* Printful Information */}
+                      {/* Printful Information - Temporarily disabled */}
+                      {/* TODO: Re-enable when Printful integration is restored
                       {(order.printful_order_id || order.printful_external_id) && (
                         <div className="bg-blue-50 p-3 rounded-lg">
                           <h4 className="font-medium text-gray-900 mb-1">Printful Information</h4>
@@ -363,6 +364,7 @@ export default function AdminOrdersPage() {
                           </p>
                         </div>
                       )}
+                      */}
                     </div>
                   </div>
                 )}

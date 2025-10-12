@@ -536,7 +536,9 @@ const billingName =
         console.log('Line items:', lineItems)
       }
 
-      // ====== Printful発注処理 ======
+      // ====== Printful発注処理 (一時的に無効化) ======
+      // TODO: Printful統合を再び有効化する際は、以下のコードのコメントアウトを解除してください
+      /*
       try {
         console.log('=== Creating Printful order ===')
         console.log('Order ID:', order.id)
@@ -605,6 +607,10 @@ const billingName =
         // Log the error for manual review
         console.log('⚠️ Continuing webhook processing despite Printful error')
       }
+      */
+      
+      // Printful統合が無効化されている旨をログに記録
+      console.log('⚠️ Printful integration is temporarily disabled for deployment')
 
       // ====== 購入確認メール ======
       try {
