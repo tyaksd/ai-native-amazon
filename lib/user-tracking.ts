@@ -16,6 +16,7 @@ interface UserProfile {
   preferredBrands: string[]
   searchHistory: string[]
   purchaseHistory: string[]
+  [key: string]: unknown
 }
 
 interface UserJourney {
@@ -81,7 +82,7 @@ class UserTracker {
 
       // Calculate user metrics
       const totalPageViews = data.page_views?.length || 0
-      const totalTimeSpent = data.page_views?.reduce((sum, pv) => sum + (pv.time_on_page || 0), 0) || 0
+      const totalTimeSpent = data.page_views?.reduce((sum: number, pv: Record<string, unknown>) => sum + (Number(pv.time_on_page) || 0), 0) || 0
       
       // Extract preferences
       const preferredCategories = this.extractCategories(data.product_interactions || [])
@@ -98,7 +99,8 @@ class UserTracker {
         totalTimeSpent,
         preferredCategories,
         preferredBrands,
-        searchHistory
+        searchHistory,
+        purchaseHistory: []
       }
     } catch (error) {
       console.error('Error getting user profile:', error)
@@ -165,17 +167,16 @@ class UserTracker {
       if (error || !data) return this.getDefaultPatterns()
 
       const pageViews = data.page_views || []
-      const interactions = data.user_interactions || []
       const productInteractions = data.product_interactions || []
 
       // Analyze browsing pattern
-      const uniquePages = new Set(pageViews.map(pv => pv.page_path)).size
+      const uniquePages = new Set(pageViews.map((pv: Record<string, unknown>) => pv.page_path)).size
       const totalPages = pageViews.length
       const browsingPattern = uniquePages / totalPages > 0.7 ? 'explorer' : 
                              uniquePages / totalPages > 0.4 ? 'focused' : 'casual'
 
       // Analyze engagement level
-      const avgTimeOnPage = pageViews.reduce((sum, pv) => sum + (pv.time_on_page || 0), 0) / pageViews.length
+      const avgTimeOnPage = pageViews.reduce((sum: number, pv: Record<string, unknown>) => sum + (Number(pv.time_on_page) || 0), 0) / pageViews.length
       const engagementLevel = avgTimeOnPage > 60 ? 'high' : 
                              avgTimeOnPage > 30 ? 'medium' : 'low'
 
@@ -264,37 +265,41 @@ class UserTracker {
   }
 
   // Helper methods
-  private extractCategories(productInteractions: any[]): string[] {
+  private extractCategories(productInteractions: Record<string, unknown>[]): string[] {
     const categories = productInteractions
       .map(pi => pi.product_category)
       .filter(Boolean)
+      .map(cat => String(cat))
     
     return [...new Set(categories)]
   }
 
-  private extractBrands(productInteractions: any[]): string[] {
+  private extractBrands(productInteractions: Record<string, unknown>[]): string[] {
     const brands = productInteractions
       .map(pi => pi.brand_id)
       .filter(Boolean)
+      .map(brand => String(brand))
     
     return [...new Set(brands)]
   }
 
-  private extractSearchHistory(searchBehavior: any[]): string[] {
+  private extractSearchHistory(searchBehavior: Record<string, unknown>[]): string[] {
     return searchBehavior
       .map(sb => sb.search_query)
       .filter(Boolean)
+      .map(query => String(query))
   }
 
-  private extractInterests(productInteractions: any[]): string[] {
+  private extractInterests(productInteractions: Record<string, unknown>[]): string[] {
     const interests = productInteractions
       .map(pi => pi.product_type)
       .filter(Boolean)
+      .map(interest => String(interest))
     
     return [...new Set(interests)]
   }
 
-  private calculateSimilarity(user1: any, user2: any): number {
+  private calculateSimilarity(user1: Record<string, unknown>, user2: Record<string, unknown>): number {
     let score = 0
     
     if (user1.deviceType === user2.device_type) score += 0.3

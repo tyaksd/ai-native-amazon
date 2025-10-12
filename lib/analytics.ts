@@ -17,6 +17,7 @@ interface SessionData {
   screenResolution: string
   language: string
   timezone: string
+  [key: string]: unknown
 }
 
 interface PageViewData {
@@ -29,6 +30,7 @@ interface PageViewData {
   viewportHeight?: number
   scrollDepth?: number
   timeOnPage?: number
+  [key: string]: unknown
 }
 
 interface InteractionData {
@@ -42,17 +44,19 @@ interface InteractionData {
   pageUrl: string
   xPosition?: number
   yPosition?: number
+  [key: string]: unknown
 }
 
 interface SearchData {
   sessionId: string
   searchQuery: string
   searchType?: 'product' | 'brand' | 'general'
-  filtersApplied?: Record<string, any>
+  filtersApplied?: Record<string, unknown>
   resultsCount?: number
   clickedResultId?: string
   clickedResultType?: 'product' | 'brand'
   searchDuration?: number
+  [key: string]: unknown
 }
 
 interface ProductInteractionData {
@@ -66,6 +70,7 @@ interface ProductInteractionData {
   productType?: string
   positionInList?: number
   timeOnProduct?: number
+  [key: string]: unknown
 }
 
 interface NavigationData {
@@ -75,6 +80,7 @@ interface NavigationData {
   navigationType?: 'direct' | 'back' | 'forward' | 'link_click' | 'form_submit'
   navigationMethod?: 'click' | 'keyboard' | 'programmatic'
   timeBetweenPages?: number
+  [key: string]: unknown
 }
 
 interface ErrorData {
@@ -84,7 +90,8 @@ interface ErrorData {
   errorStack?: string
   pageUrl: string
   userAgent?: string
-  browserInfo?: Record<string, any>
+  browserInfo?: Record<string, unknown>
+  [key: string]: unknown
 }
 
 interface PerformanceData {
@@ -96,7 +103,8 @@ interface PerformanceData {
   largestContentfulPaint?: number
   firstInputDelay?: number
   cumulativeLayoutShift?: number
-  networkInfo?: Record<string, any>
+  networkInfo?: Record<string, unknown>
+  [key: string]: unknown
 }
 
 class AnalyticsClient {
@@ -177,16 +185,27 @@ class AnalyticsClient {
     }
 
     const urlParams = new URLSearchParams(window.location.search)
-    return {
-      utmSource: urlParams.get('utm_source') || undefined,
-      utmMedium: urlParams.get('utm_medium') || undefined,
-      utmCampaign: urlParams.get('utm_campaign') || undefined,
-      utmTerm: urlParams.get('utm_term') || undefined,
-      utmContent: urlParams.get('utm_content') || undefined
-    }
+    const result: Record<string, string> = {}
+    
+    const utmSource = urlParams.get('utm_source')
+    if (utmSource) result.utmSource = utmSource
+    
+    const utmMedium = urlParams.get('utm_medium')
+    if (utmMedium) result.utmMedium = utmMedium
+    
+    const utmCampaign = urlParams.get('utm_campaign')
+    if (utmCampaign) result.utmCampaign = utmCampaign
+    
+    const utmTerm = urlParams.get('utm_term')
+    if (utmTerm) result.utmTerm = utmTerm
+    
+    const utmContent = urlParams.get('utm_content')
+    if (utmContent) result.utmContent = utmContent
+    
+    return result
   }
 
-  private async sendLog(endpoint: string, data: any): Promise<void> {
+  private async sendLog(endpoint: string, data: Record<string, unknown>): Promise<void> {
     try {
       const response = await fetch(`/api/logs/${endpoint}`, {
         method: 'POST',
@@ -330,7 +349,7 @@ class AnalyticsClient {
           sessionId: this.sessionId,
           pageUrl: window.location.href,
           loadTime: Math.round(performance.now()),
-          domContentLoaded: Math.round(performance.getEntriesByType('navigation')[0]?.domContentLoadedEventEnd || 0)
+          domContentLoaded: Math.round((performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.domContentLoadedEventEnd || 0)
         }
 
         // Get Core Web Vitals if available
@@ -407,7 +426,7 @@ class AnalyticsClient {
   }
 
   // Public methods for manual tracking
-  trackSearch(searchQuery: string, searchType?: string, filtersApplied?: Record<string, any>, resultsCount?: number): void {
+  trackSearch(searchQuery: string, searchType?: 'product' | 'brand' | 'general', filtersApplied?: Record<string, unknown>, resultsCount?: number): void {
     const searchData: SearchData = {
       sessionId: this.sessionId,
       searchQuery,
@@ -460,12 +479,12 @@ class AnalyticsClient {
   }
 
   // Track page navigation
-  trackPageNavigation(toPage: string, navigationType?: string): void {
+  trackPageNavigation(toPage: string, navigationType?: 'direct' | 'back' | 'forward' | 'link_click' | 'form_submit'): void {
     const navigationData: NavigationData = {
       sessionId: this.sessionId,
       fromPage: this.currentPage,
       toPage,
-      navigationType: navigationType as any,
+      navigationType,
       timeBetweenPages: Math.floor((Date.now() - this.pageStartTime) / 1000)
     }
 

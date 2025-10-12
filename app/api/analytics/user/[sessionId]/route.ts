@@ -3,10 +3,11 @@ import { userTracker } from '@/lib/user-tracking'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const sessionId = params.sessionId
+    const resolvedParams = await params
+    const sessionId = resolvedParams.sessionId
 
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 })

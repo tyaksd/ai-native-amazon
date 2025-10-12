@@ -196,7 +196,7 @@ Return ONLY the product name:`
 function extractNameKeywordsFromDesignElements(
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
   designStyle: string,
-  brandConcept: string
+  _brandConcept: string
 ): string {
   const keywords: string[] = []
   

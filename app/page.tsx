@@ -73,7 +73,6 @@ export default function Home() {
     }
 
     setIsSearching(true)
-    const searchStartTime = Date.now()
     
     try {
       const [productsData, brandsData] = await Promise.all([
@@ -268,7 +267,7 @@ export default function Home() {
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">Brands</h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                  {searchResults.brands.map((brand, index) => (
+                  {searchResults.brands.map((brand) => (
                     <Link 
                       key={brand.id} 
                       href={`/${brand.id}`} 
@@ -441,7 +440,7 @@ export default function Home() {
                       onClick={() => {
                         setSelectedMainCategory(c)
                         // Track filter usage
-                        analytics.trackSearch('', 'filter', { mainCategory: c })
+                        analytics.trackSearch('', 'general', { mainCategory: c })
                       }}
                       className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                         selectedMainCategory === c 
@@ -465,7 +464,7 @@ export default function Home() {
                         onClick={() => {
                           setSelectedGender(c)
                           // Track filter usage
-                          analytics.trackSearch('', 'filter', { 
+                          analytics.trackSearch('', 'general', { 
                             mainCategory: selectedMainCategory,
                             gender: c 
                           })
@@ -493,7 +492,7 @@ export default function Home() {
                         onClick={() => {
                           setSelectedType(c)
                           // Track filter usage
-                          analytics.trackSearch('', 'filter', { 
+                          analytics.trackSearch('', 'general', { 
                             mainCategory: selectedMainCategory,
                             gender: selectedGender,
                             type: c 

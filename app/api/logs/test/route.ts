@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase-admin'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // データベース接続テスト
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('user_sessions')
       .select('count')
       .limit(1)
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    await request.json()
     
     // テスト用のセッション作成
     const { error } = await supabase

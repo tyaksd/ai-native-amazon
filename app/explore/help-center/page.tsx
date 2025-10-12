@@ -22,7 +22,7 @@ export default function HelpCenterPage() {
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">Can I track my order?</h3>
-              <p className="text-gray-700">Absolutely! Once your order ships, you'll receive a tracking number via email. You can also track your order in your account dashboard.</p>
+              <p className="text-gray-700">Absolutely! Once your order ships, you&apos;ll receive a tracking number via email. You can also track your order in your account dashboard.</p>
             </div>
           </div>
         </section>
@@ -38,11 +38,11 @@ export default function HelpCenterPage() {
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">How do I start a return?</h3>
-              <p className="text-gray-700">Please email us at <a href="mailto:jack@godship.io" className="text-blue-600 hover:text-blue-800 underline">jack@godship.io</a> with your order number and reason for return. We'll review your request and provide further instructions.</p>
+              <p className="text-gray-700">Please email us at <a href="mailto:jack@godship.io" className="text-blue-600 hover:text-blue-800 underline">jack@godship.io</a> with your order number and reason for return. We&apos;ll review your request and provide further instructions.</p>
             </div>
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">What if my item doesn't fit?</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">What if my item doesn&apos;t fit?</h3>
               <p className="text-gray-700">Unfortunately, we do not offer exchanges for size issues. Please carefully check our size chart before placing your order to ensure the best fit.</p>
             </div>
             
@@ -80,7 +80,7 @@ export default function HelpCenterPage() {
           <div className="space-y-3">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">How do I find the right size?</h3>
-              <p className="text-gray-700">Each product page includes a size chart with detailed measurements. Please check the size chart on the specific product page you're interested in. If you're between sizes, we recommend sizing up.</p>
+              <p className="text-gray-700">Each product page includes a size chart with detailed measurements. Please check the size chart on the specific product page you&apos;re interested in. If you&apos;re between sizes, we recommend sizing up.</p>
             </div>
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -101,7 +101,7 @@ export default function HelpCenterPage() {
           <div className="space-y-3">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">How do I create an account?</h3>
-              <p className="text-gray-700">Click "Sign Up" in the top right corner and enter your email address and password. You can also create an account during checkout.</p>
+              <p className="text-gray-700">Click &quot;Sign Up&quot; in the top right corner and enter your email address and password. You can also create an account during checkout.</p>
             </div>
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -111,7 +111,7 @@ export default function HelpCenterPage() {
             
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-3">How do I view my order history?</h3>
-              <p className="text-gray-700">Log into your account and visit "My Orders" to view your complete order history, track current orders, and manage returns.</p>
+              <p className="text-gray-700">Log into your account and visit &quot;My Orders&quot; to view your complete order history, track current orders, and manage returns.</p>
             </div>
           </div>
         </section>
@@ -119,7 +119,7 @@ export default function HelpCenterPage() {
         {/* Contact Support */}
         <section className="bg-gray-50 rounded-lg p-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">Still Need Help?</h2>
-          <p className="text-gray-700 mb-6">Can't find the answer you're looking for? Our support team is here to help!</p>
+          <p className="text-gray-700 mb-6">Can&apos;t find the answer you&apos;re looking for? Our support team is here to help!</p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a 
               href="mailto:jack@godship.io" 

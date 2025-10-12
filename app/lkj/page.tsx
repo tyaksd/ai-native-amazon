@@ -22,9 +22,9 @@ interface Order {
   is_paid: boolean
   customer_email: string | null
   shipping_name: string | null
-  shipping_address: any
+  shipping_address: Record<string, unknown> | null
   billing_name: string | null
-  billing_address: any
+  billing_address: Record<string, unknown> | null
   created_at: string
   printful_order_id: string | null
   printful_external_id: string | null
@@ -135,7 +135,7 @@ export default function AdminOrdersPage() {
     return product.images && product.images.length > 0 ? product.images[0] : '/placeholder-image.svg'
   }
 
-  const getShippingAddress = (address: any) => {
+  const getShippingAddress = (address: Record<string, unknown> | null) => {
     if (!address) return 'N/A'
     const parts = []
     if (address.line1) parts.push(address.line1)
