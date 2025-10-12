@@ -584,7 +584,7 @@ export default function ProductDetail({ params }: PageProps) {
                 Our products are made just for you. Please allow several days for production and several days for shipping (US: 7-9 days, UK: 4-7 days, International: 1–3 weeks).
               </p>
               <p className="text-xs text-gray-700 leading-relaxed mt-2">
-                You will receive an email confirmation once your order is confirmed, and we'll keep you updated throughout the production and shipping process.
+                You will receive an email confirmation once your order is confirmed, and we&apos;ll keep you updated throughout the production and shipping process.
               </p>
               <p className="text-xs text-gray-700 leading-relaxed mt-2">
                 Thank you for choosing a sustainable option that avoids mass production and waste.

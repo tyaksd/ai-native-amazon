@@ -105,7 +105,7 @@ async function generateProductNameFromDescription(
   usedNames: string[] = []
 ): Promise<string> {
   // デザイン要素から商品名のキーワードを抽出
-  const nameKeywords = extractNameKeywordsFromDesignElements(designElements, designStyle, brandConcept)
+  const nameKeywords = extractNameKeywordsFromDesignElements(designElements, designStyle)
   
   const usedNamesText = usedNames.length > 0 ? `\n# AVOID THESE USED NAMES:\n${usedNames.join(', ')}\n` : ''
   
@@ -195,8 +195,7 @@ Return ONLY the product name:`
 // デザイン要素から商品名のキーワードを抽出
 function extractNameKeywordsFromDesignElements(
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle: string,
-  _brandConcept: string
+  designStyle: string
 ): string {
   const keywords: string[] = []
   
