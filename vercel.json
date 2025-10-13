@@ -1,3 +1,22 @@
 {
-  "version": 2
+  "version": 2,
+  "builds": [
+    {
+      "src": "x_auto_poster/auto_scheduler.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/x-auto-poster",
+      "dest": "/x_auto_poster/auto_scheduler.py"
+    }
+  ],
+  "env": {
+    "X_API_KEY": "@x_api_key",
+    "X_API_SECRET": "@x_api_secret", 
+    "X_ACCESS_TOKEN": "@x_access_token",
+    "X_ACCESS_TOKEN_SECRET": "@x_access_token_secret",
+    "X_BEARER_TOKEN": "@x_bearer_token"
+  }
 }
