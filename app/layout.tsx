@@ -46,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900`}
       >
-       <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/30 bg-white/40">
+       <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20">
           <div className="mx-auto max-w-7xl px-4 sm:px-10 py-3 flex items-center gap-4 justify-center md:justify-between relative">
             <button className="md:hidden absolute left-3 inline-flex items-center justify-center p-2 text-gray-700" aria-label="Menu">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">

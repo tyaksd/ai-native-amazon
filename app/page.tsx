@@ -257,7 +257,7 @@ export default function Home() {
             </div>
             <span className="hidden md:inline"> </span>
             <div className="block md:inline">
-              Shop Now!
+              Discover Now!
             </div>
           </h1>
           <p className="text-lg text-black max-w-2xl mx-auto">

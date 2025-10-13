@@ -24,7 +24,7 @@ export default function AdminPage() {
   const [selectedProductType, setSelectedProductType] = useState('')
   const [selectedColors, setSelectedColors] = useState<string[]>([])
   const [aiProductGender, setAiProductGender] = useState('Unisex')
-  const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState('')
   const [brandSearchQuery, setBrandSearchQuery] = useState('')
   const [showBrandDropdown, setShowBrandDropdown] = useState(false)
 
@@ -365,6 +365,17 @@ export default function AdminPage() {
       alert('Please select a brand, product type, and at least one color.')
       return
     }
+    
+    if (!quantity || quantity.trim() === '') {
+      alert('Please enter a quantity.')
+      return
+    }
+    
+    const quantityNum = Number(quantity)
+    if (isNaN(quantityNum) || quantityNum < 1 || quantityNum > 10) {
+      alert('Please enter a valid quantity between 1 and 10.')
+      return
+    }
 
     setIsGenerating(true)
     try {
@@ -378,7 +389,7 @@ export default function AdminPage() {
           productType: selectedProductType,
           colors: selectedColors,
           gender: aiProductGender,
-          quantity: quantity
+          quantity: quantityNum
         }),
         signal: AbortSignal.timeout(300000), // 5 minutes timeout
       })
@@ -401,7 +412,7 @@ export default function AdminPage() {
         setSelectedProductType('')
         setSelectedColors([])
         setAiProductGender('Unisex')
-        setQuantity(1)
+        setQuantity('')
       } else {
         throw new Error('Failed to generate products')
       }
@@ -1159,7 +1170,8 @@ export default function AdminPage() {
                           min="1" 
                           max="10" 
                           value={quantity}
-                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          onChange={(e) => setQuantity(e.target.value)}
+                          placeholder="Enter quantity"
                           className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
