@@ -1,14 +1,5 @@
-2025-10-10 10:33:32 | ERROR | Post queue saving error: name 'json' is not defined
-2025-10-10 10:33:32 | INFO | Added to post queue: post_1760060012
-2025-10-10 10:33:32 | INFO | X API authentication successful: @GodshipAI
-2025-10-10 10:34:57 | WARNING | Post queue loading error: name 'json' is not defined
-2025-10-10 10:34:58 | INFO | X API authentication successful: @GodshipAI
-2025-10-10 10:34:58 | WARNING | Post queue loading error: name 'json' is not defined
-2025-10-10 10:34:58 | ERROR | Post queue saving error: name 'json' is not defined
-2025-10-10 10:34:58 | INFO | Added to post queue: post_1760060098
-2025-10-10 10:34:58 | WARNING | Post queue loading error: name 'json' is not defined
-2025-10-10 10:34:58 | ERROR | Post queue saving error: name 'json' is not defined
-2025-10-10 10:34:58 | INFO | Added to post queue: post_1760060098
-2025-10-10 10:34:58 | WARNING | Post queue loading error: name 'json' is not defined
-2025-10-10 10:34:58 | ERROR | Post queue saving error: name 'json' is not defined
-2025-10-10 10:34:58 | INFO | Added to post queue: post_1760060098
+2025-10-12 22:05:17 | WARNING | Post queue loading error: name 'json' is not defined
+2025-10-12 22:05:17 | WARNING | Post queue loading error: name 'json' is not defined
+2025-10-12 22:05:17 | ERROR | Post queue saving error: name 'json' is not defined
+2025-10-12 22:05:17 | INFO | Added to post queue: post_1760274317
+2025-10-12 22:05:17 | INFO | X API authentication successful: @GodshipAI

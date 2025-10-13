@@ -6,10 +6,65 @@
       "media_paths": [],
       "timestamp": "2025-10-10T10:34:40.140646",
       "date": "2025-10-10"
+    },
+    {
+      "tweet_id": "1977359993520492726",
+      "text": "🚀 Introducing Navy Graffiti Pulse from Godship!\n\nDynamic streetwear with bold navy graphics and graffiti-inspired patterns. Perfect for urban fashion enthusiasts.\n\nDiscover more at godship.io\n\n#Streetwear #Fashion #Godship",
+      "media_paths": [],
+      "timestamp": "2025-10-12T22:05:34.733961",
+      "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1977360830724444217",
+      "text": "🚀 Introducing Riotloom from Godship!\n\nA streetwear label that fuses raw graffiti energy with textile craft. The brand voice is gritty, kin...\n\nDiscover more at godship.io\n\n#Godship #Riotloom #fashion",
+      "media_paths": [],
+      "timestamp": "2025-10-12T22:08:54.295619",
+      "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1977361638526521827",
+      "text": "🚀 Introducing Riotloom from Godship!\n\nA streetwear label that fuses raw graffiti energy with textile craft. The brand voice is gritty, kin...\n\nDiscover more at godship.io\n\n#Godship #Riotloom #fashion",
+      "media_paths": [
+        "riotloom_icon.png",
+        "riotloom_background.png"
+      ],
+      "timestamp": "2025-10-12T22:12:07.148296",
+      "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1977362909509693570",
+      "text": "🚀 Introducing Riotloom from Godship!\n\nA streetwear label that fuses raw graffiti energy with textile craft. The brand voice is gritty, kin...\n\nDiscover more at godship.io\n\n#Godship #Riotloom #fashion",
+      "media_paths": [
+        "riotloom_product.png",
+        "riotloom_background.png"
+      ],
+      "timestamp": "2025-10-12T22:17:10.143007",
+      "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1977363690765856796",
+      "text": "🚀 Introducing Riotloom from Godship!\n\nA streetwear label that fuses raw graffiti energy with textile craft. The brand voice is gritty, kin...\n\nDiscover more at godship.io\n\n#Godship #Riotloom #fashion",
+      "media_paths": [
+        "riotloom_product.png",
+        "riotloom_background.png"
+      ],
+      "timestamp": "2025-10-12T22:20:16.361186",
+      "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1977364745020936233",
+      "text": "🚀 Introducing Chromash from Godship!\n\nChromash conjures a post-industrial elegy where molten metal remembers memory and ash becomes orname...\n\nDiscover more at godship.io\n\n#Godship #Chromash #fashion",
+      "media_paths": [
+        "chromash_product.png",
+        "chromash_background.png"
+      ],
+      "timestamp": "2025-10-12T22:24:27.694848",
+      "date": "2025-10-12"
     }
   ],
   "daily_count": {
-    "2025-10-10": 1
+    "2025-10-10": 1,
+    "2025-10-12": 6
   },
-  "last_post_time": "2025-10-10T10:34:40.140646"
+  "last_post_time": "2025-10-12T22:24:27.694848"
 }

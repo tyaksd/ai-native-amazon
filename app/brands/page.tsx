@@ -73,7 +73,7 @@ export default function BrandsPage() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
         {filteredBrands.map((brand) => (
           <Link key={brand.id} href={`/${brand.id}`} className="group block">
             <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full">

@@ -25,6 +25,8 @@ export default function AdminPage() {
   const [selectedColors, setSelectedColors] = useState<string[]>([])
   const [aiProductGender, setAiProductGender] = useState('Unisex')
   const [quantity, setQuantity] = useState(1)
+  const [brandSearchQuery, setBrandSearchQuery] = useState('')
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false)
 
   // Predefined color options
   const colorOptions = [
@@ -78,6 +80,21 @@ export default function AdminPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // Close brand dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.brand-dropdown-container')) {
+        setShowBrandDropdown(false)
+      }
+    }
+
+    if (showBrandDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showBrandDropdown])
 
   // Filter products by category, gender, and search query
   useEffect(() => {
@@ -326,6 +343,21 @@ export default function AdminPage() {
     const randomColors = shuffled.slice(0, 2).map(color => color.name)
     
     setSelectedColors([...fixedColors, ...randomColors])
+  }
+
+  // Filter brands based on search query (character by character from start)
+  const filteredBrands = brands.filter(brand => {
+    const brandName = brand.name.toLowerCase()
+    const searchQuery = brandSearchQuery.toLowerCase()
+    
+    // Check if brand name starts with the search query
+    return brandName.startsWith(searchQuery)
+  })
+
+  const handleBrandSelect = (brandId: string) => {
+    setSelectedBrand(brandId)
+    setBrandSearchQuery('')
+    setShowBrandDropdown(false)
   }
 
   const handleGenerateAIProducts = async () => {
@@ -994,18 +1026,62 @@ export default function AdminPage() {
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       {/* Brand Selection */}
-                      <div>
+                      <div className="relative brand-dropdown-container">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select Brand</label>
-                        <select 
-                          value={selectedBrand}
-                          onChange={(e) => setSelectedBrand(e.target.value)}
-                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="">Choose a brand</option>
-                          {brands.map(brand => (
-                            <option key={brand.id} value={brand.id}>{brand.name}</option>
-                          ))}
-                        </select>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search brands..."
+                            value={brandSearchQuery}
+                            onChange={(e) => {
+                              setBrandSearchQuery(e.target.value)
+                              setShowBrandDropdown(true)
+                            }}
+                            onFocus={() => setShowBrandDropdown(true)}
+                            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                          />
+                          {selectedBrand && (
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedBrand('')
+                                  setBrandSearchQuery('')
+                                }}
+                                className="text-gray-400 hover:text-gray-600"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {showBrandDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {filteredBrands.length > 0 ? (
+                              filteredBrands.map(brand => (
+                                <button
+                                  key={brand.id}
+                                  type="button"
+                                  onClick={() => handleBrandSelect(brand.id)}
+                                  className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                                >
+                                  {brand.name}
+                                </button>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-gray-500">No brands found</div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {selectedBrand && (
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-800 text-sm">
+                              {brands.find(b => b.id === selectedBrand)?.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       {/* Gender Selection */}

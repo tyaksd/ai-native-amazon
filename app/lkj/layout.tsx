@@ -12,6 +12,9 @@ export default function OrdersLayout({
   const router = useRouter()
 
   useEffect(() => {
+    // ページの先頭にスクロール
+    window.scrollTo(0, 0)
+    
     // In development, always allow access
     if (process.env.NODE_ENV !== 'production') {
       setIsAuthenticated(true)

@@ -8,6 +8,8 @@ import os
 import json
 import time
 import logging
+import random
+import requests
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -26,7 +28,7 @@ class XConfig(BaseModel):
     access_token_secret: str = Field(..., description="Access Token Secret")
     bearer_token: str = Field(..., description="Bearer Token")
     post_interval_minutes: int = Field(default=60, description="Post interval (minutes)")
-    max_posts_per_day: int = Field(default=10, description="Maximum posts per day")
+    max_posts_per_day: int = Field(default=15, description="Maximum posts per day")
     post_start_hour: int = Field(default=9, description="Post start hour")
     post_end_hour: int = Field(default=21, description="Post end hour")
     log_level: str = Field(default="INFO", description="Log level")
@@ -49,6 +51,7 @@ class XAutoPoster:
         self.config_path = config_path
         self.config = self._load_config()
         self.client = self._create_client()
+        self.api_v1 = self._create_api_v1()
         self.post_history = self._load_post_history()
         
         # Log configuration
@@ -76,7 +79,7 @@ class XAutoPoster:
             access_token_secret=os.getenv("X_ACCESS_TOKEN_SECRET", ""),
             bearer_token=os.getenv("X_BEARER_TOKEN", ""),
             post_interval_minutes=int(os.getenv("POST_INTERVAL_MINUTES", "60")),
-            max_posts_per_day=int(os.getenv("MAX_POSTS_PER_DAY", "10")),
+            max_posts_per_day=int(os.getenv("MAX_POSTS_PER_DAY", "15")),
             post_start_hour=int(os.getenv("POST_START_HOUR", "9")),
             post_end_hour=int(os.getenv("POST_END_HOUR", "21")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
@@ -102,6 +105,26 @@ class XAutoPoster:
             
         except Exception as e:
             logger.error(f"X API authentication error: {e}")
+            raise
+    
+    def _create_api_v1(self) -> tweepy.API:
+        """Create X API v1.1 client for media upload"""
+        try:
+            auth = tweepy.OAuthHandler(
+                self.config.api_key,
+                self.config.api_secret
+            )
+            auth.set_access_token(
+                self.config.access_token,
+                self.config.access_token_secret
+            )
+            
+            api = tweepy.API(auth, wait_on_rate_limit=True)
+            logger.info("X API v1.1 client created for media upload")
+            return api
+            
+        except Exception as e:
+            logger.error(f"X API v1.1 authentication error: {e}")
             raise
     
     def _load_post_history(self) -> Dict[str, Any]:
@@ -132,10 +155,10 @@ class XAutoPoster:
         """Check if posting is possible now"""
         now = datetime.now()
         
-        # Time zone check
-        if not (self.config.post_start_hour <= now.hour < self.config.post_end_hour):
-            logger.info(f"Outside posting hours: {now.hour}:00 (Posting hours: {self.config.post_start_hour}-{self.config.post_end_hour})")
-            return False
+        # Time zone check - DISABLED (24/7 posting allowed)
+        # if not (self.config.post_start_hour <= now.hour < self.config.post_end_hour):
+        #     logger.info(f"Outside posting hours: {now.hour}:00 (Posting hours: {self.config.post_start_hour}-{self.config.post_end_hour})")
+        #     return False
         
         # Daily post count check
         today = now.strftime("%Y-%m-%d")
@@ -155,6 +178,123 @@ class XAutoPoster:
                 return False
         
         return True
+    
+    def get_brand_products(self, brand_id: str) -> List[Dict[str, Any]]:
+        """Get products for a specific brand"""
+        try:
+            # Get products from API
+            response = requests.get(f"http://localhost:3000/api/products")
+            if response.status_code == 200:
+                products_data = response.json()
+                # Filter products by brand_id
+                brand_products = []
+                for product in products_data.get('products', []):
+                    if product.get('brand_id') == brand_id:
+                        # Get the first image from the images array
+                        images = product.get('images', [])
+                        if images and len(images) > 0:
+                            brand_products.append({
+                                'id': product['id'],
+                                'name': product['name'],
+                                'image': images[0]  # Use first image
+                            })
+                return brand_products
+            return []
+        except Exception as e:
+            logger.error(f"Error fetching brand products: {e}")
+            return []
+    
+    def get_random_product_image(self, brand_id: str) -> Optional[str]:
+        """Get a random product image for a brand"""
+        products = self.get_brand_products(brand_id)
+        if products:
+            random_product = random.choice(products)
+            return random_product['image']
+        return None
+    
+    def get_all_brands(self) -> List[Dict[str, Any]]:
+        """Get all brands from Supabase"""
+        try:
+            response = requests.get("http://localhost:3000/api/brands")
+            if response.status_code == 200:
+                brands_data = response.json()
+                return brands_data.get('brands', [])
+            return []
+        except Exception as e:
+            logger.error(f"Error fetching brands: {e}")
+            return []
+    
+    def get_random_brand(self) -> Optional[Dict[str, Any]]:
+        """Get a random brand from Supabase"""
+        brands = self.get_all_brands()
+        if brands:
+            return random.choice(brands)
+        return None
+    
+    def post_random_brand(self) -> Optional[str]:
+        """Post about a random brand with product and background images"""
+        try:
+            # Get random brand
+            brand = self.get_random_brand()
+            if not brand:
+                logger.error("No brands found")
+                return None
+            
+            brand_name = brand['name']
+            brand_id = brand['id']
+            brand_description = brand.get('description', f'{brand_name}: Extraordinary Design Since 2020')
+            background_image_url = brand.get('background_image')
+            
+            if not background_image_url:
+                logger.error(f"No background image for brand {brand_name}")
+                return None
+            
+            # Get random product image
+            product_image_url = self.get_random_product_image(brand_id)
+            if not product_image_url:
+                logger.warning(f"No products found for brand {brand_name}, using brand icon")
+                product_image_url = brand.get('icon')
+            
+            if not product_image_url:
+                logger.error(f"No images available for brand {brand_name}")
+                return None
+            
+            # Download images
+            logger.info(f"Downloading images for brand: {brand_name}")
+            
+            # Download product image
+            product_response = requests.get(product_image_url)
+            product_filename = f'{brand_name.lower().replace(" ", "_")}_product.png'
+            with open(product_filename, 'wb') as f:
+                f.write(product_response.content)
+            
+            # Download background image
+            background_response = requests.get(background_image_url)
+            background_filename = f'{brand_name.lower().replace(" ", "_")}_background.png'
+            with open(background_filename, 'wb') as f:
+                f.write(background_response.content)
+            
+            # Create post text
+            post_text = f'🚀 Introducing {brand_name} from Godship!\n\n{brand_description[:100]}...\n\nDiscover more at godship.io\n\n#Godship #{brand_name} #fashion'
+            
+            # Post with media
+            tweet_id = self.post_with_media(
+                text=post_text,
+                media_paths=[product_filename, background_filename]
+            )
+            
+            # Clean up temporary files
+            try:
+                os.remove(product_filename)
+                os.remove(background_filename)
+            except:
+                pass
+            
+            return tweet_id
+            
+        except Exception as e:
+            logger.error(f"Error posting random brand: {e}")
+            return None
     
     def post_text(self, text: str, reply_to_tweet_id: Optional[str] = None) -> Optional[str]:
         """Post text"""
@@ -203,11 +343,11 @@ class XAutoPoster:
                 logger.error("No valid media files")
                 return None
             
-            # Media upload
+            # Media upload using API v1.1
             media_ids = []
             for media_path in valid_media_paths:
                 try:
-                    media = self.client.media_upload(media_path)
+                    media = self.api_v1.media_upload(media_path)
                     media_ids.append(media.media_id)
                     logger.info(f"Media upload successful: {media_path}")
                 except Exception as e:
@@ -217,7 +357,7 @@ class XAutoPoster:
                 logger.error("Media upload failed")
                 return None
             
-            # Execute post
+            # Execute post using API v2
             response = self.client.create_tweet(
                 text=text,
                 media_ids=media_ids,

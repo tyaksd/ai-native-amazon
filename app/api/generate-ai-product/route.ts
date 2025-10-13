@@ -384,7 +384,7 @@ OUTPUT:
 }
 
 function generateRandomPrice(): number {
-  const prices = [29.90, 35.90, 39.90]
+  const prices = [29.90, 34.90]
   const randomIndex = Math.floor(Math.random() * prices.length)
   return prices[randomIndex]
 }

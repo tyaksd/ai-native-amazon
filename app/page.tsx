@@ -114,10 +114,7 @@ export default function Home() {
       setSearchQuery(searchParam)
       handleSearch(searchParam)
     } else {
-      // 検索パラメータがない場合は、フィルター状態をリセットして全商品を表示
-      setSelectedMainCategory('All')
-      setSelectedGender('All')
-      setSelectedType('All')
+      // 検索パラメータがない場合は、検索結果のみをクリア（フィルターは保持）
       setSearchQuery('')
       setSearchResults(null)
     }
@@ -133,12 +130,9 @@ export default function Home() {
         setSearchQuery(searchParam)
         handleSearch(searchParam)
       } else if (!searchParam && (searchResults || searchQuery)) {
-        // 検索パラメータがない場合は検索状態とフィルター状態をクリア
+        // 検索パラメータがない場合は検索状態のみをクリア（フィルターは保持）
         setSearchResults(null)
         setSearchQuery('')
-        setSelectedMainCategory('All')
-        setSelectedGender('All')
-        setSelectedType('All')
       }
     }
 
@@ -159,7 +153,7 @@ export default function Home() {
       const urlParams = new URLSearchParams(window.location.search)
       const searchParam = urlParams.get('search')
       
-      // 検索パラメータがない場合、検索状態をクリア
+      // 検索パラメータがない場合、検索状態をクリア（フィルターは保持）
       if (!searchParam && (searchResults || searchQuery)) {
         setSearchResults(null)
         setSearchQuery('')
@@ -244,7 +238,27 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 px-8 sm:px-0">
           <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
-            AI Creates Products You Love. Shop Now!
+            <div className="block md:inline">
+              <span style={{ 
+                background: 'linear-gradient(135deg, #007AFF, #00D4FF)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>Created by AI.</span>
+            </div>
+            <span className="hidden md:inline"> </span>
+            <div className="block md:inline">
+              <span style={{ 
+                background: 'linear-gradient(135deg, #FF5E99, #FFB347)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>Loved by You.</span>
+            </div>
+            <span className="hidden md:inline"> </span>
+            <div className="block md:inline">
+              Shop Now!
+            </div>
           </h1>
           <p className="text-lg text-black max-w-2xl mx-auto">
             {/* Explore creations born from your taste, crafted on demand. */}
@@ -437,16 +451,20 @@ export default function Home() {
                   {["All", ...mainCategories].map((c) => (
                     <button 
                       key={c} 
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('Filter button clicked:', c)
                         setSelectedMainCategory(c)
                         // Track filter usage
                         analytics.trackSearch('', 'general', { mainCategory: c })
                       }}
-                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                      className={`rounded-full border px-3 py-1 text-xs transition-colors cursor-pointer ${
                         selectedMainCategory === c 
                           ? 'border-black bg-black text-white' 
                           : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-black'
                       }`}
+                      style={{ pointerEvents: 'auto', zIndex: 10 }}
                     >
                       {c}
                     </button>
