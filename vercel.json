@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "package.json",
+      "use": "@vercel/next"
+    },
+    {
       "src": "x_auto_poster/auto_scheduler.py",
       "use": "@vercel/python"
     }
