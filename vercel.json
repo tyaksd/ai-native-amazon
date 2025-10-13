@@ -13,10 +13,10 @@
     }
   ],
   "env": {
-    "X_API_KEY": "@x_api_key",
-    "X_API_SECRET": "@x_api_secret", 
-    "X_ACCESS_TOKEN": "@x_access_token",
-    "X_ACCESS_TOKEN_SECRET": "@x_access_token_secret",
-    "X_BEARER_TOKEN": "@x_bearer_token"
+    "X_API_KEY": "@X_API_KEY",
+    "X_API_SECRET": "@X_API_SECRET", 
+    "X_ACCESS_TOKEN": "@X_ACCESS_TOKEN",
+    "X_ACCESS_TOKEN_SECRET": "@X_ACCESS_TOKEN_SECRET",
+    "X_BEARER_TOKEN": "@X_BEARER_TOKEN"
   }
 }
