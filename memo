@@ -70,4 +70,3 @@ stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
-ディプロイしたら、一日等間隔の時間に、12ツイートするようにして。(つまり2時間おき)そのツイートは、存在するbrand(supabase参照)からランダムに一つ選ぶとする。
