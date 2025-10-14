@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, updateProductVisibility, getCategoryTypeMapping } from '@/lib/data'
+import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, updateProductVisibility, getCategoryTypeMapping, deleteBrand } from '@/lib/data'
 import { uploadImage } from '@/lib/cloudinary-client'
 
 export default function AdminPage() {
@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [productVisibility, setProductVisibility] = useState<{[key: string]: boolean}>({})
+  
 
   // AI Products form states
   const [selectedBrand, setSelectedBrand] = useState('')
@@ -273,9 +274,8 @@ export default function AdminPage() {
     }
   }
 
+
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
-    
     try {
       const success = await deleteProduct(productId)
       if (success) {
@@ -287,6 +287,21 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error deleting product:', error)
       alert('Failed to delete product')
+    }
+  }
+
+  const handleDeleteBrand = async (brandId: string) => {
+    try {
+      const success = await deleteBrand(brandId)
+      if (success) {
+        setBrands(prev => prev.filter(b => b.id !== brandId))
+        setCreatedMessage('Brand deleted successfully!')
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 2000)
+      }
+    } catch (error) {
+      console.error('Error deleting brand:', error)
+      alert('Failed to delete brand')
     }
   }
 
@@ -480,6 +495,7 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -1022,6 +1038,14 @@ export default function AdminPage() {
                         {brand.description && (
                           <p className="text-sm text-gray-600 break-words">{brand.description}</p>
                         )}
+                        <div className="mt-3">
+                          <button
+                            onClick={() => handleDeleteBrand(brand.id)}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

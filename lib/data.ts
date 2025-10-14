@@ -274,6 +274,20 @@ export async function updateProductVisibility(productId: string, isVisible: bool
   return true
 }
 
+export async function deleteBrand(brandId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('brands')
+    .delete()
+    .eq('id', brandId)
+
+  if (error) {
+    console.error('Error deleting brand:', error)
+    return false
+  }
+
+  return true
+}
+
 export async function searchProducts(query: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')

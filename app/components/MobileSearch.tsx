@@ -75,7 +75,7 @@ export default function MobileSearch() {
           {/* 検索欄（ヘッダー上に被せる） */}
           <div className="fixed  left-0 right-0 top-0 z-[100]">
             <div className="w-full">
-               <div className="flex items-center gap-2 bg-white shadow-lg p-2 border border-transparent ">
+               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md shadow-lg p-2 border border-white/20">
                 <form
                   onSubmit={handleSearch}
                   className="w-full flex items-center gap-2"
@@ -86,7 +86,7 @@ export default function MobileSearch() {
                     type="search"
                     placeholder="Search brands or products"
                     autoFocus
-                      className="flex-1 border border-transparent bg-white px-3 py-1 text-lg placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-transparent focus:border-transparent"
+                      className="flex-1 border border-white/20 bg-white/10 backdrop-blur-md px-3 py-1 text-lg placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/20"
                   />
                 </form>
               </div>

@@ -60,7 +60,7 @@ export default function RootLayout({
                   name="search"
                   type="search"
                   placeholder="Search brands or products"
-                  className="w-full rounded-lg border border-white/30 bg-white/30 backdrop-blur-md px-4 py-2 text-sm placeholder-gray-600 focus:outline-none focus:ring-0 focus:border-white/30"
+                  className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm placeholder-gray-600 focus:outline-none focus:ring-0 focus:border-white/20"
                 />
               </form>
             </div>

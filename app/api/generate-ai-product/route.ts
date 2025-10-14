@@ -98,14 +98,14 @@ async function generateProductNameFromDescription(
   brandName: string,
   productType: string,
   productDescription: string,
-  designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle: string,
+  designElements: ReturnType<typeof extractDesignElementsFromDescription> | undefined,
+  designStyle: string | undefined,
   gender: string,
   brandConcept: string,
   usedNames: string[] = []
 ): Promise<string> {
-  // デザイン要素から商品名のキーワードを抽出
-  const nameKeywords = extractNameKeywordsFromDesignElements(designElements, designStyle)
+  // デザイン要素から商品名のキーワードを抽出（デザイン要素がない場合は空文字）
+  const nameKeywords = designElements ? extractNameKeywordsFromDesignElements(designElements, designStyle) : ''
   
   const usedNamesText = usedNames.length > 0 ? `\n# AVOID THESE USED NAMES:\n${usedNames.join(', ')}\n` : ''
   
@@ -121,12 +121,14 @@ ${usedNamesText}
 ${productDescription}
 
 # Extracted Design Elements
+${designElements ? `
 Mood & Energy: ${designElements.mood}
 Design Style: ${designElements.style}
 Graphic Elements: ${designElements.graphics}
 Aesthetics: ${designElements.aesthetics}
 Layout: ${designElements.layout}
-Selected Design Style: ${designStyle}
+Selected Design Style: ${designStyle || 'creative and original'}
+` : 'Design elements will be interpreted from the description below.'}
 
 # Name Generation Keywords
 ${nameKeywords}
@@ -142,13 +144,9 @@ ${nameKeywords}
 - IMPORTANT: Use exactly 3-5 words, not 2 words like "Urban Strike"
 - CRITICAL: Do NOT use any of the previously used names listed above
 - Create a completely unique name that has never been used before
-
-# Examples based on design elements (3-5 words):
-- Bold/High-impact: "Strike Force Core", "Impact Bold Edge", "Power Strike Force"
-- Clean/Minimalist: "Pure Essential Line", "Clean Minimal Form", "Essential Pure Core"
-- Urban/Street: "Urban Street Code", "City Grid Pulse", "Street Urban Force"
-- Elegant/Sophisticated: "Refined Grace Flow", "Elegant Sophisticated Edge", "Grace Refined Core"
-- Vibrant/Energetic: "Energy Burst Core", "Vibrant Dynamic Flow", "Dynamic Energy Pulse"
+- Think creatively and randomly - avoid predictable patterns
+- Combine unexpected word combinations that feel fresh and original
+- Let your imagination run wild while staying true to the design essence
 
 Return ONLY the product name:`
 
@@ -195,66 +193,10 @@ Return ONLY the product name:`
 // デザイン要素から商品名のキーワードを抽出
 function extractNameKeywordsFromDesignElements(
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle: string
+  designStyle: string | undefined
 ): string {
   const keywords: string[] = []
   
-  // ムードからキーワードを抽出
-  if (designElements.mood.includes('bold')) keywords.push('strike', 'impact', 'force', 'edge')
-  if (designElements.mood.includes('clean')) keywords.push('pure', 'essential', 'core', 'line')
-  if (designElements.mood.includes('edgy')) keywords.push('raw', 'grit', 'street', 'urban')
-  if (designElements.mood.includes('elegant')) keywords.push('grace', 'refined', 'sophisticated', 'flow')
-  if (designElements.mood.includes('vibrant')) keywords.push('energy', 'dynamic', 'burst', 'pulse')
-  if (designElements.mood.includes('mysterious')) keywords.push('shadow', 'nocturnal', 'enigma', 'dark')
-  
-  // スタイルからキーワードを抽出
-  if (designElements.style.includes('geometric')) keywords.push('grid', 'form', 'structure', 'angle')
-  if (designElements.style.includes('organic')) keywords.push('flow', 'natural', 'curve', 'wave')
-  if (designElements.style.includes('vintage')) keywords.push('classic', 'heritage', 'timeless', 'retro')
-  if (designElements.style.includes('modern')) keywords.push('future', 'edge', 'cutting', 'new')
-  if (designElements.style.includes('abstract')) keywords.push('art', 'creative', 'vision', 'concept')
-  
-  // グラフィック要素からキーワードを抽出
-  if (designElements.graphics.includes('typography')) keywords.push('type', 'letter', 'word', 'text')
-  if (designElements.graphics.includes('logo')) keywords.push('mark', 'symbol', 'emblem', 'sign')
-  if (designElements.graphics.includes('pattern')) keywords.push('rhythm', 'repeat', 'motif', 'design')
-  if (designElements.graphics.includes('illustration')) keywords.push('art', 'drawing', 'sketch', 'visual')
-  if (designElements.graphics.includes('geometric')) keywords.push('shape', 'form', 'structure', 'angle')
-  
-  // 美学からキーワードを抽出
-  if (designElements.aesthetics.includes('monochrome')) keywords.push('contrast', 'bold', 'stark', 'pure')
-  if (designElements.aesthetics.includes('colorful')) keywords.push('vibrant', 'bright', 'color', 'hue')
-  if (designElements.aesthetics.includes('muted')) keywords.push('subtle', 'soft', 'refined', 'gentle')
-  if (designElements.aesthetics.includes('textured')) keywords.push('grit', 'raw', 'distressed', 'aged')
-  
-  // レイアウトからキーワードを抽出
-  if (designElements.layout.includes('centered')) keywords.push('focus', 'core', 'center', 'hub')
-  if (designElements.layout.includes('asymmetric')) keywords.push('dynamic', 'flow', 'movement', 'energy')
-  if (designElements.layout.includes('balanced')) keywords.push('harmony', 'balance', 'equilibrium', 'zen')
-  if (designElements.layout.includes('negative space')) keywords.push('breath', 'space', 'minimal', 'clean')
-  
-  // デザインスタイルからキーワードを抽出
-  if (designStyle.includes('minimalist')) keywords.push('minimal', 'essential', 'pure', 'clean')
-  if (designStyle.includes('bold')) keywords.push('strike', 'impact', 'force', 'power')
-  if (designStyle.includes('abstract')) keywords.push('art', 'creative', 'vision', 'concept')
-  if (designStyle.includes('vintage')) keywords.push('classic', 'heritage', 'timeless', 'retro')
-  if (designStyle.includes('urban')) keywords.push('street', 'city', 'urban', 'grit')
-  if (designStyle.includes('nature')) keywords.push('organic', 'natural', 'flow', 'earth')
-  if (designStyle.includes('architectural')) keywords.push('structure', 'form', 'blueprint', 'design')
-  if (designStyle.includes('pop')) keywords.push('vibrant', 'colorful', 'energy', 'dynamic')
-  if (designStyle.includes('monochrome')) keywords.push('contrast', 'bold', 'stark', 'pure')
-  if (designStyle.includes('cultural')) keywords.push('heritage', 'traditional', 'ethnic', 'cultural')
-  if (designStyle.includes('industrial')) keywords.push('mechanical', 'technical', 'engineering', 'precision')
-  if (designStyle.includes('psychedelic')) keywords.push('trippy', 'experimental', 'mind-bending', 'surreal')
-  if (designStyle.includes('elegant')) keywords.push('sophisticated', 'refined', 'grace', 'luxury')
-  if (designStyle.includes('grunge')) keywords.push('raw', 'distressed', 'authentic', 'underground')
-  if (designStyle.includes('futuristic')) keywords.push('future', 'sci-fi', 'cyber', 'digital')
-  if (designStyle.includes('hand-drawn')) keywords.push('sketch', 'artistic', 'drawn', 'illustration')
-  if (designStyle.includes('collage')) keywords.push('layered', 'mixed', 'assemblage', 'composite')
-  if (designStyle.includes('neon')) keywords.push('glow', 'luminous', 'electric', 'radiant')
-  if (designStyle.includes('watercolor')) keywords.push('painted', 'brush', 'artistic', 'fluid')
-  if (designStyle.includes('origami')) keywords.push('folded', 'dimensional', 'paper', 'craft')
-  if (designStyle.includes('mandala')) keywords.push('sacred', 'spiritual', 'meditative', 'zen')
   
   // 重複を除去して上位10個を返す
   const uniqueKeywords = [...new Set(keywords)].slice(0, 10)
@@ -264,14 +206,14 @@ function extractNameKeywordsFromDesignElements(
 
 // フォールバック商品名生成（3-5文字、重複回避）
 function generateFallbackProductName(
-  designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle: string,
+  designElements: ReturnType<typeof extractDesignElementsFromDescription> | undefined,
+  designStyle: string | undefined,
   productType: string,
   usedNames: string[] = []
 ): string {
-  const styleWords = designStyle.split(' ').slice(0, 2)
-  const moodWords = designElements.mood.split(', ')[0].split(' ').slice(0, 2)
-  const graphicsWords = designElements.graphics.split(', ')[0].split(' ').slice(0, 1)
+  const styleWords = designStyle ? designStyle.split(' ').slice(0, 2) : []
+  const moodWords = designElements ? designElements.mood.split(', ')[0].split(' ').slice(0, 2) : []
+  const graphicsWords = designElements ? designElements.graphics.split(', ')[0].split(' ').slice(0, 1) : []
   
   // 追加のユニークな単語を生成
   const uniqueWords = ['Dynamic', 'Core', 'Edge', 'Force', 'Pulse', 'Flow', 'Grid', 'Form', 'Line', 'Mark']
@@ -306,7 +248,68 @@ function generateFallbackProductName(
   return generatedName
 }
 
-// 商品説明（ブランド公式・デザイン重視・SEO配慮・素材NG）
+// 詳細なデザイン説明文を生成（150字程度、SEO無視、デザインのみ）
+async function generateDetailedDesignDescription(
+  brandName: string,
+  productName: string,
+  productType: string,
+  colors: string[],
+  gender: string,
+  brandDescription: string,
+  brandConcept: string,
+  targetAudience: string
+): Promise<string> {
+  const colorList = colors.join(', ')
+
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    {
+      role: 'system',
+      content: 'You are a design expert. Write a detailed 150-character design description focusing ONLY on visual elements, composition, and artistic aspects. No SEO, no marketing, no materials - pure design analysis.'
+    },
+    {
+      role: 'user',
+      content: `
+Create a detailed design description for a ${productType} from ${brandName}.
+
+# Brand Context
+Brand: ${brandName}
+Brand Concept: ${brandConcept}
+Target Audience: ${targetAudience}
+Gender: ${gender}
+Available Colors: ${colorList}
+
+# Requirements
+- Write exactly 150 characters (not words)
+- Focus ONLY on visual design elements
+- Describe composition, layout, visual hierarchy
+- Mention specific design elements (shapes, lines, typography, patterns)
+- Include color relationships and visual balance
+- Describe artistic style and aesthetic approach
+- NO SEO keywords, NO marketing language, NO material descriptions
+- Pure design analysis only
+
+Return ONLY the design description:`
+    }
+  ]
+
+  try {
+    const res = await openai.chat.completions.create({
+      model: 'gpt-5-mini',
+      messages,
+      max_completion_tokens: 200,
+      temperature: 0.7
+    })
+    const txt = res.choices?.[0]?.message?.content?.trim()
+    if (txt) return txt
+  } catch (e) {
+    console.warn('[Design Description] Generation failed, using fallback:', e)
+  }
+
+  // フォールバック
+  return `Bold geometric composition with asymmetric layout featuring ${brandConcept.toLowerCase()} elements. High contrast monochrome palette with dynamic typography and structured negative space.`
+}
+
+// 商品説明（ブランド公式・SEO配慮・購入意欲向上）
 async function generateProductDescription(
   brandName: string,
   productName: string,
@@ -478,7 +481,7 @@ function generateImageSpecificPrompt(
   const styleContext = designStyle ? `Primary design approach: ${designStyle}` : ''
 
   // デザインの詳細説明を生成
-  const detailedDesignDescription = generateDetailedDesignDescription(designElements, brandConcept, targetAudience)
+  const detailedDesignDescription = generateDesignElementsDescription(designElements, brandConcept, targetAudience)
 
   // ユニークネスを高めるためのランダム要素
   const uniquenessElements = [
@@ -493,56 +496,39 @@ function generateImageSpecificPrompt(
   ]
   const randomUniqueness = uniquenessElements[Math.floor(Math.random() * uniquenessElements.length)]
 
-  return `Create a high-quality, production-ready design for a ${productType} from ${brandName}.
+  return `Create a unique, high-quality design for ${brandName} that embodies the brand concept: "${brandConcept}".
 
-# Brand Foundation (must be honored)
-Brand Identity: ${brandName}
-Core Brand Concept: ${brandConcept}
-Target Audience: ${targetAudience}
-Gender Context: ${genderContext}
-${styleContext}
+# Core Requirements
+- Brand Concept: ${brandConcept}
+- Target Audience: ${targetAudience}
+- Gender: ${genderContext}
+- Design Style: ${designStyle || 'creative and original'}
 
-# Detailed Visual Design Specifications
-${detailedDesignDescription}
+# Design Approach
+- Think freely and creatively about what "${brandConcept}" means visually
+- Create something completely original that hasn't been seen before
+- Let your imagination run wild while staying true to the brand essence
+- Avoid generic, common, or overused design patterns
+- Make it distinctive and memorable
 
-# Uniqueness & Diversity Requirements
-- Create a design that is completely unique and has never been seen before
-- ${randomUniqueness}
-- Avoid common design clichés and overused visual elements
-- Incorporate unexpected design choices that surprise and delight
-- Use creative interpretation of the design brief
-- Create visual elements that are distinctive and memorable
-- Ensure this design stands out from all other similar products
+# Technical Specs
+- Output ONLY the design artwork (no garment, no background, no shadows)
+- Clean, production-ready with transparent margins
+- Use colors that work on any background
+- High-quality, professional appearance
 
-# Technical Requirements
-- Output ONLY the printed design (no garment, no mockup, no shadows, no textures)
-- Preserve artwork precisely: same shapes, proportions, line weights, and colors
-- Use neutral colors (black, white, or brand colors) that work well on any background color
-- Edges clean and production-ready with comfortable transparent margin around the design
-- The design should look realistic and natural, reflecting high-quality aesthetic of top-selling brands
-- Make this design unique and distinct from other similar products
-- Ensure visual variety and avoid repetitive patterns
-- Including the brand name in the design is not required
+# Creative Freedom
+- Don't follow any specific design rules or patterns
+- Be experimental and unexpected
+- Create visual metaphors that represent the brand concept
+- Think outside conventional design boundaries
+- Make it uniquely yours
 
-# Brand-Specific Design Elements
-- Draw inspiration from the brand's core concept: ${brandConcept}
-- Create visual metaphors that represent the brand's philosophy
-- Use design language that appeals specifically to ${targetAudience}
-- Incorporate elements that reflect the brand's character
-- Make the design feel authentic to ${brandName}'s unique voice and vision
-
-# Creative Constraints for Uniqueness
-- Avoid generic geometric patterns that are commonly used
-- Create original visual compositions that haven't been seen before
-- Use unexpected color combinations or design approaches
-- Incorporate creative elements that make this design truly distinctive
-- Think outside the box while staying true to the brand concept
-
-Negative prompt: garment, T-shirt, fabric, mannequin, hanger, props, background, shadows, reflections, text overlay, watermark, CGI, 3D render, illustration, generic, common, overused, cliché`
+Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, common, overused, cliché, predictable`
 }
 
-// デザインの詳細説明を生成する関数
-function generateDetailedDesignDescription(
+// デザイン要素の詳細説明を生成する関数
+function generateDesignElementsDescription(
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
   brandConcept: string,
   targetAudience: string
@@ -887,162 +873,7 @@ export async function POST(request: NextRequest) {
 
     const createdProducts: unknown[] = []
     const usedProductNames: string[] = []
-    const designStyles = [
-      // Minimalist & Clean
-      'minimalist geometric patterns',
-      'clean typography and lettering',
-      'monochrome artistic compositions',
-      'negative space focused designs',
-      'ultra-minimalist line work',
-      
-      // Bold & Impact
-      'bold typography and lettering',
-      'high-contrast graphic elements',
-      'striking geometric compositions',
-      'powerful visual statements',
-      'commanding presence designs',
-      
-      // Abstract & Artistic
-      'abstract artistic illustrations',
-      'surreal visual compositions',
-      'non-representational art forms',
-      'conceptual visual metaphors',
-      'experimental artistic expressions',
-      
-      // Vintage & Retro
-      'vintage retro graphics',
-      'classic typography styles',
-      'nostalgic design elements',
-      'heritage-inspired motifs',
-      'timeless aesthetic compositions',
-      
-      // Modern & Contemporary
-      'modern line art and silhouettes',
-      'contemporary graphic design',
-      'cutting-edge visual elements',
-      'futuristic design concepts',
-      'innovative visual approaches',
-      
-      // Urban & Street
-      'urban street art elements',
-      'graffiti-inspired graphics',
-      'underground culture motifs',
-      'raw street aesthetics',
-      'rebellious visual language',
-      
-      // Nature & Organic
-      'nature-inspired organic shapes',
-      'botanical design elements',
-      'organic flowing compositions',
-      'natural texture patterns',
-      'earth-inspired visual themes',
-      
-      // Architectural & Structural
-      'architectural and structural designs',
-      'geometric precision patterns',
-      'engineering-inspired graphics',
-      'structural composition elements',
-      'blueprint-style designs',
-      
-      // Pop & Vibrant
-      'pop art and vibrant graphics',
-      'colorful geometric patterns',
-      'energetic visual compositions',
-      'playful design elements',
-      'dynamic color interactions',
-      
-      // Monochrome & Artistic
-      'monochrome artistic compositions',
-      'black and white photography style',
-      'grayscale artistic elements',
-      'high-contrast monochrome',
-      'artistic shadow play',
-      
-      // Cultural & Ethnic
-      'cultural pattern motifs',
-      'ethnic design elements',
-      'traditional art influences',
-      'heritage visual symbols',
-      'cultural identity graphics',
-      
-      // Industrial & Technical
-      'industrial design aesthetics',
-      'mechanical element graphics',
-      'technical drawing styles',
-      'engineering blueprint aesthetics',
-      'industrial texture patterns',
-      
-      // Psychedelic & Experimental
-      'psychedelic visual elements',
-      'experimental color combinations',
-      'trippy visual effects',
-      'mind-bending compositions',
-      'hallucinatory design patterns',
-      
-      // Elegant & Sophisticated
-      'elegant sophisticated designs',
-      'luxury brand aesthetics',
-      'refined visual elements',
-      'premium design language',
-      'upscale artistic compositions',
-      
-      // Grunge & Distressed
-      'grunge aesthetic elements',
-      'distressed texture graphics',
-      'worn vintage appearances',
-      'raw authentic visuals',
-      'underground culture aesthetics',
-      
-      // Futuristic & Sci-Fi
-      'futuristic design concepts',
-      'sci-fi inspired graphics',
-      'cyberpunk visual elements',
-      'digital age aesthetics',
-      'technological design motifs',
-      
-      // Hand-drawn & Sketch
-      'hand-drawn sketch styles',
-      'artistic pencil work',
-      'illustration-based designs',
-      'sketchy artistic elements',
-      'drawn art aesthetics',
-      
-      // Collage & Mixed Media
-      'collage-style compositions',
-      'mixed media elements',
-      'layered visual designs',
-      'assemblage art aesthetics',
-      'multi-texture compositions',
-      
-      // Neon & Glow
-      'neon glow effects',
-      'luminous design elements',
-      'glowing visual components',
-      'electric color schemes',
-      'radiant light aesthetics',
-      
-      // Watercolor & Paint
-      'watercolor artistic styles',
-      'painted design elements',
-      'brush stroke aesthetics',
-      'artistic paint effects',
-      'painterly visual compositions',
-      
-      // Origami & Paper
-      'origami-inspired designs',
-      'paper craft aesthetics',
-      'folded geometric patterns',
-      'paper texture elements',
-      'dimensional paper art',
-      
-      // Mandala & Sacred
-      'mandala pattern designs',
-      'sacred geometry elements',
-      'spiritual visual symbols',
-      'meditative compositions',
-      'zen-inspired aesthetics'
-    ]
-    const usedStyles: string[] = []
+    // デザインスタイルの事前定義を削除 - ブランドコンセプトに基づいて自由に発想
 
      for (let i = 0; i < quantity; i++) {
        try {
@@ -1051,9 +882,9 @@ export async function POST(request: NextRequest) {
          const productGender = gender || 'Unisex'
          console.log(`[Product ${i + 1}] Gender determined: ${productGender}`)
 
-        // 先に説明文（コピー）を生成
-        console.log(`[Product ${i + 1}] Generating description...`)
-        const description = await generateProductDescription(
+        // 先に詳細デザイン説明文を生成（画像生成用）
+        console.log(`[Product ${i + 1}] Generating detailed design description...`)
+        const designDescription = await generateDetailedDesignDescription(
           brand.name,
           'Temporary Product Name', // 後で実名に更新
           productType,
@@ -1063,37 +894,18 @@ export async function POST(request: NextRequest) {
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           brand.target_audience || 'Fashion-forward individuals'
         )
-        console.log(`[Product ${i + 1}] Description length: ${description.length} characters`)
+        console.log(`[Product ${i + 1}] Design description length: ${designDescription.length} characters`)
 
-        // デザインスタイル（重複完全回避システム）
-        let selectedStyle: string
-        
-        // 未使用のスタイルから選択
-        const availableStyles = designStyles.filter(style => !usedStyles.includes(style))
-        
-        if (availableStyles.length > 0) {
-          // 未使用のスタイルからランダムに選択
-          selectedStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)]
-          console.log(`[Product ${i + 1}] Available styles: ${availableStyles.length}, Selected: ${selectedStyle}`)
-        } else {
-          // 全て使用済みの場合は、ランダムに再選択
-          selectedStyle = designStyles[Math.floor(Math.random() * designStyles.length)]
-          console.log(`[Product ${i + 1}] All styles used, randomly selecting: ${selectedStyle}`)
-        }
-        
-        usedStyles.push(selectedStyle)
+        // デザインスタイルを事前定義せず、ブランドコンセプトに基づいて自由に発想
 
-        // 商品説明文からデザイン要素を抽出
-        const designElements = extractDesignElementsFromDescription(description)
-        
-        // 次に商品名（商品説明文ベース、重複回避）
-        console.log(`[Product ${i + 1}] Generating product name from description...`)
+        // 次に商品名（詳細デザイン説明文ベース、重複回避）
+        console.log(`[Product ${i + 1}] Generating product name from design description...`)
         const productName = await generateProductNameFromDescription(
           brand.name,
           productType,
-          description,
-          designElements,
-          selectedStyle,
+          designDescription,
+          undefined, // デザイン要素抽出を削除
+          undefined, // デザインスタイルを事前定義しない
           productGender,
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           usedProductNames
@@ -1110,10 +922,23 @@ export async function POST(request: NextRequest) {
              ? generateRandomPrice() 
              : 35
         
-        console.log(`[Product ${i + 1}] Selected design style: ${selectedStyle}`)
+        // SEO用の商品説明文を生成（商品ページ表示用）
+        console.log(`[Product ${i + 1}] Generating SEO product description...`)
+        const seoDescription = await generateProductDescription(
+          brand.name,
+          productName,
+          productType,
+          colors,
+          productGender,
+          brand.description || 'A unique streetwear brand',
+          brand.design_concept || 'Bold, edgy design with urban aesthetics',
+          brand.target_audience || 'Fashion-forward individuals'
+        )
+        console.log(`[Product ${i + 1}] SEO description length: ${seoDescription.length} characters`)
+
         console.log(`[Product ${i + 1}] Generating images...`)
 
-        // ★ 画像生成（ブランド + 新商品説明文）に統一
+        // ★ 画像生成（詳細デザイン説明文を使用）
         const { productImages, designPng } = await generateProductImages(
           brand.name,
           productName,
@@ -1123,8 +948,8 @@ export async function POST(request: NextRequest) {
           brand.design_concept || 'Bold, edgy design with urban aesthetics', // brandConcept
           brand.target_audience || 'Fashion-forward individuals',
           productGender,
-          description, // ← 新商品説明文を渡す
-          selectedStyle
+          designDescription, // ← 詳細デザイン説明文を渡す
+          undefined // デザインスタイルを事前定義しない
         )
 
         console.log(`[Product ${i + 1}] Generated ${productImages.length} product images, design PNG: ${designPng ? 'Yes' : 'No'}`)
@@ -1134,7 +959,8 @@ export async function POST(request: NextRequest) {
           .from('products')
           .insert({
             name: productName,
-            description,
+            description: seoDescription, // SEO用の商品説明文
+            design_description: designDescription, // 詳細デザイン説明文
             price,
             brand_id: brandId,
             category: 'Clothing',

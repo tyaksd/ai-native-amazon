@@ -119,7 +119,10 @@ export function renderOrderEmail(params: {
         </tfoot>
       </table>
       
-      <p style="margin:24px 0 0;color:#6b7280;">If you have any questions, please contact us through our website. This is an automated message, please do not reply to this email.</p>
+       <p style="margin:24px 0 16px;color:#6b7280;">We'll let you know once it's been shipped.</p>
+       <p style="margin:0 0 24px;color:#6b7280;">We'll fulfill and send it out, and then send you an email with the order's tracking info and estimated delivery date.</p>
+      
+      <p style="margin:0;color:#6b7280;">If you have any questions, please contact us through our website. This is an automated message, please do not reply to this email.</p>
     </div>
   `
 }
