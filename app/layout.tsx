@@ -18,17 +18,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Godship - The AI E-Commerce",
-  description: "Discover Products Made for You. Explore creations born from your taste, crafted on demand.",
+  title: "Godship - The AI E-Commerce Platform",
+  description: "Created by AI. Loved by You. Discover favorite products!",
+  icons: {
+    icon: "/gblack.png",
+    shortcut: "/gblack.png",
+    apple: "/gblack.png",
+  },
   openGraph: {
     title: "Godship",
-    description: "Discover Products Made for You. Explore creations born from your taste, crafted on demand.",
+    description: "Created by AI. Loved by You. Discover favorite products!",
     images: [
       {
         url: "/gblack.png",
         width: 1200,
         height: 630,
-        alt: "Godship - The AI E-Commerce",
+        alt: "Godship - The AI E-Commerce Platform",
       },
     ],
     type: "website",

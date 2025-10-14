@@ -231,36 +231,26 @@ export default function Home() {
     )
   }
   return (
-    <div className="">
+    <div className="bg-black">
       {/* Hero Section */}
-      <div className="relative py-3 md:py-10 text-center overflow-hidden bg-white">
+      <div className="relative py-3 md:py-10 text-center overflow-hidden bg-black">
         
         {/* Content */}
         <div className="relative z-10 px-8 sm:px-0">
-          <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             <div className="block md:inline">
-              <span style={{ 
-                background: 'linear-gradient(135deg, #007AFF, #00D4FF)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Created by AI.</span>
+              <span className="animated-gradient-1">Created by AI.</span>
             </div>
             <span className="hidden md:inline"> </span>
             <div className="block md:inline">
-              <span style={{ 
-                background: 'linear-gradient(135deg, #FF5E99, #FFB347)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Loved by You.</span>
+              <span className="animated-gradient-2">Loved by You.</span>
             </div>
             <span className="hidden md:inline"> </span>
             <div className="block md:inline">
               Discover Now!
             </div>
           </h1>
-          <p className="text-lg text-black max-w-2xl mx-auto">
+          <p className="text-lg text-white max-w-2xl mx-auto">
             {/* Explore creations born from your taste, crafted on demand. */}
           </p>
         </div>
@@ -271,7 +261,7 @@ export default function Home() {
           // Search Results
           <div>
             <div className="mb-6 mt-4">
-              <h2 className="text-xl font-semibold tracking-tight">
+              <h2 className="text-xl font-semibold tracking-tight text-white">
                 Search Results for {searchQuery}
               </h2>
             </div>
@@ -279,7 +269,7 @@ export default function Home() {
             {/* Brand Results */}
             {searchResults.brands.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4">Brands</h3>
+                <h3 className="text-lg font-medium mb-4 text-white">Brands</h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   {searchResults.brands.map((brand) => (
                     <Link 
@@ -295,7 +285,7 @@ export default function Home() {
                         )
                       }}
                     >
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
                             <Image 
@@ -323,7 +313,7 @@ export default function Home() {
             {/* Product Results */}
             {searchResults.products.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-4">Products</h3>
+                <h3 className="text-lg font-medium mb-4 text-white">Products</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
                   {searchResults.products.map((p, index) => (
                     <div key={p.id} className="group relative">
@@ -373,7 +363,7 @@ export default function Home() {
                         <div className="flex items-center justify-between gap-3">
                           <Link 
                             href={`/${p.brand_id}/${p.id}`} 
-                            className="block font-medium text-gray-900 truncate hover:underline"
+                            className="block font-medium text-white truncate hover:underline"
                             onClick={() => {
                               // Track search result click
                               analytics.trackSearchResultClick(
@@ -413,7 +403,7 @@ export default function Home() {
                             <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                           </Link>
                         </div>
-                        <div className="text-sm text-gray-700">{formatUSD(p.price)}</div>
+                        <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>
                       </div>
                     </div>
                   ))}
@@ -424,7 +414,7 @@ export default function Home() {
             {/* No Results */}
             {searchResults.brands.length === 0 && searchResults.products.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-600">No results found for {searchQuery}</p>
+                <p className="text-gray-300">No results found for {searchQuery}</p>
               </div>
             )}
           </div>
@@ -433,10 +423,10 @@ export default function Home() {
           <div>
             <div className="mb-6 mt-4 px-3">
               <div className="flex items-center gap-4">
-                <h2 className="text-xl font-semibold tracking-tight">New Products</h2>
+                <h2 className="text-xl font-semibold tracking-tight text-white">New Products</h2>
                 <Link 
                   href="/brands" 
-                  className="inline-flex items-center gap-1 text-sm text-gray-700 hover:text-black transition-all duration-300 bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 hover:border-white/50 rounded-full px-4 py-2 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center gap-1 text-sm text-white hover:text-white transition-all duration-300 bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 hover:border-white/50 rounded-full px-4 py-2 shadow-lg hover:shadow-xl"
                 >
                   <span>New Brands</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -461,8 +451,8 @@ export default function Home() {
                       }}
                       className={`rounded-full border px-3 py-1 text-xs transition-colors cursor-pointer ${
                         selectedMainCategory === c 
-                          ? 'border-black bg-black text-white' 
-                          : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-black'
+                          ? 'border-white bg-white text-black' 
+                          : 'border-gray-400 text-gray-300 hover:border-white hover:text-white'
                       }`}
                       style={{ pointerEvents: 'auto', zIndex: 10 }}
                     >
@@ -489,8 +479,8 @@ export default function Home() {
                         }}
                         className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                           selectedGender === c 
-                            ? 'border-black bg-black text-white' 
-                            : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-black'
+                            ? 'border-white bg-white text-black' 
+                            : 'border-gray-400 text-gray-300 hover:border-white hover:text-white'
                         }`}
                       >
                         {c}
@@ -518,8 +508,8 @@ export default function Home() {
                         }}
                         className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                           selectedType === c 
-                            ? 'border-black bg-black text-white' 
-                            : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-black'
+                            ? 'border-white bg-white text-black' 
+                            : 'border-gray-400 text-gray-300 hover:border-white hover:text-white'
                         }`}
                       >
                         {c}
@@ -572,7 +562,7 @@ export default function Home() {
                     <div className="flex items-center justify-between gap-3">
                       <Link 
                         href={`/${p.brand_id}/${p.id}`} 
-                        className="block font-medium text-gray-900 truncate hover:underline"
+                        className="block font-medium text-white truncate hover:underline"
                         onClick={() => {
                           // Track product name click
                           analytics.trackProductInteraction(
@@ -613,7 +603,7 @@ export default function Home() {
                         <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                       </Link>
                     </div>
-                    <div className="text-sm text-gray-700">{formatUSD(p.price)}</div>
+                    <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>
                   </div>
                 </div>
               ))}

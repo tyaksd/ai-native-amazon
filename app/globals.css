@@ -80,3 +80,52 @@ body {
     transform: translateX(-20px) translateY(-10px);
   }
 }
+
+/* Animated Gradient Text */
+.animated-gradient-1 {
+  background: linear-gradient(135deg, #007AFF, #00D4FF, #007AFF, #00D4FF);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientFlow1 2s ease-in-out infinite;
+}
+
+.animated-gradient-2 {
+  background: linear-gradient(135deg, #FF5E99, #FFB347, #FF5E99, #FFB347);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientFlow2 2s ease-in-out infinite 1s;
+}
+
+@keyframes gradientFlow1 {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes gradientFlow2 {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}

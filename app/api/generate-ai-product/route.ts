@@ -257,47 +257,106 @@ async function generateDetailedDesignDescription(
   gender: string,
   brandDescription: string,
   brandConcept: string,
-  targetAudience: string
+  targetAudience: string,
+  productIndex?: number // 商品のインデックスを追加
 ): Promise<string> {
   const colorList = colors.join(', ')
+
+  // ユニークネスを高めるためのランダム要素を追加
+  const randomElements = [
+    'with unexpected geometric patterns',
+    'featuring organic flowing forms',
+    'incorporating bold typography elements',
+    'with abstract artistic expressions',
+    'featuring minimalist clean lines',
+    'incorporating vibrant color blocking',
+    'with distressed urban textures',
+    'featuring futuristic digital aesthetics',
+    'incorporating vintage retro influences',
+    'with contemporary street art vibes',
+    'featuring nature-inspired motifs',
+    'incorporating architectural elements',
+    'with psychedelic color combinations',
+    'featuring industrial design influences',
+    'incorporating hand-drawn artistic touches'
+  ]
+  
+  const randomElement = randomElements[Math.floor(Math.random() * randomElements.length)]
+  
+  // 商品インデックスに基づくユニークな要素
+  const indexBasedElements = [
+    'dynamic energy and movement',
+    'sophisticated elegance and refinement',
+    'raw authenticity and street edge',
+    'innovative technology integration',
+    'artistic expression and creativity',
+    'minimalist precision and clarity',
+    'bold statement and impact',
+    'subtle sophistication and charm',
+    'experimental boundary-pushing',
+    'timeless classic appeal'
+  ]
+  
+  const indexElement = indexBasedElements[(productIndex || 0) % indexBasedElements.length]
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     {
       role: 'system',
-      content: 'You are a design expert. Write a detailed 150-character design description focusing ONLY on visual elements, composition, and artistic aspects. No SEO, no marketing, no materials - pure design analysis.'
+      content: 'You are a creative fashion designer working for this brand. Create innovative, unique design concepts that push creative boundaries while staying true to the brand identity. Think like a designer who wants to surprise and delight customers with fresh, unexpected approaches. Each design must be completely unique and different from any previous designs.'
     },
     {
       role: 'user',
       content: `
-Create a detailed design description for a ${productType} from ${brandName}.
+As a designer for ${brandName}, create a completely new and innovative design concept for a ${productType}.
 
-# Brand Context
+# Brand DNA
 Brand: ${brandName}
-Brand Concept: ${brandConcept}
+Core Concept: ${brandConcept}
 Target Audience: ${targetAudience}
 Gender: ${gender}
 Available Colors: ${colorList}
 
-# Requirements
-- Write exactly 150 characters (not words)
-- Focus ONLY on visual design elements
-- Describe composition, layout, visual hierarchy
-- Mention specific design elements (shapes, lines, typography, patterns)
-- Include color relationships and visual balance
-- Describe artistic style and aesthetic approach
-- NO SEO keywords, NO marketing language, NO material descriptions
-- Pure design analysis only
+# Design Challenge
+Create a design that:
+- Pushes creative boundaries while honoring the brand essence
+- Offers something completely fresh and unexpected
+- Balances innovation with brand authenticity
+- Creates visual impact that stops people in their tracks
+- Incorporates unique design elements, patterns, or compositions
+- Uses color in surprising but harmonious ways
+- Tells a visual story that connects with the target audience
+- ${randomElement}
+- Embodies ${indexElement}
 
-Return ONLY the design description:`
+# Important Design Notes
+- The brand name does NOT need to be included in the design
+- Focus on visual concepts, patterns, and artistic elements
+- Create a design that represents the brand's essence without text
+- Let the visual design speak for itself
+
+# Requirements
+- Write approximately 150 words
+- Think like a designer exploring new creative territories
+- Focus on innovative visual concepts, unique compositions, and artistic approaches
+- Describe specific design elements, patterns, textures, and visual relationships
+- Include color psychology and visual storytelling
+- Consider how the design would stand out in a crowded marketplace
+- NO generic descriptions - be specific and creative
+- NO SEO or marketing language - pure design innovation
+- Make this design completely unique and different from any other design
+- Incorporate the random element: ${randomElement}
+- Embody the character: ${indexElement}
+
+Return ONLY the creative design concept:`
     }
   ]
 
   try {
     const res = await openai.chat.completions.create({
-      model: 'gpt-5-mini',
+      model: 'gpt-4o-mini',
       messages,
       max_completion_tokens: 200,
-      temperature: 0.7
+      temperature: 0.9 // 温度を上げてより多様性を確保
     })
     const txt = res.choices?.[0]?.message?.content?.trim()
     if (txt) return txt
@@ -305,8 +364,22 @@ Return ONLY the design description:`
     console.warn('[Design Description] Generation failed, using fallback:', e)
   }
 
-  // フォールバック
-  return `Bold geometric composition with asymmetric layout featuring ${brandConcept.toLowerCase()} elements. High contrast monochrome palette with dynamic typography and structured negative space.`
+  // フォールバック（商品インデックスに基づいてユニークにする）
+  const fallbackElements = [
+    'Bold geometric composition with asymmetric layout',
+    'Organic flowing forms with dynamic movement',
+    'Minimalist precision with clean typography',
+    'Urban street art with raw authenticity',
+    'Futuristic digital aesthetics with innovation',
+    'Vintage retro influences with timeless appeal',
+    'Abstract artistic expression with creativity',
+    'Industrial design with architectural elements',
+    'Nature-inspired motifs with organic beauty',
+    'Contemporary street vibes with modern edge'
+  ]
+  
+  const fallbackElement = fallbackElements[(productIndex || 0) % fallbackElements.length]
+  return `${fallbackElement} featuring ${brandConcept.toLowerCase()} elements. High contrast palette with dynamic energy and structured composition. ${randomElement}.`
 }
 
 // 商品説明（ブランド公式・SEO配慮・購入意欲向上）
@@ -470,7 +543,8 @@ function generateImageSpecificPrompt(
   targetAudience: string,
   gender: string,
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle?: string
+  designStyle?: string,
+  productIndex?: number // 商品インデックスを追加
 ): string {
   const genderContext = gender === 'Men' 
     ? 'masculine, bold, strong silhouette, tailored fit'
@@ -483,18 +557,41 @@ function generateImageSpecificPrompt(
   // デザインの詳細説明を生成
   const detailedDesignDescription = generateDesignElementsDescription(designElements, brandConcept, targetAudience)
 
-  // ユニークネスを高めるためのランダム要素
+  // ユニークネスを高めるためのランダム要素（より多様性を追加）
   const uniquenessElements = [
-    'with unexpected visual twists',
-    'featuring unconventional composition',
-    'incorporating surprising design elements',
-    'with innovative visual approaches',
-    'featuring creative interpretation',
-    'with distinctive artistic flair',
-    'incorporating unique visual metaphors',
-    'with original design concepts'
+    'with unexpected visual twists and surprising elements',
+    'featuring unconventional composition and bold layouts',
+    'incorporating surprising design elements and unique patterns',
+    'with innovative visual approaches and creative techniques',
+    'featuring creative interpretation and artistic expression',
+    'with distinctive artistic flair and original concepts',
+    'incorporating unique visual metaphors and symbolic elements',
+    'with original design concepts and fresh perspectives',
+    'featuring experimental techniques and boundary-pushing aesthetics',
+    'incorporating unexpected color combinations and visual contrasts',
+    'with dynamic movement and energetic compositions',
+    'featuring sophisticated details and refined craftsmanship',
+    'incorporating raw authenticity and street-inspired elements',
+    'with futuristic aesthetics and cutting-edge design',
+    'featuring vintage influences and timeless appeal'
   ]
   const randomUniqueness = uniquenessElements[Math.floor(Math.random() * uniquenessElements.length)]
+
+  // 商品インデックスに基づく追加のユニーク要素
+  const indexBasedUniqueness = [
+    'dynamic energy and movement',
+    'sophisticated elegance and refinement',
+    'raw authenticity and street edge',
+    'innovative technology integration',
+    'artistic expression and creativity',
+    'minimalist precision and clarity',
+    'bold statement and impact',
+    'subtle sophistication and charm',
+    'experimental boundary-pushing',
+    'timeless classic appeal'
+  ]
+  
+  const indexUniqueness = indexBasedUniqueness[(productIndex || 0) % indexBasedUniqueness.length]
 
   return `Create a unique, high-quality design for ${brandName} that embodies the brand concept: "${brandConcept}".
 
@@ -510,6 +607,8 @@ function generateImageSpecificPrompt(
 - Let your imagination run wild while staying true to the brand essence
 - Avoid generic, common, or overused design patterns
 - Make it distinctive and memorable
+- ${randomUniqueness}
+- Embody ${indexUniqueness}
 
 # Technical Specs
 - Output ONLY the design artwork (no garment, no background, no shadows)
@@ -523,8 +622,16 @@ function generateImageSpecificPrompt(
 - Create visual metaphors that represent the brand concept
 - Think outside conventional design boundaries
 - Make it uniquely yours
+- Incorporate the random element: ${randomUniqueness}
+- Embody the character: ${indexUniqueness}
 
-Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, common, overused, cliché, predictable`
+# Important Design Notes
+- The brand name does NOT need to be included in the design
+- Focus on visual concepts, patterns, and artistic elements
+- Create a design that represents the brand's essence without text
+- Let the visual design speak for itself
+
+Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, common, overused, cliché, predictable, brand name, text, typography, words`
 }
 
 // デザイン要素の詳細説明を生成する関数
@@ -751,7 +858,8 @@ async function generateProductImages(
   targetAudience: string,
   gender: string,
   productDescription: string,          // ★ 新商品の説明文を追加
-  designStyle?: string
+  designStyle?: string,
+  productIndex?: number // 商品インデックスを追加
 ): Promise<{ productImages: string[]; designPng: string }> {
   const productImages: string[] = []
   let designPng = ''
@@ -767,7 +875,8 @@ async function generateProductImages(
     targetAudience,
     gender,
     designElements,
-    designStyle
+    designStyle,
+    productIndex
   )
 
   console.log(`[DesignPNG] Generating design for ${productName}...`)
@@ -892,7 +1001,8 @@ export async function POST(request: NextRequest) {
           productGender,
           brand.description || 'A unique streetwear brand',
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
-          brand.target_audience || 'Fashion-forward individuals'
+          brand.target_audience || 'Fashion-forward individuals',
+          i // 商品インデックスを追加
         )
         console.log(`[Product ${i + 1}] Design description length: ${designDescription.length} characters`)
 
@@ -949,7 +1059,8 @@ export async function POST(request: NextRequest) {
           brand.target_audience || 'Fashion-forward individuals',
           productGender,
           designDescription, // ← 詳細デザイン説明文を渡す
-          undefined // デザインスタイルを事前定義しない
+          undefined, // デザインスタイルを事前定義しない
+          i // 商品インデックスを追加
         )
 
         console.log(`[Product ${i + 1}] Generated ${productImages.length} product images, design PNG: ${designPng ? 'Yes' : 'No'}`)
