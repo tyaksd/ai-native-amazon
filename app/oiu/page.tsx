@@ -12,7 +12,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands'>('ai-brands')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
-  const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | ''>('')
+  const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'Brand deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | ''>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [isGenerating, setIsGenerating] = useState(false)
