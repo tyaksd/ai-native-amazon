@@ -270,7 +270,7 @@ export default function Home() {
             {searchResults.brands.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4 text-white">Brands</h3>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
                   {searchResults.brands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -285,23 +285,55 @@ export default function Home() {
                         )
                       }}
                     >
-                      <div className="bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+                      <div className="relative rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full min-h-[210px]">
+                        {/* Full background image */}
+                        {brand.background_image ? (
+                          <Image 
+                            src={brand.background_image} 
+                            alt={`${brand.name} background`} 
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
+                        )}
+                        
+                        {/* Brand icon */}
+                        <div className="absolute top-4 left-4">
+                          <div className="w-20 h-20 bg-white/60 backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
                             <Image 
                               src={brand.icon} 
                               alt={brand.name} 
-                              width={48} 
-                              height={48} 
+                              fill
                               className="object-cover"
                             />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="font-semibold text-gray-900 truncate">{brand.name}</h4>
-                            <p className="text-sm text-gray-600 truncate break-words">
-                              {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
-                            </p>
+                        </div>
+                        
+                        {/* Arrow icon */}
+                        <div className="absolute top-4 right-4">
+                          <div className="w-8 h-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                           </div>
+                        </div>
+                        
+                        {/* Glass overlay for bottom half */}
+                        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10 min-h-[80px]">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
+                              {brand.name}
+                            </h3>
+                            {brand.category && (
+                              <span className="px-2  bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
+                                {brand.category}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-300 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                            {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
+                          </p>
                         </div>
                       </div>
                     </Link>
@@ -600,7 +632,7 @@ export default function Home() {
                           )
                         }}
                       >
-                        <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
+                        <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={30} height={30} className="rounded bg-white" />
                       </Link>
                     </div>
                     <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>

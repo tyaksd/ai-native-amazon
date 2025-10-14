@@ -10,36 +10,50 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     console.log('Starting AI brand generation...')
-    const { brandStyle } = await request.json()
-    console.log('Brand style:', brandStyle)
+    const { brandStyle, quantity = 1 } = await request.json()
+    console.log('Brand style:', brandStyle, 'Quantity:', quantity)
 
     if (!brandStyle || !['street', 'casual'].includes(brandStyle)) {
       return NextResponse.json({ error: 'Invalid brand style' }, { status: 400 })
     }
 
-    // Generate brand content using GPT-5 mini
-    console.log('Generating brand content with GPT-5 mini...')
-    
-    // Create style-specific prompts - completely separate for each style
-    let basePrompt: string
-    
-    if (brandStyle === 'street') {
-      basePrompt = `Role and Task: "Act as an avant-garde street fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new streetwear brand launching on an e-commerce platform."
-
-STREETWEAR FOCUS: Create bold, edgy, urban-inspired brands that embody rebellion, youth culture, and underground aesthetics. Think graffiti, skate culture, hip-hop, punk, and urban subcultures.`
-    } else if (brandStyle === 'casual') {
-      basePrompt = `Role and Task: "Act as a contemporary casual fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new casual lifestyle brand launching on an e-commerce platform."
-
-CASUAL FOCUS: Create approachable, comfortable, lifestyle-focused brands that embody everyday style, comfort, and modern living. Think minimalism, comfort, sustainability, and contemporary lifestyle aesthetics.`
-    } else {
-      throw new Error(`Invalid brand style: ${brandStyle}`)
+    const quantityNum = Number(quantity)
+    if (isNaN(quantityNum) || quantityNum < 1 || quantityNum > 10) {
+      return NextResponse.json({ error: 'Invalid quantity. Must be between 1 and 10.' }, { status: 400 })
     }
+
+    // Generate multiple unique brands
+    console.log(`Generating ${quantityNum} unique ${brandStyle} brands...`)
     
-    // Create the complete prompt with style-specific content
-    let prompt: string
+    const generatedBrands = []
     
-    if (brandStyle === 'street') {
-      prompt = basePrompt + `
+    for (let i = 0; i < quantityNum; i++) {
+      console.log(`Generating brand ${i + 1}/${quantityNum}...`)
+      
+      // Create style-specific prompts - completely separate for each style
+      let basePrompt: string
+      
+      if (brandStyle === 'street') {
+        basePrompt = `Role and Task: "Act as an avant-garde street fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new streetwear brand launching on an e-commerce platform."
+
+STREETWEAR FOCUS: Create bold, edgy, urban-inspired brands that embody rebellion, youth culture, and underground aesthetics. Think graffiti, skate culture, hip-hop, punk, and urban subcultures.
+
+CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands being generated. Each brand must be COMPLETELY UNIQUE and DIFFERENT from all others. Avoid any similarities in names, concepts, colors, or aesthetics.`
+      } else if (brandStyle === 'casual') {
+        basePrompt = `Role and Task: "Act as a contemporary casual fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new casual lifestyle brand launching on an e-commerce platform."
+
+CASUAL FOCUS: Create approachable, comfortable, lifestyle-focused brands that embody everyday style, comfort, and modern living. Think minimalism, comfort, sustainability, and contemporary lifestyle aesthetics.
+
+CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands being generated. Each brand must be COMPLETELY UNIQUE and DIFFERENT from all others. Avoid any similarities in names, concepts, colors, or aesthetics.`
+      } else {
+        throw new Error(`Invalid brand style: ${brandStyle}`)
+      }
+      
+      // Create the complete prompt with style-specific content
+      let prompt: string
+      
+      if (brandStyle === 'street') {
+        prompt = basePrompt + `
 
 IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
 
@@ -50,7 +64,7 @@ Each brand should feel as if it belongs to a *unique micro-universe* within stre
 
 — Brand Name —
 Invent an original, memorable word or phrase that captures the brand's distinct tone and emotion.
-Avoid generic streetwear words like “urban,” “graffiti,” or “vibe.”
+Avoid generic streetwear words like "urban," "graffiti," or "vibe."
 Draw from unexpected cultural or emotional sources such as:
 Subcultures — youth movements, digital aesthetics, underground art, or futuristic styles
 Languages — blend sounds or fragments from multiple languages, or create new invented syllables
@@ -61,7 +75,7 @@ The name should feel fresh, ownable, and globally distinctive.
 Let intuition override logic.
 Embrace imperfection, randomness, and subconscious inspiration — the name can sound irrational, misspelled, or strangely beautiful.
 Sometimes the best names are born from accidents, rhythm, or visual noise.
-It’s okay if it feels improvised, like a word you might discover by accident on a wall, a sound, or a glitch.
+It's okay if it feels improvised, like a word you might discover by accident on a wall, a sound, or a glitch.
 Focus on raw emotion over reason.
 
 
@@ -98,19 +112,19 @@ For street brands, use bold, edgy, graffiti-inspired fonts with urban aesthetics
 The text should be the main focus, positioned centrally with generous white space around it.
 
 — Background Image —
-Describe a striking header background that embodies the brand’s atmosphere and emotional tone.
+Describe a striking header background that embodies the brand's atmosphere and emotional tone.
 The scene should visually translate the brand concept into space, light, and texture, rather than rely on typical street settings.
 The image must feel like an immersive world where the brand lives — poetic, cinematic, and conceptually aligned with its design DNA.
 For street brands, you may explore a wide range of environments and moods, not limited to neon or dark cityscapes.
-Think of the background as a visual metaphor for the brand’s soul — each one a distinct world with its own texture, rhythm, and emotion.
+Think of the background as a visual metaphor for the brand's soul — each one a distinct world with its own texture, rhythm, and emotion.
 Go beyond repetition of neon, darkness, or city imagery.
 Explore diverse, contrasting settings that reflect different philosophies, aesthetics, and emotions.
 The image should be high-resolution, visually sharp, and production-ready, suitable for use as a large-scale e-commerce header.
 It must directly reflect the unique emotional core and aesthetic philosophy of the specific brand concept —
-not a generic “streetwear” tone, but a distinct visual world that could only belong to that brand.`
-} else {
-      // Casual brand prompt
-      prompt = basePrompt + `
+not a generic "streetwear" tone, but a distinct visual world that could only belong to that brand.`
+      } else {
+        // Casual brand prompt
+        prompt = basePrompt + `
 
 IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
 
@@ -124,8 +138,8 @@ Let randomness, emotion, and unexpected combinations guide creativity.
 Surprise yourself.
 
 — Brand Name —
-Invent an original, memorable word or phrase that captures the brand’s distinct tone and emotion.
-Avoid generic casual words like “comfort,” “lifestyle,” or “modern.”
+Invent an original, memorable word or phrase that captures the brand's distinct tone and emotion.
+Avoid generic casual words like "comfort," "lifestyle," or "modern."
 Draw from unexpected cultural or emotional sources such as:
 Lifestyle Philosophies — mindfulness, sustainability, minimalism, or contemporary living
 Languages — blend sounds or fragments from multiple languages, or create new invented syllables
@@ -135,36 +149,36 @@ The name should feel fresh, ownable, and globally distinctive.
 
 → Be spontaneous, experimental, and random.
 Let the name emerge from intuition, rhythm, or even accidental wordplay.
-It’s fine if it feels irrational, nonsensical, or improvised — embrace playfulness, imperfection, and unpredictability.
+It's fine if it feels irrational, nonsensical, or improvised — embrace playfulness, imperfection, and unpredictability.
 Use the examples only as distant references, not as rules.
 
 — Brand Concept —
-Write a detailed and emotionally resonant description of around 80 words that captures the brand’s worldview, visual philosophy, and emotional tone.
+Write a detailed and emotionally resonant description of around 80 words that captures the brand's worldview, visual philosophy, and emotional tone.
 Describe how the brand feels — its rhythm, aesthetic, and underlying story — not just what it sells.
 Blend poetic abstraction with visual precision.
 → Avoid structured or formulaic writing.
 Let the tone flow naturally — poetic, dreamy, or fragmented.
 The description can sound like a short film scene, a feeling, or a piece of abstract poetry.
-It doesn’t need to follow the examples; randomness and intuition are encouraged.
+It doesn't need to follow the examples; randomness and intuition are encouraged.
 
 — Design Concept —
 Describe the visual DNA of the brand: color schemes, shapes, typography, and motifs.
 Blend unexpected design schools 
 Encourage unusual materials, hybrid inspirations, and experimental layout approaches.
 Focus on originality and sensory impact.
-→ You don’t need to adhere to logic.
-Colors, textures, and materials can contradict or clash — that’s fine.
+→ You don't need to adhere to logic.
+Colors, textures, and materials can contradict or clash — that's fine.
 Allow some chaos and imperfection; the goal is feeling, not harmony.
 
 — Target Audience —
 Define the lifestyle or mindset of the audience.
 They can be: conscious consumers, minimalists, sustainability advocates, comfort seekers, modern professionals, or lifestyle enthusiasts.
 → Feel free to invent entirely new archetypes or imaginary lifestyles.
-The “audience” could be poetic, absurd, or metaphorical — even imaginary tribes or emotional identities.
+The "audience" could be poetic, absurd, or metaphorical — even imaginary tribes or emotional identities.
 Make it vivid, unique, and emotionally specific, not demographic.
 
 — Logo Design —
-Create a simple, iconic symbol that reflects the brand’s visual identity and can adapt to collaborations.
+Create a simple, iconic symbol that reflects the brand's visual identity and can adapt to collaborations.
 Focus on visual elements, shapes, and typography.
 Generate a minimalist logo image with the emblem or symbol positioned precisely at the center of the canvas.
 Avoid any extraneous objects, backgrounds, or text; focus solely on the primary logo shape.
@@ -177,7 +191,7 @@ IMPORTANT: There is a 70% chance the logo should be text-based rather than a sym
 If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept.
 For casual brands, use clean, friendly, approachable fonts with comfortable aesthetics, rounded edges, and welcoming warmth.
 The text should be the main focus, positioned centrally with generous white space around it.
-→ The logo doesn’t need to be perfect or balanced.
+→ The logo doesn't need to be perfect or balanced.
 Slight asymmetry, rough edges, or experimental letterforms can express personality and authenticity.
 Let it feel human, not mechanical.
 
@@ -190,12 +204,12 @@ You can imagine any world — surreal, dreamlike, digital, nostalgic, or abstrac
 Think freely: from warm kitchens and paper textures to foggy forests, sunset rooms, or floating architecture.
 Explore diverse environments that reflect contrasting moods and philosophies, can be anything.
 The image should be high-resolution, visually sharp, and production-ready — suitable for use as a large-scale e-commerce header.
-It must directly reflect the essence of the specific brand concept, not a generic “casual lifestyle” tone.
+It must directly reflect the essence of the specific brand concept, not a generic "casual lifestyle" tone.
 → Allow visual serendipity: the result can be dreamy, abstract, or strangely beautiful.`
-    }
+      }
 
-    // Add JSON format instructions to the prompt
-    prompt += `
+      // Add JSON format instructions to the prompt
+      prompt += `
 
 Please provide the response in the following JSON format:
 {
@@ -207,157 +221,150 @@ Please provide the response in the following JSON format:
   "background_image_description": "Background Image Description"
 }`
 
+      const completion = await openai.chat.completions.create({
+        model: "gpt-5-mini",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+      })
 
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-5-mini",
-      messages: [
-        {
-          role: "user",
-          content: prompt
+      const responseContent = completion.choices[0].message.content || '{}'
+      
+      // Extract JSON from markdown if present
+      let jsonContent = responseContent
+      if (responseContent.includes('```json')) {
+        const jsonMatch = responseContent.match(/```json\n([\s\S]*?)\n```/)
+        if (jsonMatch) {
+          jsonContent = jsonMatch[1]
         }
-      ],
-    })
-
-    const responseContent = completion.choices[0].message.content || '{}'
-    
-    // Extract JSON from markdown if present
-    let jsonContent = responseContent
-    if (responseContent.includes('```json')) {
-      const jsonMatch = responseContent.match(/```json\n([\s\S]*?)\n```/)
-      if (jsonMatch) {
-        jsonContent = jsonMatch[1]
       }
-    }
-    
-    const brandContent = JSON.parse(jsonContent)
-    console.log('Brand content generated:', brandContent.name)
+      
+      const brandContent = JSON.parse(jsonContent)
+      console.log(`Brand ${i + 1} content generated:`, brandContent.name)
 
-    // Generate logo image using DALL-E 3
-    console.log('Generating logo with gpt-image-1...')
-    let logoResponse
-    try {
-      logoResponse = await openai.images.generate({
-        model: "gpt-image-1",
-        prompt: brandContent.logo_design + ", realistic brand logo, clean typography, professional corporate design, minimalist, modern, authentic, no AI art style, real brand aesthetic, 1024x1024, high quality",
-        size: "1024x1024",
-        quality: "low",
-        n: 1,
+      // Generate logo image using DALL-E 3
+      console.log(`Generating logo ${i + 1} with gpt-image-1...`)
+      let logoResponse
+      try {
+        logoResponse = await openai.images.generate({
+          model: "gpt-image-1",
+          prompt: brandContent.logo_design + ", realistic brand logo, clean typography, professional corporate design, minimalist, modern, authentic, no AI art style, real brand aesthetic, 1024x1024, high quality",
+          size: "1024x1024",
+          quality: "low",
+          n: 1,
+        })
+        console.log(`Logo ${i + 1} generated successfully`)
+      } catch (error) {
+        console.error(`Error generating logo ${i + 1}:`, error)
+        throw new Error(`Failed to generate logo ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+
+      // Generate background image using DALL-E 3
+      console.log(`Generating background image ${i + 1} with gpt-image-1...`)
+      let backgroundResponse
+      try {
+        backgroundResponse = await openai.images.generate({
+          model: "gpt-image-1",
+          prompt: brandContent.background_image_description + ", realistic photography, authentic street photography, natural lighting, real urban environment, no AI art style, professional fashion photography, authentic, genuine, 1024x1792, high quality",
+          size: "1536x1024",
+          quality: "low",
+          n: 1,
+        })
+        console.log(`Background image ${i + 1} generated successfully`)
+      } catch (error) {
+        console.error(`Error generating background image ${i + 1}:`, error)
+        throw new Error(`Failed to generate background image ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+
+      // Upload images to Cloudinary
+      console.log(`Uploading images ${i + 1} to Cloudinary...`)
+      
+      // Check if we have URL or base64 data
+      const logoUrl = logoResponse.data?.[0]?.url
+      const backgroundUrl = backgroundResponse.data?.[0]?.url
+      
+      // If we have base64 data instead of URLs, we need to handle it differently
+      const logoB64 = logoResponse.data?.[0]?.b64_json
+      const backgroundB64 = backgroundResponse.data?.[0]?.b64_json
+
+      if (!logoUrl && !logoB64) {
+        console.error(`No logo image data found for brand ${i + 1}`)
+        throw new Error(`Failed to generate logo image for brand ${i + 1}`)
+      }
+      
+      if (!backgroundUrl && !backgroundB64) {
+        console.error(`No background image data found for brand ${i + 1}`)
+        throw new Error(`Failed to generate background image for brand ${i + 1}`)
+      }
+
+      // Download and upload to Cloudinary
+      let uploadedLogoUrl: string
+      let uploadedBackgroundUrl: string
+      
+      if (logoUrl) {
+        // Handle URL-based image
+        const logoResponse_fetch = await fetch(logoUrl)
+        const logoBuffer = await logoResponse_fetch.arrayBuffer()
+        const logoBlob = new Blob([logoBuffer], { type: 'image/png' })
+        const logoFile = new File([logoBlob], `logo-${i + 1}.png`, { type: 'image/png' })
+        uploadedLogoUrl = await uploadImage(logoFile)
+      } else if (logoB64) {
+        // Handle base64 image
+        const logoBuffer = Buffer.from(logoB64, 'base64')
+        const logoBlob = new Blob([logoBuffer], { type: 'image/png' })
+        const logoFile = new File([logoBlob], `logo-${i + 1}.png`, { type: 'image/png' })
+        uploadedLogoUrl = await uploadImage(logoFile)
+      } else {
+        throw new Error(`No logo image data available for brand ${i + 1}`)
+      }
+
+      if (backgroundUrl) {
+        // Handle URL-based image
+        const backgroundResponse_fetch = await fetch(backgroundUrl)
+        const backgroundBuffer = await backgroundResponse_fetch.arrayBuffer()
+        const backgroundBlob = new Blob([backgroundBuffer], { type: 'image/png' })
+        const backgroundFile = new File([backgroundBlob], `background-${i + 1}.png`, { type: 'image/png' })
+        uploadedBackgroundUrl = await uploadImage(backgroundFile)
+      } else if (backgroundB64) {
+        // Handle base64 image
+        const backgroundBuffer = Buffer.from(backgroundB64, 'base64')
+        const backgroundBlob = new Blob([backgroundBuffer], { type: 'image/png' })
+        const backgroundFile = new File([backgroundBlob], `background-${i + 1}.png`, { type: 'image/png' })
+        uploadedBackgroundUrl = await uploadImage(backgroundFile)
+      } else {
+        throw new Error(`No background image data available for brand ${i + 1}`)
+      }
+      console.log(`Images ${i + 1} uploaded to Cloudinary successfully`)
+
+      // Create brand in database
+      console.log(`Creating brand ${i + 1} in database...`)
+      const newBrand = await createBrand({
+        name: brandContent.name,
+        description: brandContent.description,
+        icon: uploadedLogoUrl,
+        background_image: uploadedBackgroundUrl,
+        category: brandStyle === 'street' ? 'Streetwear' : 'Casual',
+        design_concept: brandContent.design_concept,
+        target_audience: brandContent.target_audience,
+        logo_design: brandContent.logo_design,
       })
-      console.log('Logo generated successfully')
-      console.log('Logo response:', JSON.stringify(logoResponse, null, 2))
-    } catch (error) {
-      console.error('Error generating logo:', error)
-      throw new Error(`Failed to generate logo: ${error instanceof Error ? error.message : 'Unknown error'}`)
+
+      if (!newBrand) {
+        console.log(`Failed to create brand ${i + 1} in database`)
+        throw new Error(`Failed to create brand ${i + 1}`)
+      }
+
+      console.log(`Brand ${i + 1} created successfully:`, newBrand.name)
+      generatedBrands.push(newBrand)
     }
 
-    // Generate background image using DALL-E 3
-    console.log('Generating background image with gpt-image-1...')
-    let backgroundResponse
-    try {
-      backgroundResponse = await openai.images.generate({
-        model: "gpt-image-1",
-        prompt: brandContent.background_image_description + ", realistic photography, authentic street photography, natural lighting, real urban environment, no AI art style, professional fashion photography, authentic, genuine, 1024x1792, high quality",
-        size: "1536x1024",
-        quality: "low",
-        n: 1,
-      })
-      console.log('Background image generated successfully')
-      console.log('Background response:', JSON.stringify(backgroundResponse, null, 2))
-    } catch (error) {
-      console.error('Error generating background image:', error)
-      throw new Error(`Failed to generate background image: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-
-    // Upload images to Cloudinary
-    console.log('Uploading images to Cloudinary...')
-    
-    // Check if we have URL or base64 data
-    const logoUrl = logoResponse.data?.[0]?.url
-    const backgroundUrl = backgroundResponse.data?.[0]?.url
-    
-    // If we have base64 data instead of URLs, we need to handle it differently
-    const logoB64 = logoResponse.data?.[0]?.b64_json
-    const backgroundB64 = backgroundResponse.data?.[0]?.b64_json
-
-    console.log('Logo URL:', logoUrl)
-    console.log('Background URL:', backgroundUrl)
-    console.log('Logo B64 available:', !!logoB64)
-    console.log('Background B64 available:', !!backgroundB64)
-
-    if (!logoUrl && !logoB64) {
-      console.error('No logo image data found')
-      console.error('Logo response structure:', JSON.stringify(logoResponse, null, 2))
-      throw new Error('Failed to generate logo image')
-    }
-    
-    if (!backgroundUrl && !backgroundB64) {
-      console.error('No background image data found')
-      console.error('Background response structure:', JSON.stringify(backgroundResponse, null, 2))
-      throw new Error('Failed to generate background image')
-    }
-
-    // Download and upload to Cloudinary
-    let uploadedLogoUrl: string
-    let uploadedBackgroundUrl: string
-    
-    if (logoUrl) {
-      // Handle URL-based image
-      const logoResponse_fetch = await fetch(logoUrl)
-      const logoBuffer = await logoResponse_fetch.arrayBuffer()
-      const logoBlob = new Blob([logoBuffer], { type: 'image/png' })
-      const logoFile = new File([logoBlob], 'logo.png', { type: 'image/png' })
-      uploadedLogoUrl = await uploadImage(logoFile)
-    } else if (logoB64) {
-      // Handle base64 image
-      const logoBuffer = Buffer.from(logoB64, 'base64')
-      const logoBlob = new Blob([logoBuffer], { type: 'image/png' })
-      const logoFile = new File([logoBlob], 'logo.png', { type: 'image/png' })
-      uploadedLogoUrl = await uploadImage(logoFile)
-    } else {
-      throw new Error('No logo image data available')
-    }
-
-    if (backgroundUrl) {
-      // Handle URL-based image
-      const backgroundResponse_fetch = await fetch(backgroundUrl)
-      const backgroundBuffer = await backgroundResponse_fetch.arrayBuffer()
-      const backgroundBlob = new Blob([backgroundBuffer], { type: 'image/png' })
-      const backgroundFile = new File([backgroundBlob], 'background.png', { type: 'image/png' })
-      uploadedBackgroundUrl = await uploadImage(backgroundFile)
-    } else if (backgroundB64) {
-      // Handle base64 image
-      const backgroundBuffer = Buffer.from(backgroundB64, 'base64')
-      const backgroundBlob = new Blob([backgroundBuffer], { type: 'image/png' })
-      const backgroundFile = new File([backgroundBlob], 'background.png', { type: 'image/png' })
-      uploadedBackgroundUrl = await uploadImage(backgroundFile)
-    } else {
-      throw new Error('No background image data available')
-    }
-    console.log('Images uploaded to Cloudinary successfully')
-
-    // Create brand in database
-    console.log('Creating brand in database...')
-    const newBrand = await createBrand({
-      name: brandContent.name,
-      description: brandContent.description,
-      icon: uploadedLogoUrl,
-      background_image: uploadedBackgroundUrl,
-      category: brandStyle === 'street' ? 'Streetwear' : 'Casual',
-      design_concept: brandContent.design_concept,
-      target_audience: brandContent.target_audience,
-      logo_design: brandContent.logo_design,
-    })
-
-    if (!newBrand) {
-      console.log('Failed to create brand in database')
-      return NextResponse.json({ error: 'Failed to create brand' }, { status: 500 })
-    }
-
-    console.log('Brand created successfully:', newBrand.name)
+    console.log(`All ${quantityNum} brands created successfully`)
     return NextResponse.json({ 
       success: true, 
-      brand: newBrand 
+      brands: generatedBrands 
     })
 
   } catch (error) {

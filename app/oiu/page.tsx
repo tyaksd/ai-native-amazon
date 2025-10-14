@@ -12,7 +12,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands'>('ai-brands')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
-  const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'Brand deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | ''>('')
+  const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'Brand deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -28,6 +28,10 @@ export default function AdminPage() {
   const [quantity, setQuantity] = useState('')
   const [brandSearchQuery, setBrandSearchQuery] = useState('')
   const [showBrandDropdown, setShowBrandDropdown] = useState(false)
+
+  // AI Brands form states
+  const [aiBrandQuantity, setAiBrandQuantity] = useState('')
+  const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0)
 
   // Predefined color options
   const colorOptions = [
@@ -440,7 +444,20 @@ export default function AdminPage() {
   }
 
   const handleGenerateAIBrand = async () => {
+    if (!aiBrandQuantity || aiBrandQuantity.trim() === '') {
+      alert('Please enter a quantity.')
+      return
+    }
+    
+    const quantityNum = Number(aiBrandQuantity)
+    if (isNaN(quantityNum) || quantityNum < 1 || quantityNum > 10) {
+      alert('Please enter a valid quantity between 1 and 10.')
+      return
+    }
+
     setIsGenerating(true)
+    setGeneratedBrandsCount(0)
+    
     try {
       const selectedStyle = (document.querySelector('input[name="brandStyle"]:checked') as HTMLInputElement)?.value || 'street'
       
@@ -449,27 +466,34 @@ export default function AdminPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ brandStyle: selectedStyle }),
-        signal: AbortSignal.timeout(120000), // 2分のタイムアウト
+        body: JSON.stringify({ 
+          brandStyle: selectedStyle,
+          quantity: quantityNum 
+        }),
+        signal: AbortSignal.timeout(300000), // 5 minutes timeout for multiple brands
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate AI brand')
+        throw new Error('Failed to generate AI brands')
       }
 
       const result = await response.json()
       
-      if (result.success && result.brand) {
-        setBrands(prev => [...prev, result.brand])
-        setCreatedMessage('AI Brand Generated!')
+      if (result.success && result.brands) {
+        setBrands(prev => [...prev, ...result.brands])
+        setGeneratedBrandsCount(result.brands.length)
+        setCreatedMessage(`AI Brands Generated! (${result.brands.length} brands)`)
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 3000)
+        
+        // Reset form
+        setAiBrandQuantity('')
       } else {
-        throw new Error('Failed to generate brand')
+        throw new Error('Failed to generate brands')
       }
     } catch (error) {
-      console.error('Error generating AI brand:', error)
-      alert('Failed to generate AI brand. Please try again.')
+      console.error('Error generating AI brands:', error)
+      alert('Failed to generate AI brands. Please try again.')
     } finally {
       setIsGenerating(false)
     }
@@ -1223,8 +1247,9 @@ export default function AdminPage() {
                   
                   {/* Brand Style Selection and Generate Button */}
                   <div className="bg-white p-8 rounded-lg border border-gray-200">
-                    <h3 className="text-xl font-semibold mb-6 text-gray-900">🎯 Generate AI Brand</h3>
-                    <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                    <h3 className="text-xl font-semibold mb-6 text-gray-900">🎯 Generate AI Brands</h3>
+                    <div className="space-y-6">
+                      {/* Brand Style Selection */}
                       <div className="flex gap-6">
                         <label className="flex items-center cursor-pointer">
                           <input
@@ -1246,13 +1271,40 @@ export default function AdminPage() {
                           <span className="text-lg font-medium text-gray-700">Casual</span>
                         </label>
                       </div>
-                      <button 
-                        onClick={handleGenerateAIBrand}
-                        disabled={isGenerating}
-                        className="bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isGenerating ? 'Generating...' : 'Generate Brand'}
-                      </button>
+                      
+                      {/* Quantity Input */}
+                      <div className="flex items-center gap-4">
+                        <label className="text-lg font-medium text-gray-700">Quantity:</label>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max="10" 
+                          value={aiBrandQuantity}
+                          onChange={(e) => setAiBrandQuantity(e.target.value)}
+                          placeholder="Enter quantity (1-10)"
+                          className="w-32 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                        />
+                        <span className="text-sm text-gray-500">Each brand will be completely unique</span>
+                      </div>
+                      
+                      {/* Generate Button */}
+                      <div className="flex justify-center">
+                        <button 
+                          onClick={handleGenerateAIBrand}
+                          disabled={isGenerating}
+                          className="bg-indigo-600 text-white px-8 py-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isGenerating ? `Generating ${aiBrandQuantity} Brands...` : `Generate ${aiBrandQuantity || 'X'} Brands`}
+                        </button>
+                      </div>
+                      
+                      {/* Progress Indicator */}
+                      {isGenerating && (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                          <p className="mt-2 text-gray-600">Generating unique brands...</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

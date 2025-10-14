@@ -81,7 +81,7 @@ export default function RootLayout({
                   <path d="M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9.75 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                 </svg>
               </Link>
-              <Link href="#" className="inline-flex items-center rounded-md border border-gray-300 bg-transparent px-4 py-2 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50">
+              <Link href="#" className="inline-flex items-center rounded-md border border-gray-500 bg-transparent px-4 py-2 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50">
                 Login
               </Link>
             </div>

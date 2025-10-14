@@ -90,8 +90,8 @@ export default function BrandsPage() {
               )}
               
               {/* Brand icon */}
-              <div className="absolute top-4 left-4">
-                <div className="w-20 h-20 bg-white/60 backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute top-6 left-4">
+                <div className="w-20 h-20 bg-white backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
                   <Image 
                     src={brand.icon} 
                     alt={brand.name} 
