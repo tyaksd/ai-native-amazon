@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getBrands, Brand } from '@/lib/data'
 
 interface PostData {
@@ -193,9 +194,11 @@ export default function SNSPage() {
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                               {brand.icon ? (
-                                <img
+                                <Image
                                   src={brand.icon}
                                   alt={`${brand.name} logo`}
+                                  width={32}
+                                  height={32}
                                   className="w-full h-full object-cover rounded-full"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
@@ -230,9 +233,11 @@ export default function SNSPage() {
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                       {postData.selectedBrand.icon ? (
-                        <img
+                        <Image
                           src={postData.selectedBrand.icon}
                           alt={`${postData.selectedBrand.name} logo`}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover rounded-full"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;

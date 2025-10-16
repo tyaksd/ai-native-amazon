@@ -11,28 +11,28 @@ export interface Sora2VideoRequest {
 /**
  * 画像を動画サイズにリサイズ（Sharpライブラリを使用）
  */
-async function resizeImageToVideoSize(imageBuffer: ArrayBuffer, videoSize: string): Promise<Blob> {
-  const [width, height] = videoSize.split('x').map(Number);
-  
-  try {
-    // Sharpライブラリを使用してリサイズ
-    const sharp = (await import('sharp')).default;
-    const resizedBuffer = await sharp(Buffer.from(imageBuffer))
-      .resize(width, height, { 
-        fit: 'inside', // 全体を保持してリサイズ
-        withoutEnlargement: true // 拡大はしない
-      })
-      .png()
-      .toBuffer();
-    
-    console.log(`画像をリサイズしました: ${width}x${height}`);
-    return new Blob([new Uint8Array(resizedBuffer)], { type: 'image/png' });
-  } catch (error) {
-    console.error('Sharp resize failed, using original image:', error);
-    // Sharpが利用できない場合は元の画像を使用
-    return new Blob([imageBuffer], { type: 'image/png' });
-  }
-}
+// async function resizeImageToVideoSize(imageBuffer: ArrayBuffer, videoSize: string): Promise<Blob> {
+//   const [width, height] = videoSize.split('x').map(Number);
+//   
+//   try {
+//     // Sharpライブラリを使用してリサイズ
+//     const sharp = (await import('sharp')).default;
+//     const resizedBuffer = await sharp(Buffer.from(imageBuffer))
+//       .resize(width, height, { 
+//         fit: 'inside', // 全体を保持してリサイズ
+//         withoutEnlargement: true // 拡大はしない
+//       })
+//       .png()
+//       .toBuffer();
+//     
+//     console.log(`画像をリサイズしました: ${width}x${height}`);
+//     return new Blob([new Uint8Array(resizedBuffer)], { type: 'image/png' });
+//   } catch (error) {
+//     console.error('Sharp resize failed, using original image:', error);
+//     // Sharpが利用できない場合は元の画像を使用
+//     return new Blob([imageBuffer], { type: 'image/png' });
+//   }
+// }
 
 /**
  * 画像を指定されたサイズに正確にリサイズする関数（Sora2 API要件対応）
@@ -337,7 +337,7 @@ export async function generateBrandVideo(
     });
 
     // 映像プロンプトを生成（アスペクト比に応じて処理を分ける）
-    const isVerticalVideo = params.resolution === '720x1280';
+    // const isVerticalVideo = params.resolution === '720x1280';
     
     // background_imageの説明は使用しない（moderation回避）
     const backgroundDescription = undefined;

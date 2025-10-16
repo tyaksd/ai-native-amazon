@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
+// Define Cloudinary upload result type
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  format: string;
+  width: number;
+  height: number;
+  bytes: number;
+}
+
 // Cloudinary設定
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -45,12 +55,12 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          secure_url: (result as any).secure_url,
-          public_id: (result as any).public_id,
-          format: (result as any).format,
-          width: (result as any).width,
-          height: (result as any).height,
-          bytes: (result as any).bytes
+          secure_url: (result as CloudinaryUploadResult).secure_url,
+          public_id: (result as CloudinaryUploadResult).public_id,
+          format: (result as CloudinaryUploadResult).format,
+          width: (result as CloudinaryUploadResult).width,
+          height: (result as CloudinaryUploadResult).height,
+          bytes: (result as CloudinaryUploadResult).bytes
         });
       } else if (body.url) {
         // URLからのアップロード
@@ -114,12 +124,12 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        url: (result as any).secure_url,
-        public_id: (result as any).public_id,
-        format: (result as any).format,
-        width: (result as any).width,
-        height: (result as any).height,
-        bytes: (result as any).bytes
+        url: (result as CloudinaryUploadResult).secure_url,
+        public_id: (result as CloudinaryUploadResult).public_id,
+        format: (result as CloudinaryUploadResult).format,
+        width: (result as CloudinaryUploadResult).width,
+        height: (result as CloudinaryUploadResult).height,
+        bytes: (result as CloudinaryUploadResult).bytes
       });
     }
 

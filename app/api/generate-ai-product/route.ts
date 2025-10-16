@@ -192,8 +192,8 @@ Return ONLY the product name:`
 
 // デザイン要素から商品名のキーワードを抽出
 function extractNameKeywordsFromDesignElements(
-  designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  designStyle: string | undefined
+  _designElements: ReturnType<typeof extractDesignElementsFromDescription>,
+  _designStyle: string | undefined
 ): string {
   const keywords: string[] = []
   
@@ -552,10 +552,10 @@ function generateImageSpecificPrompt(
     ? 'feminine, elegant, flattering silhouette, fitted cut'
     : 'unisex, versatile, inclusive silhouette, universal fit'
 
-  const styleContext = designStyle ? `Primary design approach: ${designStyle}` : ''
+  // const styleContext = designStyle ? `Primary design approach: ${designStyle}` : ''
 
   // デザインの詳細説明を生成
-  const detailedDesignDescription = generateDesignElementsDescription(designElements, brandConcept, targetAudience)
+  // const detailedDesignDescription = generateDesignElementsDescription(designElements, brandConcept, targetAudience)
 
   // ユニークネスを高めるためのランダム要素（より多様性を追加）
   const uniquenessElements = [

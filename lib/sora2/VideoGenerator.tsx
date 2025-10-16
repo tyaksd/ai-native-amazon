@@ -1,10 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Loader2, Play, Download, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import Image from 'next/image';
+import { Loader2, Play, Download, RefreshCw, CheckCircle } from 'lucide-react';
 
 // Button component (simple implementation)
-const Button = ({ children, onClick, variant = 'default', className = '', ...props }: any) => {
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'default' | 'secondary' | 'destructive';
+  className?: string;
+  [key: string]: any;
+}
+
+const Button = ({ children, onClick, variant = 'default', className = '', ...props }: ButtonProps) => {
   const baseClasses = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors";
   const variantClasses = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
@@ -241,10 +250,10 @@ export default function VideoGenerator({
   };
 
   // 生成された映像をデータベースに保存（オプション）
-  const saveVideoToDatabase = async (jobId: string, videoUrl: string) => {
-    // Cloudinaryを使用しない場合は、必要に応じて実装
-    console.log('Video URL available for download:', videoUrl);
-  };
+  // const saveVideoToDatabase = async (jobId: string, videoUrl: string) => {
+  //   // Cloudinaryを使用しない場合は、必要に応じて実装
+  //   console.log('Video URL available for download:', videoUrl);
+  // };
 
   // 映像をダウンロード
   const downloadVideo = () => {
@@ -317,9 +326,11 @@ export default function VideoGenerator({
         {backgroundImage && (
           <div className="space-y-4">
             <div className="relative">
-              <img
+              <Image
                 src={backgroundImage}
                 alt={`${brandName} background`}
+                width={400}
+                height={192}
                 className="w-full h-48 object-cover rounded-lg shadow-lg"
               />
               <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm">

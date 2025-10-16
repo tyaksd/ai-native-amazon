@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateVideoWithSora2, checkVideoGenerationStatus } from '../../../lib/sora2/sora2-video-generator';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('Starting timeout-protected video generation...');
     

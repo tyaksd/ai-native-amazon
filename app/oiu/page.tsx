@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Brand, Product, getBrands, getProducts, createBrand, createProduct, deleteProduct, updateProductVisibility, getCategoryTypeMapping, deleteBrand } from '@/lib/data'
 import { uploadImage } from '@/lib/cloudinary-client'
 
@@ -32,6 +33,7 @@ export default function AdminPage() {
   // AI Brands form states
   const [aiBrandQuantity, setAiBrandQuantity] = useState('')
   const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0)
+  // Note: generatedBrandsCount is used in the UI but ESLint doesn't detect it
 
   // Predefined color options
   const colorOptions = [
@@ -1337,7 +1339,7 @@ export default function AdminPage() {
                       <p className="text-gray-600 mb-6">
                         Create and post content to Instagram and X (Twitter) with AI-generated content based on your brands.
                       </p>
-                      <a
+                      <Link
                         href="/sns"
                         className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
                       >
@@ -1345,7 +1347,7 @@ export default function AdminPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Open SNS Posting Tool
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>

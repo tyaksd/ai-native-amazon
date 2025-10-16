@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getBrands, Brand } from '@/lib/data'
 
 interface PostData {
@@ -54,12 +55,12 @@ export default function SNSPage() {
     }
   }, [brandSearch, brands])
 
-  const handleInputChange = (field: keyof PostData, value: string) => {
-    setPostData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
+  // const handleInputChange = (field: keyof PostData, value: string) => {
+  //   setPostData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }))
+  // }
 
   const handleBrandSelect = (brand: Brand) => {
     setPostData(prev => ({
@@ -140,11 +141,11 @@ export default function SNSPage() {
   }
 
   // Convert godship.io to clickable link with brand UUID
-  const formatContentWithLinks = (content: string) => {
-    if (!postData.selectedBrand) return content
-    
-    return content.replace(/godship\.io/g, `[godship.io](https://godship.io/${postData.selectedBrand.id})`)
-  }
+  // const formatContentWithLinks = (content: string) => {
+  //   if (!postData.selectedBrand) return content
+  //   
+  //   return content.replace(/godship\.io/g, `[godship.io](https://godship.io/${postData.selectedBrand.id})`)
+  // }
 
   // Render content with clickable links
   const renderContentWithLinks = (content: string, platform?: string) => {
@@ -250,9 +251,11 @@ export default function SNSPage() {
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                               {brand.icon ? (
-                                <img
+                                <Image
                                   src={brand.icon}
                                   alt={`${brand.name} logo`}
+                                  width={32}
+                                  height={32}
                                   className="w-full h-full object-cover rounded-full"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
@@ -287,9 +290,11 @@ export default function SNSPage() {
                   <div className="flex items-center mb-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                       {postData.selectedBrand.icon ? (
-                        <img
+                        <Image
                           src={postData.selectedBrand.icon}
                           alt={`${postData.selectedBrand.name} logo`}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover rounded-full"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -311,9 +316,11 @@ export default function SNSPage() {
                   {postData.selectedBrand.background_image && (
                     <div className="mt-3">
                       <div className="text-sm font-medium text-gray-700 mb-2">Brand Image:</div>
-                      <img
+                      <Image
                         src={postData.selectedBrand.background_image}
                         alt={`${postData.selectedBrand.name} background image`}
+                        width={400}
+                        height={192}
                         className="w-full h-48 object-cover rounded-lg border border-gray-200"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;

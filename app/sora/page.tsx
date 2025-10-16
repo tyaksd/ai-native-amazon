@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import VideoGenerator from '@/lib/sora2/VideoGenerator';
 // UI components removed - using native HTML and Tailwind CSS
-import { Loader2, Play, Video, Image as ImageIcon, Search, AlertCircle } from 'lucide-react';
+import { Loader2, Play, Video, Image as ImageIcon, Search } from 'lucide-react';
 
 interface Brand {
   id: string;
@@ -136,9 +137,11 @@ export default function SoraPage() {
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                         {brand.icon ? (
-                          <img
+                          <Image
                             src={brand.icon}
                             alt={brand.name}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -181,7 +184,7 @@ export default function SoraPage() {
                 {filteredBrands.length === 0 && searchQuery && (
                   <div className="text-center py-8">
                     <Search className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600">No brands found matching "{searchQuery}"</p>
+                    <p className="text-gray-600">No brands found matching &quot;{searchQuery}&quot;</p>
                     <button
                       onClick={() => setSearchQuery('')}
                       className="text-blue-600 hover:text-blue-800 text-sm mt-2"
