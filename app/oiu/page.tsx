@@ -34,6 +34,7 @@ export default function AdminPage() {
   const [aiBrandQuantity, setAiBrandQuantity] = useState('')
   const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0)
   // Note: generatedBrandsCount is used in the UI but ESLint doesn't detect it
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
   // Predefined color options
   const colorOptions = [

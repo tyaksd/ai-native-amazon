@@ -635,47 +635,47 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 }
 
 // デザイン要素の詳細説明を生成する関数
-function generateDesignElementsDescription(
-  designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  brandConcept: string,
-  targetAudience: string
-): string {
-  const { mood, style, graphics, aesthetics, layout, brandIdentity } = designElements
+// function generateDesignElementsDescription(
+//   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
+//   brandConcept: string,
+//   targetAudience: string
+// ): string {
+//   const { mood, style, graphics, aesthetics, layout, brandIdentity } = designElements
 
-  // ムード・雰囲気の詳細説明
-  const moodDescription = generateMoodDescription(mood, brandConcept)
-  
-  // デザインスタイルの詳細説明
-  const styleDescription = generateStyleDescription(style, targetAudience)
-  
-  // グラフィック要素の詳細説明
-  const graphicsDescription = generateGraphicsDescription(graphics, brandIdentity)
-  
-  // 色・質感の詳細説明
-  const aestheticsDescription = generateAestheticsDescription(aesthetics, mood)
-  
-  // レイアウト・構成の詳細説明
-  const layoutDescription = generateLayoutDescription(layout, style)
+//   // ムード・雰囲気の詳細説明
+//   const moodDescription = generateMoodDescription(mood, brandConcept)
+//   
+//   // デザインスタイルの詳細説明
+//   const styleDescription = generateStyleDescription(style, targetAudience)
+//   
+//   // グラフィック要素の詳細説明
+//   const graphicsDescription = generateGraphicsDescription(graphics, brandIdentity)
+//   
+//   // 色・質感の詳細説明
+//   const aestheticsDescription = generateAestheticsDescription(aesthetics, mood)
+//   
+//   // レイアウト・構成の詳細説明
+//   const layoutDescription = generateLayoutDescription(layout, style)
 
-  return `
-## Mood & Energy
-${moodDescription}
+//   return `
+// ## Mood & Energy
+// ${moodDescription}
 
-## Design Style & Approach
-${styleDescription}
+// ## Design Style & Approach
+// ${styleDescription}
 
-## Graphic Elements & Visual Components
-${graphicsDescription}
+// ## Graphic Elements & Visual Components
+// ${graphicsDescription}
 
-## Color Palette & Aesthetics
-${aestheticsDescription}
+// ## Color Palette & Aesthetics
+// ${aestheticsDescription}
 
-## Layout & Composition
-${layoutDescription}
+// ## Layout & Composition
+// ${layoutDescription}
 
-## Brand Character Integration
-The design must authentically represent ${brandIdentity} while embodying the core concept: "${brandConcept}". Every visual element should speak directly to ${targetAudience} and create an immediate emotional connection that reflects the brand's unique voice and vision.`
-}
+// ## Brand Character Integration
+// The design must authentically represent ${brandIdentity} while embodying the core concept: "${brandConcept}". Every visual element should speak directly to ${targetAudience} and create an immediate emotional connection that reflects the brand's unique voice and vision.`
+// }
 
 // ムード・雰囲気の詳細説明を生成
 function generateMoodDescription(mood: string, brandConcept: string): string {

@@ -10,7 +10,7 @@ interface ButtonProps {
   onClick?: () => void;
   variant?: 'default' | 'secondary' | 'destructive';
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const Button = ({ children, onClick, variant = 'default', className = '', ...props }: ButtonProps) => {

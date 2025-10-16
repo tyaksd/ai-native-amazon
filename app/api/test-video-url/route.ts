@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { checkVideoGenerationStatus } from '../../../lib/sora2/sora2-video-generator';
 
 export async function POST() {

@@ -74,8 +74,6 @@ export default function SNSPage() {
     setShowBrandDropdown(false)
   }
 
-
-
   const generateContent = async () => {
     if (!postData.selectedBrand) {
       alert('Please select a brand first')
@@ -127,7 +125,6 @@ export default function SNSPage() {
       alert('Failed to copy to clipboard')
     }
   }
-
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true)
@@ -335,7 +332,6 @@ export default function SNSPage() {
               )}
             </div>
 
-
             {/* Generated Content Display */}
             {showGeneratedContent && (generatedContent.instagram || generatedContent.x) && (
               <div className="space-y-4">
@@ -386,7 +382,6 @@ export default function SNSPage() {
                 )}
               </div>
             )}
-
 
             {/* Media Input */}
             <div>
@@ -512,99 +507,8 @@ export default function SNSPage() {
                   )}
                 </div>
               )}
-
-              {/* URL Input - Hidden */}
-              {/* 
-              <div>
-                <label htmlFor="mediaUrl" className="block text-sm font-medium text-gray-600 mb-2">
-                  Or enter Media URL
-                </label>
-                
-                {postData.selectedBrand?.background_image && (
-                  <div className="mb-2 space-y-2">
-                    <div className="p-2 bg-blue-50 border border-blue-200 rounded-md">
-                      <div className="flex items-center text-sm text-blue-800">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {postData.selectedBrand.name}'s brand image (preview only - not included in posts)
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                      <div className="text-sm font-medium text-gray-700 mb-2">Brand Image Preview:</div>
-                      <img
-                        src={postData.selectedBrand.background_image}
-                        alt={`${postData.selectedBrand.name} background image`}
-                        className="max-w-full h-48 object-cover rounded border"
-                      />
-                      <div className="mt-3 space-y-2">
-                        <div className="text-xs text-gray-500">
-                          This image is for reference only and will not be posted to social media
-                        </div>
-                        <div className="text-xs">
-                          <div className="font-medium text-gray-600 mb-1">Image URL:</div>
-                          <div className="p-2 bg-white border border-gray-200 rounded text-xs text-gray-700 break-all">
-                            {postData.selectedBrand.background_image}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="flex space-x-2">
-                  <input
-                    type="url"
-                    id="mediaUrl"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="https://example.com/image.jpg or https://example.com/video.mp4"
-                    value={postData.imageUrl || postData.videoUrl}
-                    onChange={(e) => {
-                      const url = e.target.value
-                      if (url.includes('.jpg') || url.includes('.jpeg') || url.includes('.png') || url.includes('.gif') || url.includes('.webp')) {
-                        setPostData(prev => ({ ...prev, imageUrl: url, videoUrl: '' }))
-                      } else if (url.includes('.mp4') || url.includes('.mov') || url.includes('.avi') || url.includes('.webm')) {
-                        setPostData(prev => ({ ...prev, videoUrl: url, imageUrl: '' }))
-                      } else {
-                        setPostData(prev => ({ ...prev, imageUrl: url, videoUrl: '' }))
-                      }
-                    }}
-                  />
-                  {(postData.imageUrl || postData.videoUrl) && (
-                    <button
-                      onClick={() => {
-                        setPostData(prev => ({ ...prev, imageUrl: '', videoUrl: '' }))
-                      }}
-                      className="px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 border border-red-200 rounded-md transition-colors"
-                      title="Clear URL"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-              */}
-
-            {/* Scheduled Time Input - Hidden */}
-            {/* 
-            <div>
-              <label htmlFor="scheduledTime" className="block text-sm font-medium text-gray-700 mb-2">
-                Schedule Post (Optional)
-              </label>
-              <input
-                type="datetime-local"
-                id="scheduledTime"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={postData.scheduledTime}
-                onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
-              />
             </div>
-            */}
           </div>
-
 
           {/* Instructions */}
           <div className="mt-8 p-4 bg-gray-50 rounded-lg">

@@ -55,12 +55,12 @@ export default function SNSPage() {
     }
   }, [brandSearch, brands])
 
-  const handleInputChange = (field: keyof PostData, value: string) => {
-    setPostData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
+  // const handleInputChange = (field: keyof PostData, value: string) => {
+  //   setPostData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }))
+  // }
 
   const handleBrandSelect = (brand: Brand) => {
     setPostData(prev => ({
