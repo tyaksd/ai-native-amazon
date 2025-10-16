@@ -60,11 +60,47 @@
       ],
       "timestamp": "2025-10-12T22:24:27.694848",
       "date": "2025-10-12"
+    },
+    {
+      "tweet_id": "1978691090531451054",
+      "text": "🧪 Test post from Python script - 2025-10-16 14:14:52",
+      "media_paths": [],
+      "timestamp": "2025-10-16T14:14:53.013524",
+      "date": "2025-10-16"
+    },
+    {
+      "tweet_id": "1978691164309246311",
+      "text": "🧪 Test post from Python script - 2025-10-16 14:15:10",
+      "media_paths": [],
+      "timestamp": "2025-10-16T14:15:10.587533",
+      "date": "2025-10-16"
+    },
+    {
+      "tweet_id": "1978691242298118485",
+      "text": "🧪 Test post from Python script - 2025-10-16 14:15:28",
+      "media_paths": [],
+      "timestamp": "2025-10-16T14:15:29.196586",
+      "date": "2025-10-16"
+    },
+    {
+      "tweet_id": "1978691493671182518",
+      "text": "🧪 Test post from Python script - 2025-10-16 14:16:28",
+      "media_paths": [],
+      "timestamp": "2025-10-16T14:16:29.194914",
+      "date": "2025-10-16"
+    },
+    {
+      "tweet_id": "1978691734097048035",
+      "text": "🧪 Test post from Python script - 2025-10-16 14:17:25",
+      "media_paths": [],
+      "timestamp": "2025-10-16T14:17:26.452377",
+      "date": "2025-10-16"
     }
   ],
   "daily_count": {
     "2025-10-10": 1,
-    "2025-10-12": 6
+    "2025-10-12": 6,
+    "2025-10-16": 5
   },
-  "last_post_time": "2025-10-12T22:24:27.694848"
+  "last_post_time": "2025-10-16T14:17:26.452377"
 }

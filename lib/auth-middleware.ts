@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
-const PROTECTED_ROUTES = ['/oiu', '/lkj']
+const PROTECTED_ROUTES = ['/oiu', '/lkj', '/sora', '/sns'] // sora2 and sns re-enabled
 
 export function isProtectedRoute(pathname: string): boolean {
   return PROTECTED_ROUTES.some(route => pathname.startsWith(route))

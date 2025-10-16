@@ -72,12 +72,30 @@ class XAutoPoster:
         """Load configuration file"""
         load_dotenv(self.config_path)
         
+        # Validate required credentials
+        api_key = os.getenv("X_API_KEY", "")
+        api_secret = os.getenv("X_API_SECRET", "")
+        access_token = os.getenv("X_ACCESS_TOKEN", "")
+        access_token_secret = os.getenv("X_ACCESS_TOKEN_SECRET", "")
+        bearer_token = os.getenv("X_BEARER_TOKEN", "")
+        
+        # Log credential validation
+        logger.info(f"API Key present: {bool(api_key)}")
+        logger.info(f"API Secret present: {bool(api_secret)}")
+        logger.info(f"Access Token present: {bool(access_token)}")
+        logger.info(f"Access Token Secret present: {bool(access_token_secret)}")
+        logger.info(f"Bearer Token present: {bool(bearer_token)}")
+        
+        if not all([api_key, api_secret, access_token, access_token_secret]):
+            logger.error("Missing required X API credentials")
+            raise ValueError("Missing required X API credentials")
+        
         return XConfig(
-            api_key=os.getenv("X_API_KEY", ""),
-            api_secret=os.getenv("X_API_SECRET", ""),
-            access_token=os.getenv("X_ACCESS_TOKEN", ""),
-            access_token_secret=os.getenv("X_ACCESS_TOKEN_SECRET", ""),
-            bearer_token=os.getenv("X_BEARER_TOKEN", ""),
+            api_key=api_key,
+            api_secret=api_secret,
+            access_token=access_token,
+            access_token_secret=access_token_secret,
+            bearer_token=bearer_token,
             post_interval_minutes=int(os.getenv("POST_INTERVAL_MINUTES", "60")),
             max_posts_per_day=int(os.getenv("MAX_POSTS_PER_DAY", "15")),
             post_start_hour=int(os.getenv("POST_START_HOUR", "9")),
@@ -89,6 +107,10 @@ class XAutoPoster:
     def _create_client(self) -> tweepy.Client:
         """Create X API client"""
         try:
+            # Log configuration (without sensitive data)
+            logger.info(f"Creating X API client with API Key: {self.config.api_key[:10]}...")
+            logger.info(f"Access Token: {self.config.access_token[:10]}...")
+            
             client = tweepy.Client(
                 bearer_token=self.config.bearer_token,
                 consumer_key=self.config.api_key,
@@ -98,13 +120,23 @@ class XAutoPoster:
                 wait_on_rate_limit=True
             )
             
-            # Authentication test
-            user = client.get_me()
-            logger.info(f"X API authentication successful: @{user.data.username}")
+            # Try a simple API call to verify authentication
+            try:
+                # Get user info to verify authentication
+                user = client.get_me()
+                if user and user.data:
+                    logger.info(f"X API authentication successful: @{user.data.username}")
+                else:
+                    logger.warning("X API authentication test failed - proceeding anyway")
+            except Exception as auth_error:
+                logger.warning(f"X API authentication test failed: {auth_error}")
+                logger.info("Proceeding with client creation anyway...")
+            
+            logger.info("X API client created successfully")
             return client
             
         except Exception as e:
-            logger.error(f"X API authentication error: {e}")
+            logger.error(f"X API client creation error: {e}")
             raise
     
     def _create_api_v1(self) -> tweepy.API:
@@ -324,6 +356,62 @@ class XAutoPoster:
         except Exception as e:
             logger.error(f"Post error: {e}")
             return None
+
+    def post_with_content(self, text: str, image_url: Optional[str] = None, video_url: Optional[str] = None) -> Optional[str]:
+        """Post with provided content (bypasses time restrictions)"""
+        try:
+            logger.info("Posting with provided content...")
+            
+            # Character count check
+            if len(text) > 280:
+                logger.error(f"Post text is too long: {len(text)} characters")
+                return None
+            
+            # Add media URLs to text if provided
+            post_text = text
+            if video_url and video_url.strip():
+                logger.info(f"Adding video URL to post: {video_url}")
+                post_text = f"{text}\n\n{video_url}"
+            elif image_url and image_url.strip():
+                logger.info(f"Adding image URL to post: {image_url}")
+                post_text = f"{text}\n\n{image_url}"
+            
+            # Try to post with the client
+            try:
+                response = self.client.create_tweet(text=post_text)
+                tweet_id = response.data['id']
+                logger.info(f"Immediate post successful: {tweet_id}")
+                
+                # Update history
+                self._update_post_history(tweet_id, post_text)
+                
+                return tweet_id
+            except Exception as e:
+                logger.error(f"Failed to post with client: {e}")
+                
+                # Try with API v1.1 as fallback
+                try:
+                    logger.info("Trying fallback with API v1.1...")
+                    if self.api_v1:
+                        # Use API v1.1 for posting
+                        status = self.api_v1.update_status(status=post_text)
+                        tweet_id = status.id_str
+                        logger.info(f"Fallback post successful: {tweet_id}")
+                        
+                        # Update history
+                        self._update_post_history(tweet_id, post_text)
+                        
+                        return tweet_id
+                    else:
+                        logger.error("API v1.1 not available")
+                        return None
+                except Exception as fallback_error:
+                    logger.error(f"Fallback posting also failed: {fallback_error}")
+                    return None
+            
+        except Exception as e:
+            logger.error(f"Error posting with content: {e}")
+            return None
     
     def post_with_media(self, text: str, media_paths: List[str], reply_to_tweet_id: Optional[str] = None) -> Optional[str]:
         """Post with media"""
@@ -440,24 +528,49 @@ def main():
         # Initialize X auto posting system
         poster = XAutoPoster()
         
-        # Display user information
-        user_info = poster.get_user_info()
-        if user_info:
-            logger.info(f"User: @{user_info['username']} ({user_info['name']})")
-            logger.info(f"Followers: {user_info['followers_count']:,}")
+        # Check if we have environment variables for immediate posting
+        post_text = os.getenv('POST_TEXT')
+        post_image_url = os.getenv('POST_IMAGE_URL')
+        post_video_url = os.getenv('POST_VIDEO_URL')
         
-        # Display post statistics
-        stats = poster.get_post_stats()
-        logger.info(f"Today's posts: {stats['daily_posts']}/{stats['max_daily_posts']}")
-        
-        # Test post (based on configuration)
-        test_text = "X auto posting system test post 🚀"
-        tweet_id = poster.post_text(test_text)
-        
-        if tweet_id:
-            logger.info(f"Test post successful: https://twitter.com/i/web/status/{tweet_id}")
+        if post_text:
+            # Immediate posting with provided content
+            logger.info("Posting with provided content...")
+            logger.info(f"Text: {post_text[:100]}...")
+            logger.info(f"Image URL: {post_image_url}")
+            logger.info(f"Video URL: {post_video_url}")
+            
+            # Post with provided content
+            tweet_id = poster.post_with_content(
+                text=post_text,
+                image_url=post_image_url,
+                video_url=post_video_url
+            )
+            
+            if tweet_id:
+                logger.info(f"Immediate post successful: https://twitter.com/i/web/status/{tweet_id}")
+            else:
+                logger.error("Immediate post failed")
         else:
-            logger.info("Test post skipped (restricted or outside hours)")
+            # Regular scheduled posting
+            # Display user information
+            user_info = poster.get_user_info()
+            if user_info:
+                logger.info(f"User: @{user_info['username']} ({user_info['name']})")
+                logger.info(f"Followers: {user_info['followers_count']:,}")
+            
+            # Display post statistics
+            stats = poster.get_post_stats()
+            logger.info(f"Today's posts: {stats['daily_posts']}/{stats['max_daily_posts']}")
+            
+            # Test post (based on configuration)
+            test_text = "X auto posting system test post 🚀"
+            tweet_id = poster.post_text(test_text)
+            
+            if tweet_id:
+                logger.info(f"Test post successful: https://twitter.com/i/web/status/{tweet_id}")
+            else:
+                logger.info("Test post skipped (restricted or outside hours)")
         
     except Exception as e:
         logger.error(f"Main process error: {e}")

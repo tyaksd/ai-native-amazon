@@ -37,6 +37,32 @@ export default function Home() {
     return arr
   }
 
+  // 商品の色に基づいてランダムに画像を選択する関数
+  const getRandomImageForProduct = (product: Product): string | null => {
+    if (!product.images || product.images.length === 0) {
+      return null
+    }
+    
+    if (!product.colors || product.colors.length === 0) {
+      // 色情報がない場合は最初の画像を返す
+      return product.images[0]
+    }
+    
+    // 利用可能な色から最初の2つを取得（black, white, red, blue の例では black, white）
+    const availableColors = product.colors.slice(0, 2)
+    
+    // 利用可能な色からランダムに1つ選択
+    const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)]
+    
+    // 選択された色に対応する画像のインデックスを取得
+    const colorIndex = product.colors.indexOf(randomColor)
+    
+    // 色のインデックスに対応する画像を返す（画像が足りない場合は循環）
+    const imageIndex = colorIndex % product.images.length
+    
+    return product.images[imageIndex]
+  }
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -374,15 +400,18 @@ export default function Home() {
                           )
                         }}
                       >
-                        {p.images && p.images.length > 0 ? (
-                          <div className="aspect-square overflow-hidden">
-                            <Image src={p.images[0]} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500">No image</span>
-                          </div>
-                        )}
+                        {(() => {
+                          const randomImage = getRandomImageForProduct(p)
+                          return randomImage ? (
+                            <div className="aspect-square overflow-hidden">
+                              <Image src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500">No image</span>
+                            </div>
+                          )
+                        })()}
                       </Link>
                       <div className="absolute top-2 right-2 z-10">
                         <FavoriteButton 
@@ -573,15 +602,18 @@ export default function Home() {
                       )
                     }}
                   >
-                    {p.images && p.images.length > 0 ? (
-                      <div className="aspect-square overflow-hidden">
-                        <Image src={p.images[0]} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500">No image</span>
-                      </div>
-                    )}
+                    {(() => {
+                      const randomImage = getRandomImageForProduct(p)
+                      return randomImage ? (
+                        <div className="aspect-square overflow-hidden">
+                          <Image src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="aspect-square bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500">No image</span>
+                        </div>
+                      )
+                    })()}
                   </Link>
                   <div className="absolute top-2 right-2 z-10">
                     <FavoriteButton 

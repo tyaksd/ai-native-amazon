@@ -16,7 +16,7 @@ export default function LegalNoticePage() {
             <span className="font-medium">Website:</span> godship.io
           </p>
         </section>
-
+x
         <section>
           <h2 className="text-xl font-semibold text-gray-900">Pricing & Fees</h2>
           <ul className="mt-3 list-disc list-inside leading-7 space-y-1">

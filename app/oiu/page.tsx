@@ -10,7 +10,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands'>('ai-brands')
+  const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands' | 'sns'>('ai-brands')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
   const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'Brand deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
@@ -548,6 +548,16 @@ export default function AdminPage() {
                 }`}
               >
                 AI Products
+              </button>
+              <button
+                onClick={() => setActiveTab('sns')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'sns'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                SNS Posting
               </button>
               <button
                 onClick={() => setActiveTab('brands')}
@@ -1305,6 +1315,37 @@ export default function AdminPage() {
                           <p className="mt-2 text-gray-600">Generating unique brands...</p>
                         </div>
                       )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'sns' && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border border-green-200">
+                  <h2 className="text-lg font-semibold mb-6 text-green-800">📱 SNS Posting</h2>
+                  
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="text-center">
+                      <div className="mb-4">
+                        <svg className="w-16 h-16 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-4 text-gray-900">Social Media Posting</h3>
+                      <p className="text-gray-600 mb-6">
+                        Create and post content to Instagram and X (Twitter) with AI-generated content based on your brands.
+                      </p>
+                      <a
+                        href="/sns"
+                        className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Open SNS Posting Tool
+                      </a>
                     </div>
                   </div>
                 </div>

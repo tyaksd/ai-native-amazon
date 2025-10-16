@@ -158,6 +158,45 @@ class InstagramGraphAPI:
         response = self._make_request('POST', endpoint, data=data)
         return response.get('id')
     
+    def upload_video_to_container(self, video_url: str, caption: str) -> str:
+        """
+        Upload video to container (REELS)
+        
+        Args:
+            video_url: Video URL
+            caption: Caption
+            
+        Returns:
+            str: Container ID
+        """
+        endpoint = f"{self.instagram_account_id}/media"
+        data = {
+            'media_type': 'REELS',
+            'video_url': video_url,
+            'caption': caption
+        }
+        
+        response = self._make_request('POST', endpoint, data=data)
+        return response.get('id')
+    
+    def check_media_status(self, container_id: str) -> str:
+        """
+        Check media container status
+        
+        Args:
+            container_id: Container ID
+            
+        Returns:
+            str: Media status
+        """
+        endpoint = f"{container_id}"
+        params = {
+            'fields': 'status_code'
+        }
+        
+        response = self._make_request('GET', endpoint, params=params)
+        return response.get('status_code', 'UNKNOWN')
+    
     def publish_media(self, container_id: str) -> str:
         """
         Publish media

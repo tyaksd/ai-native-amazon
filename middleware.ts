@@ -26,5 +26,7 @@ export const config = {
   matcher: [
     '/oiu/:path*',
     '/lkj/:path*',
+    '/sora/:path*', // sora2 re-enabled
+    '/sns/:path*', // sns re-enabled
   ]
 }

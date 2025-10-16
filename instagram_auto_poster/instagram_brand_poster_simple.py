@@ -8,6 +8,7 @@ import os
 import json
 import random
 import requests
+import time
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -192,6 +193,90 @@ Discover more unique designs at godship.io
         
         logger.info(f"Post history updated: {today} ({self.post_history['daily_count'][today]}/3)")
     
+    def post_with_content(self, text: str, image_url: Optional[str] = None, video_url: Optional[str] = None) -> Optional[str]:
+        """Post with provided content (bypasses time restrictions)"""
+        try:
+            logger.info("Posting with provided content...")
+            
+            # Create media container
+            media_id = None
+            if image_url and image_url.strip():
+                logger.info("Posting with image...")
+                media_id = self.api.upload_photo_to_container(
+                    image_url=image_url,
+                    caption=text
+                )
+            elif video_url and video_url.strip():
+                logger.info("Posting with video...")
+                media_id = self.api.upload_video_to_container(
+                    video_url=video_url,
+                    caption=text
+                )
+            else:
+                # Text-only post - use placeholder image
+                logger.info("Posting text-only with placeholder image...")
+                placeholder_image = "https://via.placeholder.com/1080x1080/000000/FFFFFF?text=Text+Post"
+                media_id = self.api.upload_photo_to_container(
+                    image_url=placeholder_image,
+                    caption=text
+                )
+            
+            if not media_id:
+                logger.error("Failed to create media container")
+                return None
+            
+            # Wait for container to be ready (Instagram needs time to process)
+            logger.info("Waiting for container to be ready...")
+            time.sleep(20)  # Wait 20 seconds for container registration
+            
+            # Check media status before publishing
+            max_attempts = 10
+            for attempt in range(max_attempts):
+                status = self.api.check_media_status(media_id)
+                logger.info(f"Media status check {attempt + 1}/{max_attempts}: {status}")
+                
+                if status == 'FINISHED':
+                    logger.info("Media is ready for publishing")
+                    break
+                elif status == 'ERROR':
+                    logger.error("Media processing failed")
+                    return None
+                else:
+                    logger.info(f"Media not ready yet (status: {status}), waiting 5 seconds...")
+                    time.sleep(5)
+            else:
+                logger.error("Media did not become ready after maximum attempts")
+                return None
+            
+            # Publish the media
+            published_id = self.api.publish_media(media_id)
+            
+            if published_id:
+                # Update post history
+                now = datetime.now()
+                today = now.strftime("%Y-%m-%d")
+                
+                self.post_history["posts"].append({
+                    "id": published_id,
+                    "text": text,
+                    "timestamp": now.isoformat(),
+                    "type": "immediate_post"
+                })
+                
+                self.post_history["daily_count"][today] = self.post_history.get("daily_count", {}).get(today, 0) + 1
+                self.post_history["last_post_time"] = now.isoformat()
+                self._save_post_history()
+                
+                logger.info(f"Immediate post successful: {published_id}")
+                return published_id
+            else:
+                logger.error("Failed to publish media")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error posting with content: {e}")
+            return None
+
     def get_post_stats(self) -> Dict[str, Any]:
         """Get post statistics"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -212,17 +297,42 @@ def main():
         # Initialize Instagram brand posting system
         poster = InstagramBrandPosterSimple()
         
-        # Display post statistics
-        stats = poster.get_post_stats()
-        logger.info(f"Today's posts: {stats['daily_posts']}/{stats['max_daily_posts']}")
+        # Check if we have environment variables for immediate posting
+        post_text = os.getenv('POST_TEXT')
+        post_image_url = os.getenv('POST_IMAGE_URL')
+        post_video_url = os.getenv('POST_VIDEO_URL')
         
-        # Post random brand
-        media_id = poster.post_brand_single()
-        
-        if media_id:
-            logger.info(f"Brand post successful: {media_id}")
+        if post_text:
+            # Immediate posting with provided content
+            logger.info("Posting with provided content...")
+            logger.info(f"Text: {post_text[:100]}...")
+            logger.info(f"Image URL: {post_image_url}")
+            logger.info(f"Video URL: {post_video_url}")
+            
+            # Post with provided content
+            media_id = poster.post_with_content(
+                text=post_text,
+                image_url=post_image_url,
+                video_url=post_video_url
+            )
+            
+            if media_id:
+                logger.info(f"Immediate post successful: {media_id}")
+            else:
+                logger.error("Immediate post failed")
         else:
-            logger.info("Brand post skipped (restricted or limit reached)")
+            # Regular scheduled posting
+            # Display post statistics
+            stats = poster.get_post_stats()
+            logger.info(f"Today's posts: {stats['daily_posts']}/{stats['max_daily_posts']}")
+            
+            # Post random brand
+            media_id = poster.post_brand_single()
+            
+            if media_id:
+                logger.info(f"Brand post successful: {media_id}")
+            else:
+                logger.info("Brand post skipped (restricted or limit reached)")
         
     except Exception as e:
         logger.error(f"Main process error: {e}")
