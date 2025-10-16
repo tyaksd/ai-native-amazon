@@ -14,7 +14,7 @@ export async function POST() {
     const videoRequest = {
       prompt: testPrompt,
       model: 'sora-2',
-      seconds: '4',
+      seconds: 4,
       size: '1280x720'
     };
 

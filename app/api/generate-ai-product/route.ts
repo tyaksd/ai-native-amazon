@@ -105,7 +105,7 @@ async function generateProductNameFromDescription(
   usedNames: string[] = []
 ): Promise<string> {
   // デザイン要素から商品名のキーワードを抽出（デザイン要素がない場合は空文字）
-  const nameKeywords = designElements ? extractNameKeywordsFromDesignElements(designElements, designStyle) : ''
+  const nameKeywords = designElements ? 'design keywords' : ''
   
   const usedNamesText = usedNames.length > 0 ? `\n# AVOID THESE USED NAMES:\n${usedNames.join(', ')}\n` : ''
   
@@ -191,18 +191,18 @@ Return ONLY the product name:`
 }
 
 // デザイン要素から商品名のキーワードを抽出
-function extractNameKeywordsFromDesignElements(
-  _designElements: ReturnType<typeof extractDesignElementsFromDescription>,
-  _designStyle: string | undefined
-): string {
-  const keywords: string[] = []
-  
-  
-  // 重複を除去して上位10個を返す
-  const uniqueKeywords = [...new Set(keywords)].slice(0, 10)
-  
-  return `Key design keywords: ${uniqueKeywords.join(', ')}`
-}
+// function extractNameKeywordsFromDesignElements(
+//   _designElements: ReturnType<typeof extractDesignElementsFromDescription>,
+//   _designStyle: string | undefined
+// ): string {
+//   const keywords: string[] = []
+//   
+//   
+//   // 重複を除去して上位10個を返す
+//   const uniqueKeywords = [...new Set(keywords)].slice(0, 10)
+
+//   return `Key design keywords: ${uniqueKeywords.join(', ')}`
+// }
 
 // フォールバック商品名生成（3-5文字、重複回避）
 function generateFallbackProductName(
@@ -678,135 +678,77 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 // }
 
 // ムード・雰囲気の詳細説明を生成
-function generateMoodDescription(mood: string, brandConcept: string): string {
-  const moodKeywords = mood.split(', ').filter(Boolean)
+// function generateMoodDescription(mood: string, brandConcept: string): string {
+//   const moodKeywords = mood.split(', ').filter(Boolean)
   
-  if (moodKeywords.includes('bold, high-impact')) {
-    return `Create a design with commanding presence and strong visual impact. Use bold, assertive elements that demand attention while maintaining sophistication. The design should feel powerful and confident, with strong contrast and dynamic energy that reflects "${brandConcept}". Incorporate elements that convey strength and determination.`
-  }
-  
-  if (moodKeywords.includes('clean, minimalist')) {
-    return `Design with elegant simplicity and refined restraint. Focus on essential elements with plenty of breathing room and negative space. Every line and shape should have purpose, creating a sophisticated and timeless aesthetic that embodies "${brandConcept}". Use subtle details and precise execution.`
-  }
-  
-  if (moodKeywords.includes('edgy, urban')) {
-    return `Create a design with raw, authentic street energy and urban grit. Incorporate distressed textures, bold typography, and dynamic compositions that reflect the underground culture. The design should feel rebellious and authentic, with elements that speak to street culture and "${brandConcept}".`
-  }
-  
-  if (moodKeywords.includes('elegant, sophisticated')) {
-    return `Design with refined elegance and sophisticated aesthetics. Use graceful curves, balanced proportions, and premium visual elements that convey luxury and quality. The design should feel polished and upscale, perfectly representing "${brandConcept}" with understated confidence.`
-  }
-  
-  if (moodKeywords.includes('vibrant, energetic')) {
-    return `Create a design bursting with life and dynamic energy. Use bright, saturated colors and dynamic compositions that convey movement and excitement. The design should feel alive and engaging, with elements that capture the youthful spirit and "${brandConcept}".`
-  }
-  
-  if (moodKeywords.includes('mysterious, nocturnal')) {
-    return `Design with dark, enigmatic energy and nocturnal atmosphere. Use deep contrasts, shadowy elements, and mysterious visual metaphors that evoke night-time adventures. The design should feel intriguing and alluring, embodying the secretive nature of "${brandConcept}".`
-  }
-  
-  return `Create a design that embodies ${mood} while authentically representing the brand concept: "${brandConcept}". The visual mood should immediately communicate the intended emotional response and brand personality.`
-}
+//   if (moodKeywords.includes('bold, high-impact')) {
+//     return `Create a design with commanding presence and strong visual impact. Use bold, assertive elements that demand attention while maintaining sophistication. The design should feel powerful and confident, with strong contrast and dynamic energy that reflects "${brandConcept}". Incorporate elements that convey strength and determination.`
+//   }
+//   
+//   if (moodKeywords.includes('clean, minimalist')) {
+//     return `Design with elegant simplicity and refined restraint. Focus on essential elements with plenty of breathing room and negative space. Every line and shape should have purpose, creating a sophisticated and timeless aesthetic that embodies "${brandConcept}". Use subtle details and precise execution.`
+//   }
+//   
+//   if (moodKeywords.includes('edgy, urban')) {
+//     return `Create a design with raw, authentic street energy and urban grit. Incorporate distressed textures, bold typography, and dynamic compositions that reflect the underground culture. The design should feel rebellious and authentic, with elements that speak to street culture and "${brandConcept}".`
+//   }
+//   
+//   if (moodKeywords.includes('elegant, sophisticated')) {
+//     return `Design with refined elegance and sophisticated aesthetics. Use graceful curves, balanced proportions, and premium visual elements that convey luxury and quality. The design should feel polished and upscale, perfectly representing "${brandConcept}" with understated confidence.`
+//   }
+//   
+//   if (moodKeywords.includes('vibrant, energetic')) {
+//     return `Create a design bursting with life and dynamic energy. Use bright, saturated colors and dynamic compositions that convey movement and excitement. The design should feel alive and engaging, with elements that capture the youthful spirit and "${brandConcept}".`
+//   }
+//   
+//   if (moodKeywords.includes('mysterious, nocturnal')) {
+//     return `Design with dark, enigmatic energy and nocturnal atmosphere. Use deep contrasts, shadowy elements, and mysterious visual metaphors that evoke night-time adventures. The design should feel intriguing and alluring, embodying the secretive nature of "${brandConcept}".`
+//   }
+//   
+//   return `Create a design that embodies ${mood} while authentically representing the brand concept: "${brandConcept}". The visual mood should immediately communicate the intended emotional response and brand personality.`
+// }
 
 // デザインスタイルの詳細説明を生成
-function generateStyleDescription(style: string, targetAudience: string): string {
-  const styleKeywords = style.split(', ').filter(Boolean)
+// function generateStyleDescription(style: string, targetAudience: string): string {
+//   const styleKeywords = style.split(', ').filter(Boolean)
   
-  if (styleKeywords.includes('geometric, structured')) {
-    return `Use precise geometric forms, clean lines, and structured compositions. Incorporate angular shapes, grid-based layouts, and mathematical precision. The design should feel organized and systematic, with elements that create visual harmony through geometric relationships. Perfect for ${targetAudience} who appreciate order and clarity.`
-  }
-  
-  if (styleKeywords.includes('organic, flowing')) {
-    return `Design with natural, flowing forms and organic shapes. Use curved lines, fluid compositions, and nature-inspired elements. The design should feel alive and dynamic, with elements that suggest growth and movement. Ideal for ${targetAudience} who value authenticity and natural beauty.`
-  }
-  
-  if (styleKeywords.includes('vintage, retro')) {
-    return `Create a design with nostalgic charm and retro aesthetics. Use classic typography, vintage color palettes, and period-appropriate visual elements. The design should feel timeless and familiar, with elements that evoke specific eras and cultural moments. Perfect for ${targetAudience} who appreciate heritage and tradition.`
-  }
-  
-  if (styleKeywords.includes('modern, contemporary')) {
-    return `Design with cutting-edge aesthetics and contemporary visual language. Use current design trends, innovative compositions, and forward-thinking elements. The design should feel fresh and relevant, with elements that speak to today's culture and ${targetAudience}'s modern sensibilities.`
-  }
-  
-  if (styleKeywords.includes('abstract, artistic')) {
-    return `Create a design with artistic expression and abstract visual language. Use non-representational forms, creative interpretations, and expressive elements. The design should feel like wearable art, with elements that encourage interpretation and emotional response from ${targetAudience}.`
-  }
-  
-  return `Design with ${style} approach, ensuring the visual style resonates with ${targetAudience} and creates an immediate visual impact that reflects the brand's unique character.`
-}
+//   if (styleKeywords.includes('geometric, structured')) {
+//     return `Use precise geometric forms, clean lines, and structured compositions. Incorporate angular shapes, grid-based layouts, and mathematical precision. The design should feel organized and systematic, with elements that create visual harmony through geometric relationships. Perfect for ${targetAudience} who appreciate order and clarity.`
+//   }
+//   
+//   if (styleKeywords.includes('organic, flowing')) {
+//     return `Design with natural, flowing forms and organic shapes. Use curved lines, fluid compositions, and nature-inspired elements. The design should feel alive and dynamic, with elements that suggest growth and movement. Ideal for ${targetAudience} who value authenticity and natural beauty.`
+//   }
+//   
+//   if (styleKeywords.includes('vintage, retro')) {
+//     return `Create a design with nostalgic charm and retro aesthetics. Use classic typography, vintage color palettes, and period-appropriate visual elements. The design should feel timeless and familiar, with elements that evoke specific eras and cultural moments. Perfect for ${targetAudience} who appreciate heritage and tradition.`
+//   }
+//   
+//   if (styleKeywords.includes('modern, contemporary')) {
+//     return `Design with cutting-edge aesthetics and contemporary visual language. Use current design trends, innovative compositions, and forward-thinking elements. The design should feel fresh and relevant, with elements that speak to today's culture and ${targetAudience}'s modern sensibilities.`
+//   }
+//   
+//   if (styleKeywords.includes('abstract, artistic')) {
+//     return `Create a design with artistic expression and abstract visual language. Use non-representational forms, creative interpretations, and expressive elements. The design should feel like wearable art, with elements that encourage interpretation and emotional response from ${targetAudience}.`
+//   }
+//   
+//   return `Design with ${style} approach, ensuring the visual style resonates with ${targetAudience} and creates an immediate visual impact that reflects the brand's unique character.`
+// }
 
 // グラフィック要素の詳細説明を生成
-function generateGraphicsDescription(graphics: string, brandIdentity: string): string {
-  const graphicsKeywords = graphics.split(', ').filter(Boolean)
+// function generateGraphicsDescription(graphics: string, brandIdentity: string): string {
+//   const graphicsKeywords = graphics.split(', ').filter(Boolean)
   
-  if (graphicsKeywords.includes('typography, lettering')) {
-    return `Incorporate sophisticated typography and custom lettering that becomes the primary design element. Use carefully selected fonts, custom letterforms, or hand-drawn text that reflects ${brandIdentity}. The typography should be legible yet artistic, with proper spacing and hierarchy that creates visual impact.`
-  }
-  
-  if (graphicsKeywords.includes('logo, emblem')) {
-    return `Feature a distinctive logo or emblem as the central design element. Create a memorable symbol that represents the brand's identity and ${brandIdentity}. The logo should be scalable, recognizable, and work effectively at various sizes. Consider incorporating subtle details that reward closer inspection.`
-  }
-  
-  if (graphicsKeywords.includes('pattern, motif')) {
-    return `Develop a repeating pattern or distinctive motif that creates visual rhythm and brand recognition. The pattern should be carefully balanced, not overwhelming, and work well across different garment colors. Consider how the motif relates to ${brandIdentity} and creates a cohesive brand experience.`
-  }
-  
-  if (graphicsKeywords.includes('illustration, artwork')) {
-    return `Create original artwork or illustration that tells a visual story. The artwork should be detailed enough to be interesting but simple enough to work as a garment print. Consider how the illustration relates to ${brandIdentity} and creates an emotional connection with the wearer.`
-  }
-  
-  if (graphicsKeywords.includes('geometric shapes')) {
-    return `Use geometric shapes and forms to create a structured, modern design. Combine different shapes, sizes, and orientations to create visual interest. The geometric elements should work together harmoniously and reflect the brand's ${brandIdentity} through their arrangement and relationships.`
-  }
-  
-  return `Incorporate ${graphics} elements that authentically represent ${brandIdentity} and create a distinctive visual identity that sets the brand apart from competitors.`
-}
 
 // 色・質感の詳細説明を生成
-function generateAestheticsDescription(aesthetics: string, mood: string): string {
-  const aestheticsKeywords = aesthetics.split(', ').filter(Boolean)
+// function generateAestheticsDescription(aesthetics: string, mood: string): string {
+//   const aestheticsKeywords = aesthetics.split(', ').filter(Boolean)
   
-  if (aestheticsKeywords.includes('monochrome, high contrast')) {
-    return `Use a monochrome color palette with strong contrast between light and dark elements. Create visual impact through contrast rather than color, ensuring the design works effectively in black and white. The high contrast should enhance the ${mood} mood and create a bold, striking appearance.`
-  }
-  
-  if (aestheticsKeywords.includes('colorful, vibrant')) {
-    return `Employ a vibrant, colorful palette that creates energy and excitement. Use saturated colors that work well together and create visual harmony. The colors should enhance the ${mood} mood and create an optimistic, lively feeling that draws attention and creates positive associations.`
-  }
-  
-  if (aestheticsKeywords.includes('muted, subtle')) {
-    return `Use a refined, muted color palette with subtle variations and sophisticated tones. Create depth through color relationships rather than high contrast. The subtle colors should enhance the ${mood} mood and create an understated, elegant appearance that appeals to sophisticated tastes.`
-  }
-  
-  if (aestheticsKeywords.includes('textured, distressed')) {
-    return `Incorporate textured elements and distressed effects that add character and authenticity. Use visual textures that suggest wear, age, or artistic treatment. The textures should enhance the ${mood} mood and create a sense of history, authenticity, and artistic value.`
-  }
-  
-  return `Create a color and aesthetic approach that uses ${aesthetics} to enhance the ${mood} mood and create a distinctive visual character that reflects the brand's unique identity.`
-}
 
 // レイアウト・構成の詳細説明を生成
-function generateLayoutDescription(layout: string, style: string): string {
-  const layoutKeywords = layout.split(', ').filter(Boolean)
+// function generateLayoutDescription(layout: string, style: string): string {
+//   const layoutKeywords = layout.split(', ').filter(Boolean)
   
-  if (layoutKeywords.includes('centered, focal point')) {
-    return `Create a centered composition with a strong focal point that draws immediate attention. Use symmetrical balance and clear hierarchy to guide the viewer's eye. The centered approach should work with the ${style} style to create a commanding presence and professional appearance.`
-  }
-  
-  if (layoutKeywords.includes('asymmetric, dynamic')) {
-    return `Design with asymmetric balance and dynamic composition that creates visual tension and movement. Use off-center elements and diagonal lines to create energy and interest. The asymmetric approach should enhance the ${style} style and create a modern, engaging appearance.`
-  }
-  
-  if (layoutKeywords.includes('balanced, symmetrical')) {
-    return `Create a balanced, symmetrical composition that feels stable and harmonious. Use equal visual weight on both sides and clear geometric relationships. The balanced approach should complement the ${style} style and create a sense of order and professionalism.`
-  }
-  
-  if (layoutKeywords.includes('negative space, breathing room')) {
-    return `Use generous negative space and breathing room to create a clean, uncluttered appearance. Allow the design to breathe and focus attention on key elements. The spacious approach should enhance the ${style} style and create a sophisticated, minimalist aesthetic.`
-  }
-  
-  return `Create a layout that uses ${layout} principles to enhance the ${style} style and create a composition that effectively communicates the brand's message and visual identity.`
-}
 
 // ----------------------------
 // Image generation (Design First → Apply to Products)

@@ -52,7 +52,7 @@ async function resizeImageToExactSize(imageBuffer: ArrayBuffer, targetWidth: num
     
   console.log(`リサイズ完了: ${targetWidth}x${targetHeight}`);
   
-  return new Blob([resizedBuffer], { type: 'image/png' });
+  return new Blob([new Uint8Array(resizedBuffer)], { type: 'image/png' });
 }
 
 export interface Sora2VideoResponse {

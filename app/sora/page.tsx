@@ -257,7 +257,7 @@ export default function SoraPage() {
                         src={videoUrl}
                         controls
                         className="w-full rounded-lg shadow-lg"
-                        poster={brand?.background_image}
+                        poster={brand?.background_image || undefined}
                       >
                         Your browser does not support the video tag.
                       </video>

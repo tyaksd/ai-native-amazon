@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getBrands, Brand } from '@/lib/data'
 
 interface PostData {
@@ -58,12 +59,12 @@ export default function SNSPage() {
     }
   }, [brandSearch, brands])
 
-  const handleInputChange = (field: keyof PostData, value: string) => {
-    setPostData(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
+  // const handleInputChange = (field: keyof PostData, value: string) => {
+  //   setPostData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }))
+  // }
 
   const handleBrandSelect = (brand: Brand) => {
     setPostData(prev => ({
@@ -272,9 +273,11 @@ export default function SNSPage() {
                         >
                           <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-gray-100">
                             {brand.icon ? (
-                              <img
+                              <Image
                                 src={brand.icon}
                                 alt={`${brand.name} logo`}
+                                width={32}
+                                height={32}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
@@ -306,9 +309,11 @@ export default function SNSPage() {
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden bg-white">
                       {postData.selectedBrand.icon ? (
-                        <img
+                        <Image
                           src={postData.selectedBrand.icon}
                           alt={`${postData.selectedBrand.name} logo`}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
@@ -489,9 +494,11 @@ export default function SNSPage() {
                     <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
                       <div className="text-sm font-medium text-gray-700 mb-2">Preview:</div>
                       {uploadedFile.type.startsWith('image/') ? (
-                        <img
+                        <Image
                           src={uploadedFileUrl}
                           alt="Uploaded image preview"
+                          width={400}
+                          height={192}
                           className="max-w-full h-48 object-cover rounded border"
                         />
                       ) : (

@@ -8,7 +8,7 @@ import { Loader2, Play, Download, RefreshCw, CheckCircle } from 'lucide-react';
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'default' | 'secondary' | 'destructive';
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   className?: string;
   [key: string]: unknown;
 }
@@ -17,6 +17,8 @@ const Button = ({ children, onClick, variant = 'default', className = '', ...pro
   const baseClasses = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors";
   const variantClasses = {
     default: "bg-blue-600 text-white hover:bg-blue-700",
+    secondary: "bg-gray-600 text-white hover:bg-gray-700",
+    destructive: "bg-red-600 text-white hover:bg-red-700",
     outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
   };
   
@@ -442,7 +444,7 @@ export default function VideoGenerator({
                 Download
               </Button>
               <Button 
-                onClick={() => window.open(videoStatus.videoUrl, '_blank')} 
+                onClick={() => videoStatus.videoUrl && window.open(videoStatus.videoUrl, '_blank')} 
                 variant="outline"
               >
                 Open in New Tab

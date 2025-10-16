@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       ...(scheduledTime && { POST_SCHEDULED_TIME: scheduledTime })
     }
     
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       const child = spawn('python3', [pythonPath], {
         env,
         stdio: ['pipe', 'pipe', 'pipe']

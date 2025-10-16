@@ -15,7 +15,7 @@ export async function POST() {
     const testRequest = {
       model: 'sora-2',
       prompt: 'A simple test video of a red ball bouncing on a white background',
-      seconds: '4',
+      seconds: 4,
       size: '1280x720'
     };
 
