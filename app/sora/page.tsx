@@ -25,6 +25,11 @@ export default function SoraPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [generatedVideos, setGeneratedVideos] = useState<{ [brandId: string]: string }>({});
+  
+  // SNS Content Generation states
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<{instagram?: string, x?: string, tiktok?: string}>({});
+  const [showGeneratedContent, setShowGeneratedContent] = useState(false);
 
   useEffect(() => {
     fetchBrands();
@@ -76,6 +81,109 @@ export default function SoraPage() {
     console.log('Video generated for brand:', brandId, videoUrl);
   };
 
+  // SNS Content Generation functions
+  const generateContent = async () => {
+    if (!selectedBrand) {
+      alert('Please select a brand first');
+      return;
+    }
+
+    setIsGeneratingContent(true);
+    setGeneratedContent({});
+    setShowGeneratedContent(false);
+
+    try {
+      // Generate content for both platforms
+      const response = await fetch('/api/generate-sns-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          brandId: selectedBrand.id,
+          platform: 'all'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert(`Error generating content: ${result.error}`);
+        return;
+      }
+
+      // Update generated content
+      setGeneratedContent(result.content);
+      setShowGeneratedContent(true);
+
+    } catch (error) {
+      console.error('Error generating content:', error);
+      alert('Failed to generate content');
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string, platform: string, event?: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Show temporary "copied" message
+      const button = event?.currentTarget as HTMLButtonElement;
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.classList.add('bg-green-500', 'hover:bg-green-600');
+        button.classList.remove('bg-pink-500', 'hover:bg-pink-600', 'bg-blue-500', 'hover:bg-blue-600');
+        
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.classList.remove('bg-green-500', 'hover:bg-green-600');
+          if (platform === 'Instagram') {
+            button.classList.add('bg-pink-500', 'hover:bg-pink-600');
+          } else {
+            button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+          }
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert('Failed to copy to clipboard');
+    }
+  };
+
+  // Render content with clickable links
+  const renderContentWithLinks = (content: string, platform?: string) => {
+    if (!selectedBrand) {
+      return <span className="whitespace-pre-wrap">{content}</span>;
+    }
+    
+    // Different link handling for X (Twitter) vs Instagram
+    const linkPattern = /(godship\.io)/g;
+    const linkUrl = platform === 'X' ? 'https://www.godship.io/brands' : `https://godship.io/${selectedBrand.id}`;
+    
+    const parts = content.split(linkPattern);
+    return (
+      <span className="whitespace-pre-wrap">
+        {parts.map((part, index) => {
+          if (part === 'godship.io') {
+            return (
+              <a
+                key={index}
+                href={linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                {platform === 'X' ? '@https://www.godship.io/brands' : part}
+              </a>
+            );
+          }
+          return part;
+        })}
+      </span>
+    );
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -122,6 +230,23 @@ export default function SoraPage() {
                   </p>
                 )}
               </div>
+
+              {/* Content Generation Button */}
+              {selectedBrand && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Content Generation</h3>
+                  <button
+                    onClick={generateContent}
+                    disabled={isGeneratingContent}
+                    className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    {isGeneratingContent ? 'Generating Content...' : 'Generate SNS Content'}
+                  </button>
+                </div>
+              )}
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {filteredBrands.map((brand) => (
@@ -211,6 +336,65 @@ export default function SoraPage() {
                   </h2>
                 </div>
               </div>
+
+              {/* Generated Content Display */}
+              {showGeneratedContent && (generatedContent.instagram || generatedContent.x) && (
+                <div className="bg-white rounded-lg shadow-lg border">
+                  <div className="p-6 border-b">
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      Generated SNS Content
+                    </h2>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    {generatedContent.instagram && (
+                      <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-pink-800 flex items-center">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                            Instagram
+                          </h4>
+                          <button
+                            onClick={(e) => copyToClipboard(generatedContent.instagram!, 'Instagram', e)}
+                            className="px-3 py-1 bg-pink-500 text-white text-sm rounded hover:bg-pink-600 transition-colors"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                        <div className="bg-white p-3 rounded border text-sm text-gray-700">
+                          {renderContentWithLinks(generatedContent.instagram!, 'Instagram')}
+                        </div>
+                      </div>
+                    )}
+
+                    {generatedContent.x && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-blue-800 flex items-center">
+                            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            X (Twitter)
+                          </h4>
+                          <button
+                            onClick={(e) => copyToClipboard(generatedContent.x!, 'X', e)}
+                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                        <div className="bg-white p-3 rounded border text-sm text-gray-700">
+                          {renderContentWithLinks(generatedContent.x!, 'X')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* VideoGeneratorコンポーネント */}
               <VideoGenerator
