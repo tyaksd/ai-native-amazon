@@ -7,12 +7,25 @@ import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@cl
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [clerkLoaded, setClerkLoaded] = useState(false);
   const pathname = usePathname();
 
   // Close menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  // Check if Clerk is loaded
+  useEffect(() => {
+    const checkClerk = () => {
+      if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Clerk) {
+        setClerkLoaded(true);
+      } else {
+        setTimeout(checkClerk, 100);
+      }
+    };
+    checkClerk();
+  }, []);
 
   return (
     <>
@@ -49,41 +62,77 @@ export default function MobileMenu() {
                 </svg>
               </button>
               
-              {/* Authentication Section */}
+              {/* Navigation Links */}
               <div className="pt-8 bg-white">
-                <SignedOut>
-                  <div className="space-y-3">
-                    <SignInButton mode="modal">
-                      <button className="w-full inline-flex items-center justify-center rounded-md border border-gray-500 bg-transparent px-4 py-3 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
-                        Login
-                      </button>
-                    </SignInButton>
-                    <SignUpButton mode="modal">
-                      <button className="w-full inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-3 text-sm text-white hover:bg-gray-800 transition-colors">
-                        Sign Up
-                      </button>
-                    </SignUpButton>
-                  </div>
-                </SignedOut>
-                <SignedIn>
-                  <div className="space-y-4">
-                    <Link href="/user" className="flex items-center gap-3 p-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      User Profile
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Navigation</h3>
+                  <nav className="space-y-2">
+                    <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                      Home
                     </Link>
-                    <div className="flex items-center justify-center">
-                      <UserButton 
-                        appearance={{
-                          elements: {
-                            avatarBox: "w-10 h-10"
-                          }
-                        }}
-                      />
+                    <Link href="/brands" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                      Brands
+                    </Link>
+                    <Link href="/favorites" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                      Favorites
+                    </Link>
+                    <Link href="/cart" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                      Cart
+                    </Link>
+                    <Link href="/about" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                      About
+                    </Link>
+                  </nav>
+                </div>
+                
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Account</h3>
+                </div>
+                {!clerkLoaded ? (
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-500 text-center py-4">
+                      Loading authentication...
                     </div>
                   </div>
-                </SignedIn>
+                ) : (
+                  <>
+                    <SignedOut>
+                      <div className="space-y-3">
+                        <SignInButton mode="modal">
+                          <button className="w-full inline-flex items-center justify-center rounded-md border border-gray-500 bg-transparent px-4 py-3 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
+                            Login
+                          </button>
+                        </SignInButton>
+                        <SignUpButton mode="modal">
+                          <button className="w-full inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-3 text-sm text-white hover:bg-gray-800 transition-colors">
+                            Sign Up
+                          </button>
+                        </SignUpButton>
+                      </div>
+                    </SignedOut>
+                  </>
+                )}
+                {clerkLoaded && (
+                  <SignedIn>
+                    <div className="space-y-4">
+                      <Link href="/user" className="flex items-center gap-3 p-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        User Profile
+                      </Link>
+                      <div className="flex items-center justify-center">
+                        <UserButton 
+                          appearance={{
+                            elements: {
+                              avatarBox: "w-10 h-10"
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </SignedIn>
+                )}
               </div>
             </div>
           </div>
