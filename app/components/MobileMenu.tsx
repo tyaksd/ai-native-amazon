@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export default function MobileMenu() {
@@ -62,32 +61,8 @@ export default function MobileMenu() {
                 </svg>
               </button>
               
-              {/* Navigation Links */}
+              {/* Authentication Section */}
               <div className="pt-8 bg-white">
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Navigation</h3>
-                  <nav className="space-y-2">
-                    <Link href="/" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      Home
-                    </Link>
-                    <Link href="/brands" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      Brands
-                    </Link>
-                    <Link href="/favorites" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      Favorites
-                    </Link>
-                    <Link href="/cart" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      Cart
-                    </Link>
-                    <Link href="/about" className="block px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                      About
-                    </Link>
-                  </nav>
-                </div>
-                
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Account</h3>
-                </div>
                 {!clerkLoaded ? (
                   <div className="space-y-3">
                     <div className="text-sm text-gray-500 text-center py-4">
@@ -114,22 +89,14 @@ export default function MobileMenu() {
                 )}
                 {clerkLoaded && (
                   <SignedIn>
-                    <div className="space-y-4">
-                      <Link href="/user" className="flex items-center gap-3 p-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        User Profile
-                      </Link>
-                      <div className="flex items-center justify-center">
-                        <UserButton 
-                          appearance={{
-                            elements: {
-                              avatarBox: "w-10 h-10"
-                            }
-                          }}
-                        />
-                      </div>
+                    <div className="flex items-center justify-center">
+                      <UserButton 
+                        appearance={{
+                          elements: {
+                            avatarBox: "w-10 h-10"
+                          }
+                        }}
+                      />
                     </div>
                   </SignedIn>
                 )}
