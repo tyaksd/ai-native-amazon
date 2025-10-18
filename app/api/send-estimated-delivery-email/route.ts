@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       productId: orderItem.product_id
     })
 
-    const customerEmail = (orderItem.orders as any)?.customer_email
+    const customerEmail = (orderItem.orders as { customer_email: string }[])?.[0]?.customer_email
     console.log('📧 Customer email:', customerEmail)
     console.log('📧 Orders data:', orderItem.orders)
     

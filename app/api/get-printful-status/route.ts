@@ -23,7 +23,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
   const ordersData = await response.json()
   
   // Find order with matching external_id
-  let matchingOrder = ordersData.result.find((order: any) => 
+  let matchingOrder = ordersData.result.find((order: { external_id: string }) => 
     order.external_id === externalId
   )
 
@@ -38,7 +38,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
 
     if (response.ok) {
       const moreOrdersData = await response.json()
-      matchingOrder = moreOrdersData.result.find((order: any) => 
+      matchingOrder = moreOrdersData.result.find((order: { external_id: string }) => 
         order.external_id === externalId
       )
     }

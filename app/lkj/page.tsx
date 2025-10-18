@@ -68,6 +68,7 @@ export default function AdminOrdersPage() {
   const [showYesterdayOnly, setShowYesterdayOnly] = useState(false)
   const [problemTexts, setProblemTexts] = useState<Record<string, string>>({})
   const [showSavedBanner, setShowSavedBanner] = useState(false)
+  const [showEmailSentBanner, setShowEmailSentBanner] = useState(false)
 
   useEffect(() => {
     // ページの先頭にスクロール
@@ -395,6 +396,11 @@ export default function AdminOrdersPage() {
 
           if (response.ok) {
             console.log('✅ Estimated delivery email sent successfully')
+            // Show email sent banner
+            setShowEmailSentBanner(true)
+            setTimeout(() => {
+              setShowEmailSentBanner(false)
+            }, 3000) // Hide after 3 seconds
           } else {
             const errorData = await response.json()
             console.error('❌ Failed to send estimated delivery email:', {
@@ -475,6 +481,18 @@ export default function AdminOrdersPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
             <span className="font-medium">Saved!</span>
+          </div>
+        </div>
+      )}
+
+      {/* Email Sent Banner */}
+      {showEmailSentBanner && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span className="font-medium">Email Sent!</span>
           </div>
         </div>
       )}
@@ -748,7 +766,7 @@ export default function AdminOrdersPage() {
                       ) && (
                         <div className="bg-blue-50 p-3 rounded-lg">
                           <h4 className="font-medium text-gray-900 mb-2">Printful Information</h4>
-                          {order.order_items.map((item, index) => (
+                          {order.order_items.map((item) => (
                             <div key={item.id} className="mb-3 last:mb-0">
                               <div className="text-sm font-medium text-gray-700 mb-1">
                                 {item.product_name} ({item.size}, {item.color})

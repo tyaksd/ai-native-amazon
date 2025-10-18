@@ -39,13 +39,24 @@ interface OrderItem {
   } | null
 }
 
+interface OrderItemWithProducts extends OrderItem {
+  products?: {
+    id: string
+    name: string
+    images: string[]
+  } | null
+}
+
 interface Order {
   id: string
   total_amount: number
   currency: string
   is_paid: boolean
   created_at: string
-  order_items: OrderItem[]
+  order_items: Record<string, unknown>[]
+  shipping_address?: Record<string, unknown>
+  billing_address?: Record<string, unknown>
+  billing_name?: string
 }
 
 export default async function UserPage() {
@@ -225,7 +236,7 @@ export default async function UserPage() {
   }
 
   // Function to determine order status based on Printful data
-  const getOrderStatus = (order: any) => {
+  const getOrderStatus = (order: Order) => {
     if (!order.is_paid) {
       return { status: 'Pending Payment', color: 'bg-yellow-100 text-yellow-800' };
     }
@@ -235,20 +246,20 @@ export default async function UserPage() {
     }
     
     // Check Printful status for each item
-    const hasPrintfulData = order.order_items.some((item: any) => item.printful_status);
-    const hasErrors = order.order_items.some((item: any) => item.printful_error_message);
-    const allFulfilled = order.order_items.every((item: any) => 
+    const hasPrintfulData = order.order_items.some((item: Record<string, unknown>) => item.printful_status);
+    const hasErrors = order.order_items.some((item: Record<string, unknown>) => item.printful_error_message);
+    const allFulfilled = order.order_items.every((item: Record<string, unknown>) => 
       item.printful_fulfillment_status === 'delivered' || 
       item.printful_fulfillment_status === 'shipped'
     );
-    const anyShipped = order.order_items.some((item: any) => 
+    const anyShipped = order.order_items.some((item: Record<string, unknown>) => 
       item.printful_fulfillment_status === 'shipped' || 
       item.printful_fulfillment_status === 'delivered'
     );
-    const anyInProcess = order.order_items.some((item: any) => 
+    const anyInProcess = order.order_items.some((item: Record<string, unknown>) => 
       item.printful_status === 'inprocess'
     );
-    const anyPending = order.order_items.some((item: any) => 
+    const anyPending = order.order_items.some((item: Record<string, unknown>) => 
       item.printful_status === 'pending'
     );
     
@@ -277,7 +288,7 @@ export default async function UserPage() {
     }
     
     // Check if all items have been sent to Printful
-    const allItemsSentToPrintful = order.order_items.every((item: any) => item.i_sent_to_printful === true);
+    const allItemsSentToPrintful = order.order_items.every((item: Record<string, unknown>) => item.i_sent_to_printful === true);
     
     if (allItemsSentToPrintful) {
       return { status: 'Sent to Printful', color: 'bg-indigo-100 text-indigo-800' };
@@ -286,18 +297,37 @@ export default async function UserPage() {
     return { status: 'Processing', color: 'bg-blue-100 text-blue-800' };
   };
 
-  // Function to get estimated delivery date - Only manual input
-  const getEstimatedDelivery = (order: any) => {
+  // Function to get estimated delivery date - Only manual input (unused but kept for potential future use)
+  /*
+  const getEstimatedDelivery = (order: Order) => {
     if (!order.order_items || order.order_items.length === 0) return null;
     
     // Only check for manual estimated delivery
-    const manualDelivery = order.order_items.find((item: any) => item.manual_estimated_delivery);
+    const manualDelivery = order.order_items.find((item: OrderItem) => item.manual_estimated_delivery);
     if (manualDelivery) {
       return manualDelivery.manual_estimated_delivery;
     }
     
     // No fallback to Printful data - only show manual input
     return null;
+  };
+  */
+
+  // Helper function to check if item has product images
+  const hasProductImages = (item: Record<string, unknown>) => {
+    const products = item.products as Record<string, unknown> | null;
+    return products && 
+           'images' in products &&
+           Array.isArray(products.images) &&
+           products.images.length > 0;
+  };
+
+  const getProductImage = (item: Record<string, unknown>) => {
+    if (hasProductImages(item)) {
+      const products = item.products as Record<string, unknown>;
+      return (products.images as string[])[0];
+    }
+    return '/placeholder-image.svg';
   };
 
   return (
@@ -374,10 +404,10 @@ export default async function UserPage() {
                       {/* Product Details */}
                       <div className="flex items-start gap-3">
                         {/* Product Image */}
-                        {(item as any).products?.images && (item as any).products.images.length > 0 ? (
+                        {hasProductImages(item) ? (
                           <div className="flex-shrink-0">
                             <Image
-                              src={(item as any).products.images[0]}
+                              src={getProductImage(item)}
                               alt={item.product_name}
                               width={60}
                               height={60}
@@ -510,7 +540,7 @@ export default async function UserPage() {
                       <div className="flex items-start space-x-4 mb-4">
                         <div className="flex-shrink-0">
                           <Image
-                            src={(item as any).products?.images?.[0] || '/placeholder-image.svg'}
+                            src={getProductImage(item)}
                             alt={item.product_name}
                             width={60}
                             height={60}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface AccountInfoProps {
   userId: string
@@ -37,9 +38,11 @@ export default function AccountInfo({ userId, user }: AccountInfoProps) {
       >
         <div className="flex items-center space-x-4">
           {user.imageUrl && (
-            <img 
+            <Image 
               src={user.imageUrl} 
               alt="Profile" 
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-full object-cover"
             />
           )}

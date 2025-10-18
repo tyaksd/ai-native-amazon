@@ -37,7 +37,22 @@ export default function AdminPage() {
 
   // Batch Products form states
   const [isBatchGenerating, setIsBatchGenerating] = useState(false)
-  const [batchResult, setBatchResult] = useState<any>(null)
+  
+  interface BatchResult {
+    totalProcessed: number;
+    generatedProducts: Array<{
+      brand: string;
+      product: string;
+      color: string;
+      price: string;
+    }>;
+    errors: Array<{
+      brand: string;
+      error: string;
+    }>;
+  }
+  
+  const [batchResult, setBatchResult] = useState<BatchResult | null>(null)
 
   // Predefined color options
   const colorOptions = [
@@ -1389,7 +1404,7 @@ export default function AdminPage() {
                       </div>
                       <h3 className="text-xl font-semibold mb-4 text-gray-900">Generate Products for All Brands</h3>
                       <p className="text-gray-600 mb-6">
-                        Automatically generate one T-shirt product for each brand that doesn't have any products yet. 
+                        Automatically generate one T-shirt product for each brand that doesn&apos;t have any products yet. 
                         Uses the same AI generation flow as the individual product generator, ensuring consistent quality and brand concept reflection.
                       </p>
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -1400,7 +1415,7 @@ export default function AdminPage() {
                           <li>• Generate one T-shirt per brand (quantity: 1)</li>
                           <li>• Use random colors for variety</li>
                           <li>• Apply full AI generation with images and descriptions</li>
-                          <li>• Set category to "Clothing", type to "T-Shirt", gender to "Men"</li>
+                          <li>• Set category to &quot;Clothing&quot;, type to &quot;T-Shirt&quot;, gender to &quot;Men&quot;</li>
                         </ul>
                       </div>
                       
@@ -1418,17 +1433,17 @@ export default function AdminPage() {
                         <h4 className="font-semibold text-gray-800 mb-3">Generation Results:</h4>
                         <div className="text-sm text-gray-600 space-y-2">
                           <p><strong>Total processed:</strong> {batchResult.totalProcessed} brands</p>
-                          <p><strong>Products generated:</strong> {batchResult.generatedProducts.length}</p>
+                          <p><strong>Products generated:</strong> {batchResult.generatedProducts?.length || 0}</p>
                           {batchResult.errors && batchResult.errors.length > 0 && (
                             <p><strong>Errors:</strong> {batchResult.errors.length}</p>
                           )}
                         </div>
                         
-                        {batchResult.generatedProducts.length > 0 && (
+                        {batchResult.generatedProducts?.length > 0 && (
                           <div className="mt-4">
                             <h5 className="font-medium text-gray-800 mb-2">Generated Products:</h5>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
-                              {batchResult.generatedProducts.map((item: any, index: number) => (
+                              {batchResult.generatedProducts.map((item, index: number) => (
                                 <div key={index} className="text-sm bg-white p-2 rounded border">
                                   <span className="font-medium">{item.brand}</span>: {item.product} ({item.color}) - ${item.price}
                                 </div>
@@ -1441,7 +1456,7 @@ export default function AdminPage() {
                           <div className="mt-4">
                             <h5 className="font-medium text-red-800 mb-2">Errors:</h5>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
-                              {batchResult.errors.map((error: any, index: number) => (
+                              {batchResult.errors.map((error, index: number) => (
                                 <div key={index} className="text-sm bg-red-50 p-2 rounded border border-red-200">
                                   <span className="font-medium text-red-800">{error.brand}</span>: {error.error}
                                 </div>

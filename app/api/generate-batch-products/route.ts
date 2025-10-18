@@ -40,7 +40,7 @@ async function generateAIProduct(brandId: string, productType: string, colors: s
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     console.log('Starting batch product generation for brands without products...')
 

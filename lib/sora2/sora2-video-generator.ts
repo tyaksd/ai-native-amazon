@@ -339,7 +339,7 @@ export async function checkVideoGenerationStatus(jobId: string, retryCount: numb
       try {
         const errorData = await statusResponse.json();
         errorMessage = errorData.error?.message || errorData.message || `HTTP ${statusResponse.status}`;
-      } catch (parseError) {
+      } catch (_parseError) {
         errorMessage = `HTTP ${statusResponse.status}: ${statusResponse.statusText}`;
       }
       

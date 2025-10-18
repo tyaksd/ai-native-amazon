@@ -15,10 +15,29 @@ function verifyPrintfulSignature(payload: string, signature: string, secret: str
   )
 }
 
+interface PrintfulData {
+  status?: string;
+  fulfillment_status?: string;
+  tracking_number?: string;
+  shipment_id?: string;
+  shipment_number?: string;
+  shipment?: string;
+  error_message?: string;
+  shipments?: Array<{
+    id?: string;
+    shipment_id?: string;
+    shipment_number?: string;
+    estimated_delivery_date?: string;
+    estimated_delivery_timestamp?: string;
+  }>;
+  estimated_delivery_date?: string;
+  estimated_delivery_timestamp?: string;
+}
+
 // Update order item with Printful status
 async function updateOrderItemStatus(
   externalId: string,
-  printfulData: any
+  printfulData: PrintfulData
 ) {
   console.log(`Updating order item ${externalId} with Printful data:`, JSON.stringify(printfulData, null, 2))
   

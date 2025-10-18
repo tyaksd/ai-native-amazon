@@ -26,7 +26,7 @@ async function getPrintfulOrderWithEstimatedDelivery(externalId: string) {
     const ordersData = await response.json()
     
     // Find order with matching external_id
-    const matchingOrder = ordersData.result.find((order: any) => 
+    const matchingOrder = ordersData.result.find((order: { external_id: string }) => 
       order.external_id === externalId
     )
 
@@ -62,7 +62,6 @@ export async function GET(req: NextRequest) {
     
     // Extract estimated delivery from Printful order
     let estimatedDeliveryDate = null
-    let estimatedDeliveryTimestamp = null
     
     if (printfulOrder) {
       console.log('Printful order data:', JSON.stringify(printfulOrder, null, 2))
@@ -156,7 +155,7 @@ export async function GET(req: NextRequest) {
     
     // Update database with shipment and estimated delivery information
     try {
-      const updateData: any = {
+      const updateData: Record<string, string | null> = {
         printful_shipment_number: shipmentNumber,
         printful_last_updated: new Date().toISOString()
       }

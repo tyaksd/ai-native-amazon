@@ -1,6 +1,5 @@
 'use client'
 
-import Image from "next/image";
 import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from 'react'

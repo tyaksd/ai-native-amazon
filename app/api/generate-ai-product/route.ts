@@ -760,7 +760,7 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 async function compositeDesignOnTshirt(
   plainTshirtUrl: string, 
   designPngUrl: string, 
-  outputName: string
+  _outputName: string
 ): Promise<string> {
   try {
     const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME

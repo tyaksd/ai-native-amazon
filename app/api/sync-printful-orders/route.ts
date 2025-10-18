@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-// Printful API client for fetching order status
+// Printful API client for fetching order status (unused but kept for potential future use)
+/*
 async function getPrintfulOrderStatus(orderId: string) {
   const apiKey = process.env.PRINTFUL_API_KEY
   if (!apiKey) {
@@ -21,11 +22,20 @@ async function getPrintfulOrderStatus(orderId: string) {
 
   return await response.json()
 }
+*/
+
+interface PrintfulOrderData {
+  status?: string;
+  fulfillment_status?: string;
+  tracking_number?: string;
+  shipment_id?: string;
+  error_message?: string;
+}
 
 // Update order item with Printful status
 async function updateOrderItemStatus(
   orderItemId: string, 
-  printfulData: any
+  printfulData: PrintfulOrderData
 ) {
   const { error } = await supabaseAdmin
     .from('order_items')
@@ -53,7 +63,8 @@ async function getOrderItemsToSync() {
       id,
       printful_item_id,
       printful_last_updated,
-      printful_status
+      printful_status,
+      printful_retry_count
     `)
     .not('printful_item_id', 'is', null)
     .or('printful_status.is.null,printful_status.neq.fulfilled')
@@ -87,7 +98,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
   const ordersData = await response.json()
   
   // Find order with matching external_id
-  let matchingOrder = ordersData.result.find((order: any) => 
+  let matchingOrder = ordersData.result.find((order: { external_id: string }) => 
     order.external_id === externalId
   )
 
@@ -102,7 +113,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
 
     if (response.ok) {
       const moreOrdersData = await response.json()
-      matchingOrder = moreOrdersData.result.find((order: any) => 
+      matchingOrder = moreOrdersData.result.find((order: { external_id: string }) => 
         order.external_id === externalId
       )
     }
@@ -115,7 +126,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
   return matchingOrder
 }
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     console.log('=== Starting Printful Order Sync ===')
     
