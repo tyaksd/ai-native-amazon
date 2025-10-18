@@ -1,11 +1,12 @@
-2025-10-16 13:57:08 | INFO | 🚀 Instagram auto scheduler started
-2025-10-16 13:57:08 | INFO | 📅 Posts scheduled every 8 hours
-2025-10-16 13:57:08 | INFO | ⏰ Next posts: 08:00, 16:00, 00:00
-2025-10-16 13:57:08 | INFO | Setting up Instagram auto scheduler...
-2025-10-16 13:57:08 | INFO | 📅 Scheduled Instagram post at 08:00
-2025-10-16 13:57:08 | INFO | 📅 Scheduled Instagram post at 16:00
-2025-10-16 13:57:08 | INFO | 📅 Scheduled Instagram post at 00:00
-2025-10-16 13:57:08 | INFO | ✅ Instagram auto scheduler configured for 3 posts per day
-2025-10-16 16:00:05 | INFO | Starting scheduled Instagram brand post...
-2025-10-16 16:00:05 | ERROR | No brands found
-2025-10-16 16:00:05 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-17 17:13:30 | INFO | Starting scheduled Instagram brand post...
+2025-10-17 17:13:31 | ERROR | No brands found
+2025-10-17 17:13:31 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-18 00:59:52 | INFO | 🔄 Daily Instagram post count reset
+2025-10-18 00:59:52 | INFO | Starting scheduled Instagram brand post...
+2025-10-18 00:59:53 | ERROR | No brands found
+2025-10-18 00:59:53 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-18 08:00:52 | INFO | Starting scheduled Instagram brand post...
+2025-10-18 08:00:54 | WARNING | Not enough products for brand SLOTCHŌ, using available products
+2025-10-18 08:00:54 | INFO | Creating carousel with 2 images for brand: SLOTCHŌ
+2025-10-18 08:00:55 | ERROR | ❌ Instagram brand post failed
+2025-10-18 08:00:55 | ERROR | ❌ Scheduled Instagram post failed

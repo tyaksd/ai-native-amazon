@@ -403,6 +403,10 @@ const billingName =
         lineItems = fetched.data as unknown as Stripe.LineItem[]
       }
 
+      // Get Clerk user ID from metadata
+      const clerkId = session.metadata?.clerk_id || null
+      console.log('Clerk ID from metadata:', clerkId)
+
       // === Order を作成 ===
       console.log('Creating order with data:', {
         stripe_session_id: session.id,
@@ -414,6 +418,7 @@ const billingName =
         shipping_name: shippingName,
         billing_address: billingAddress,
         billing_name: billingName,
+        clerk_id: clerkId,
       })
       
       // Check if order already exists to prevent duplicates
@@ -442,6 +447,7 @@ const billingName =
           shipping_name: shippingName,
           billing_address: billingAddress,
           billing_name: billingName,
+          clerk_id: clerkId, // Include Clerk user ID
         })
         .select()
         .single()
@@ -494,6 +500,7 @@ const billingName =
           quantity: Number(ci.quantity ?? 1),
           size: ci.size ? String(ci.size) : null,
           color: ci.color ? String(ci.color) : null,
+          clerk_id: clerkId, // Include Clerk user ID
         }))
       } else {
         // StripeのLineItemから計算
@@ -513,6 +520,7 @@ const billingName =
             quantity,
             size: metadata?.size ?? null,
             color: metadata?.color ?? null,
+            clerk_id: clerkId, // Include Clerk user ID
           }
         })
       }

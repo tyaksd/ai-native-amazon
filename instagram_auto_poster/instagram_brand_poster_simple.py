@@ -107,17 +107,52 @@ class InstagramBrandPosterSimple:
         return None
     
     def create_instagram_caption(self, brand_name: str, brand_description: str) -> str:
-        """Create Instagram-optimized caption"""
-        # Instagram用のハッシュタグを追加
-        hashtags = f"#Godship #{brand_name} #fashion #streetwear #style #brand #design #clothing #outfit #trendy #fashionista #ootd #instafashion #fashionblogger #styleinspo #fashionista #streetstyle #urbanfashion #contemporary #modernfashion"
+        """Create Instagram-optimized caption with extensive hashtag strategy"""
+        # 大幅に拡張されたハッシュタグ戦略
+        brand_hashtag = brand_name.replace(' ', '').replace('-', '')
         
-        caption = f"""🚀 Introducing {brand_name} from Godship!
+        # 人気ファッションハッシュタグ
+        popular_hashtags = [
+            "#fashion", "#style", "#ootd", "#fashionista", "#styleinspo", 
+            "#fashionblogger", "#instafashion", "#fashiontok", "#stylegoals",
+            "#fashionforward", "#trending", "#viral", "#fashionlover"
+        ]
+        
+        # ニッチハッシュタグ
+        niche_hashtags = [
+            "#streetwear", "#urbanfashion", "#contemporary", "#modernfashion",
+            "#designer", "#brand", "#clothing", "#outfit", "#trendy",
+            "#streetstyle", "#fashionstyle", "#styleup", "#fashionaddict"
+        ]
+        
+        # ブランド固有ハッシュタグ
+        brand_hashtags = [
+            "#godship", f"#{brand_hashtag}", "#godshipmall", "#godshipbrands",
+            "#godshipfashion", "#godshipstyle"
+        ]
+        
+        # トレンドハッシュタグ
+        trending_hashtags = [
+            "#fashiontrends", "#outfitideas", "#styleinspiration", 
+            "#fashionstyle", "#styleinspo", "#fashionista", "#ootd"
+        ]
+        
+        # ロケーション系ハッシュタグ（必要に応じて）
+        location_hashtags = [
+            "#fashiontok", "#stylecommunity", "#fashionworld", "#stylelife"
+        ]
+        
+        # 全てのハッシュタグを結合
+        all_hashtags = popular_hashtags + niche_hashtags + brand_hashtags + trending_hashtags + location_hashtags
+        hashtags_string = " ".join(all_hashtags)
+        
+        caption = f"""✨ Introducing {brand_name}! 
 
 {brand_description[:200]}...
 
 Discover more unique designs at godship.io
 
-{hashtags}"""
+{hashtags_string}"""
         
         return caption
     

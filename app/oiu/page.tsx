@@ -11,7 +11,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands' | 'sns'>('ai-brands')
+  const [activeTab, setActiveTab] = useState<'brands' | 'products' | 'ai-products' | 'ai-brands' | 'sns' | 'batch-products'>('ai-brands')
   const [showCreatedBanner, setShowCreatedBanner] = useState(false)
   const [createdMessage, setCreatedMessage] = useState<'Created!' | 'AI Brand Generated!' | 'Product deleted successfully!' | 'Brand deleted successfully!' | 'AI Products Generated!' | 'Product is now visible!' | 'Product is now hidden!' | string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
@@ -34,6 +34,10 @@ export default function AdminPage() {
   const [aiBrandQuantity, setAiBrandQuantity] = useState('')
   const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0)
   // Note: generatedBrandsCount is used in the UI but ESLint doesn't detect it
+
+  // Batch Products form states
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false)
+  const [batchResult, setBatchResult] = useState<any>(null)
 
   // Predefined color options
   const colorOptions = [
@@ -501,6 +505,44 @@ export default function AdminPage() {
     }
   }
 
+  const handleBatchGenerateProducts = async () => {
+    setIsBatchGenerating(true)
+    setBatchResult(null)
+    
+    try {
+      const response = await fetch('/api/generate-batch-products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(600000), // 10 minutes timeout
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate batch products')
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setBatchResult(result)
+        setCreatedMessage(`Batch Products Generated! ${result.generatedProducts.length} products created`)
+        setShowCreatedBanner(true)
+        setTimeout(() => setShowCreatedBanner(false), 5000)
+        
+        // Refresh data
+        await loadData()
+      } else {
+        throw new Error('Failed to generate batch products')
+      }
+    } catch (error) {
+      console.error('Error generating batch products:', error)
+      alert('Failed to generate batch products. Please try again.')
+    } finally {
+      setIsBatchGenerating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -560,6 +602,16 @@ export default function AdminPage() {
                 }`}
               >
                 SNS Posting
+              </button>
+              <button
+                onClick={() => setActiveTab('batch-products')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'batch-products'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Batch Products
               </button>
               <button
                 onClick={() => setActiveTab('brands')}
@@ -1318,6 +1370,87 @@ export default function AdminPage() {
                         </div>
                       )}
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'batch-products' && (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200">
+                  <h2 className="text-lg font-semibold mb-6 text-purple-800">🎯 Batch Product Generation</h2>
+                  
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="text-center mb-6">
+                      <div className="mb-4">
+                        <svg className="w-16 h-16 mx-auto text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                      <h3 className="text-xl font-semibold mb-4 text-gray-900">Generate Products for All Brands</h3>
+                      <p className="text-gray-600 mb-6">
+                        Automatically generate one T-shirt product for each brand that doesn't have any products yet. 
+                        Uses the same AI generation flow as the individual product generator, ensuring consistent quality and brand concept reflection.
+                      </p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h4 className="font-semibold text-blue-800 mb-2">What this will do:</h4>
+                        <ul className="text-sm text-blue-700 text-left space-y-1">
+                          <li>• Find all brands without any products</li>
+                          <li>• Use existing AI product generation flow for each brand</li>
+                          <li>• Generate one T-shirt per brand (quantity: 1)</li>
+                          <li>• Use random colors for variety</li>
+                          <li>• Apply full AI generation with images and descriptions</li>
+                          <li>• Set category to "Clothing", type to "T-Shirt", gender to "Men"</li>
+                        </ul>
+                      </div>
+                      
+                      <button 
+                        onClick={handleBatchGenerateProducts}
+                        disabled={isBatchGenerating}
+                        className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isBatchGenerating ? 'Generating Products...' : 'Generate Products for All Brands'}
+                      </button>
+                    </div>
+                    
+                    {batchResult && (
+                      <div className="mt-6 bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-800 mb-3">Generation Results:</h4>
+                        <div className="text-sm text-gray-600 space-y-2">
+                          <p><strong>Total processed:</strong> {batchResult.totalProcessed} brands</p>
+                          <p><strong>Products generated:</strong> {batchResult.generatedProducts.length}</p>
+                          {batchResult.errors && batchResult.errors.length > 0 && (
+                            <p><strong>Errors:</strong> {batchResult.errors.length}</p>
+                          )}
+                        </div>
+                        
+                        {batchResult.generatedProducts.length > 0 && (
+                          <div className="mt-4">
+                            <h5 className="font-medium text-gray-800 mb-2">Generated Products:</h5>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                              {batchResult.generatedProducts.map((item: any, index: number) => (
+                                <div key={index} className="text-sm bg-white p-2 rounded border">
+                                  <span className="font-medium">{item.brand}</span>: {item.product} ({item.color}) - ${item.price}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {batchResult.errors && batchResult.errors.length > 0 && (
+                          <div className="mt-4">
+                            <h5 className="font-medium text-red-800 mb-2">Errors:</h5>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                              {batchResult.errors.map((error: any, index: number) => (
+                                <div key={index} className="text-sm bg-red-50 p-2 rounded border border-red-200">
+                                  <span className="font-medium text-red-800">{error.brand}</span>: {error.error}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -76,8 +76,8 @@ export default function VideoGenerator({
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationSettings, setGenerationSettings] = useState({
-    duration: 4,
-    resolution: '1280x720',
+    duration: 8,
+    resolution: '720x1280',
     useBackgroundImage: true
   });
 

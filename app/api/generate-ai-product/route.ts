@@ -777,16 +777,18 @@ async function compositeDesignOnTshirt(
     // 注: l_<public_id> は同一Cloudアカウントのアセットを参照
     const compositeUrl =
       `https://res.cloudinary.com/${cloud}/image/upload` +
-      `/w_1024,h_1024,c_fit` + // 出力の枠
+      `/w_800,h_800,c_fit` + // 出力サイズを小さくして処理を軽量化
       `/l_${encodeURIComponent(designPublicId)},fl_relative,w_0.33,h_0.33,y_-0.05,g_center` + // オーバーレイ
       `/${encodeURIComponent(basePublicId)}`
 
-    // 変換URLを再アップロードして確定URLに
-    const finalUrl = await uploadToCloudinary(compositeUrl, `${outputName}-composite.png`)
-    return finalUrl
+    // 変換URLを直接返す（再アップロードを避けてタイムアウトを防ぐ）
+    console.log(`[Composite] Generated composite URL: ${compositeUrl}`)
+    return compositeUrl
   } catch (error) {
     console.error('Error compositing images:', error)
-    throw error
+    // エラー時はプレーンTシャツを返す
+    console.log(`[Composite] Using plain t-shirt as fallback: ${plainTshirtUrl}`)
+    return plainTshirtUrl
   }
 }
 
@@ -875,11 +877,17 @@ async function generateProductImages(
     if (designPng) {
       console.log(`[Composite:${color}] Compositing design onto ${color} t-shirt...`)
       try {
-        const compositeUrl = await compositeDesignOnTshirt(plainTshirtUrl, designPng, `${productName}-${color}`)
+        // タイムアウトを設定して合成処理を実行
+        const compositeUrl = await Promise.race([
+          compositeDesignOnTshirt(plainTshirtUrl, designPng, `${productName}-${color}`),
+          new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error('Composite timeout')), 30000) // 30秒タイムアウト
+          )
+        ])
         productImages.push(compositeUrl)
         console.log(`[Composite:${color}] Design composited: ${compositeUrl}`)
       } catch (err) {
-        console.error(`[Composite:${color}]`, JSON.stringify(err, null, 2))
+        console.error(`[Composite:${color}] Composite failed, using plain t-shirt:`, err instanceof Error ? err.message : 'Unknown error')
         productImages.push(plainTshirtUrl)
         console.log(`[Composite:${color}] Using plain t-shirt: ${plainTshirtUrl}`)
       }

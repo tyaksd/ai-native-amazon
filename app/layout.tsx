@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import "./globals.css";
 import MobileSearch from "./components/MobileSearch";
+import MobileMenu from "./components/MobileMenu";
 import LogoLink from "./components/LogoLink";
 import ContactButton from "./components/ContactButton";
 import NewsletterSignup from "./components/NewsletterSignup";
@@ -47,17 +56,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900`}
-      >
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900`}
+        >
        <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20">
           <div className="mx-auto max-w-7xl px-4 sm:px-10 py-3 flex items-center gap-4 justify-center md:justify-between relative">
-            <button className="md:hidden absolute left-3 inline-flex items-center justify-center p-2 text-gray-700" aria-label="Menu">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path fillRule="evenodd" d="M3.75 6.75A.75.75 0 014.5 6h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm0 5.25a.75.75 0 01.75-.75h15a.75.75 0 010 1.5h-15a.75.75 0 01-.75-.75zm.75 4.5a.75.75 0 000 1.5h15a.75.75 0 000-1.5h-15z" clipRule="evenodd" />
-              </svg>
-            </button>
+            <MobileMenu />
             <LogoLink />
             <div className="hidden md:flex flex-1">
               <form action="/" method="get" className="w-full max-w-sm">
@@ -70,6 +76,13 @@ export default function RootLayout({
               </form>
             </div>
             <div className="hidden md:flex items-center gap-3">
+              <SignedIn>
+                <Link href="/user" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900" title="User Profile">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
+              </SignedIn>
               <Link href="/favorites" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900" title="Favorites">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -81,9 +94,27 @@ export default function RootLayout({
                   <path d="M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9.75 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                 </svg>
               </Link>
-              <Link href="#" className="inline-flex items-center rounded-md border border-gray-500 bg-transparent px-4 py-2 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50">
-                Login
-              </Link>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="inline-flex items-center rounded-md border border-gray-500 bg-transparent px-4 py-2 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50">
+                    Login
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="inline-flex items-center rounded-md border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-gray-700 hover:bg-white/20 hover:border-white/30 ml-2">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8"
+                    }
+                  }}
+                />
+              </SignedIn>
             </div>
             <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-700">
               <MobileSearch />
@@ -163,5 +194,6 @@ export default function RootLayout({
         </footer>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

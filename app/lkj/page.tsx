@@ -15,6 +15,18 @@ interface OrderItem {
   i_sent_to_printful: boolean
   printful_sent: boolean
   problem: string | null
+  // New Printful fields for individual item tracking
+  printful_item_id: string | null
+  printful_variant_id: number | null
+  printful_product_id: number | null
+  printful_tracking_number: string | null
+  printful_shipment_id: string | null
+  printful_status: string | null
+  printful_fulfillment_status: string | null
+  printful_error_message: string | null
+  printful_retry_count: number
+  printful_last_updated: string | null
+  manual_estimated_delivery: string | null
 }
 
 interface Order {
@@ -29,8 +41,7 @@ interface Order {
   billing_name: string | null
   billing_address: Record<string, unknown> | null
   created_at: string
-  printful_order_id: string | null
-  printful_external_id: string | null
+  // Removed printful_order_id and printful_external_id - now tracked per item
   order_items: OrderItem[]
 }
 
@@ -54,7 +65,9 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null)
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set())
   const [showTodayOnly, setShowTodayOnly] = useState(false)
+  const [showYesterdayOnly, setShowYesterdayOnly] = useState(false)
   const [problemTexts, setProblemTexts] = useState<Record<string, string>>({})
+  const [showSavedBanner, setShowSavedBanner] = useState(false)
 
   useEffect(() => {
     // ページの先頭にスクロール
@@ -81,7 +94,8 @@ export default function AdminOrdersPage() {
             color,
             i_sent_to_printful,
             printful_sent,
-            problem
+            problem,
+            manual_estimated_delivery
           )
         `)
         .order('created_at', { ascending: false })
@@ -210,6 +224,13 @@ export default function AdminOrdersPage() {
     return orderDate.toDateString() === today.toDateString()
   }
 
+  const isYesterday = (dateString: string) => {
+    const orderDate = new Date(dateString)
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    return orderDate.toDateString() === yesterday.toDateString()
+  }
+
   const handleCheckboxChange = async (orderItemId: string, field: 'i_sent_to_printful' | 'printful_sent', checked: boolean) => {
     try {
       console.log('=== CHECKBOX UPDATE START ===')
@@ -325,8 +346,95 @@ export default function AdminOrdersPage() {
     }
   }
 
+  const validateEstimatedDelivery = (text: string): boolean => {
+    if (!text.trim()) return true // Empty is valid
+    
+    // Pattern: Month Day–Day (e.g., October 18–23, Dec 1-5)
+    const pattern = /^[A-Za-z]+ [0-9]+[–-][0-9]+$/
+    return pattern.test(text.trim())
+  }
+
+  const handleEstimatedDeliveryChange = async (orderItemId: string, text: string, sendEmail: boolean = false) => {
+    try {
+      console.log('Updating estimated delivery:', { orderItemId, text, sendEmail })
+      
+      // Validate format
+      if (text.trim() && !validateEstimatedDelivery(text)) {
+        console.warn('Invalid estimated delivery format:', text)
+        // Still allow saving but warn user
+      }
+      
+      const { data, error } = await supabase
+        .from('order_items')
+        .update({ manual_estimated_delivery: text })
+        .eq('id', orderItemId)
+        .select('id, manual_estimated_delivery')
+
+      if (error) {
+        console.error('Error updating estimated delivery:', error)
+        return
+      }
+
+      console.log('✅ Estimated delivery update successful')
+      console.log('Updated estimated delivery data:', data)
+
+      // Send email notification only if sendEmail is true
+      if (sendEmail && text && text.trim()) {
+        try {
+          console.log('Sending estimated delivery email notification...')
+          const response = await fetch('/api/send-estimated-delivery-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderItemId,
+              estimatedDelivery: text.trim()
+            })
+          })
+
+          if (response.ok) {
+            console.log('✅ Estimated delivery email sent successfully')
+          } else {
+            const errorData = await response.json()
+            console.error('❌ Failed to send estimated delivery email:', {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorData
+            })
+          }
+        } catch (emailError) {
+          console.error('❌ Error sending estimated delivery email:', emailError)
+          // Don't block the UI update if email fails
+        }
+      }
+
+      // Show saved banner
+      setShowSavedBanner(true)
+      setTimeout(() => {
+        setShowSavedBanner(false)
+      }, 2000) // Hide after 2 seconds
+
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(order => ({
+          ...order,
+          order_items: order.order_items?.map(item => 
+            item.id === orderItemId 
+              ? { ...item, manual_estimated_delivery: text }
+              : item
+          ) || []
+        }))
+      )
+    } catch (err) {
+      console.error('Error updating estimated delivery:', err)
+    }
+  }
+
   const filteredOrders = showTodayOnly 
     ? orders.filter(order => isToday(order.created_at))
+    : showYesterdayOnly
+    ? orders.filter(order => isYesterday(order.created_at))
     : orders
 
   if (loading) {
@@ -359,18 +467,45 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Saved Banner */}
+      {showSavedBanner && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">Saved!</span>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="mb-2">
           <h1 className="text-3xl font-bold text-gray-900">Orders Dashboard</h1>
-          <div className="mt-2 flex items-center">
+          <div className="mt-2 flex items-center space-x-4">
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={showTodayOnly}
-                onChange={(e) => setShowTodayOnly(e.target.checked)}
+                onChange={(e) => {
+                  setShowTodayOnly(e.target.checked)
+                  if (e.target.checked) setShowYesterdayOnly(false)
+                }}
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
               />
               <span className="ml-2 text-sm font-medium text-gray-700">Today</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showYesterdayOnly}
+                onChange={(e) => {
+                  setShowYesterdayOnly(e.target.checked)
+                  if (e.target.checked) setShowTodayOnly(false)
+                }}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+              />
+              <span className="ml-2 text-sm font-medium text-gray-700">Yesterday</span>
             </label>
           </div>
         </div>
@@ -378,18 +513,17 @@ export default function AdminOrdersPage() {
         {filteredOrders.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-500 text-lg">
-              {showTodayOnly ? 'No orders found for today' : 'No orders found'}
+              {showTodayOnly ? 'No orders found for today' : 
+               showYesterdayOnly ? 'No orders found for yesterday' : 
+               'No orders found'}
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredOrders.map((order) => (
               <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                {/* Order Items Summary - Clickable */}
-                <div 
-                  className="p-2 cursor-pointer hover:bg-gray-50 transition-colors"
-                  onClick={() => toggleOrderExpansion(order.id)}
-                >
+                {/* Order Items Summary */}
+                <div className="p-2">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center justify-between ">
@@ -451,11 +585,46 @@ export default function AdminOrdersPage() {
                             <div className="flex-1 min-w-0">
                               <h5 className="text-sm font-medium text-gray-900 truncate">
                                 {item.product_name}
+                                <span className="text-xs text-gray-400 font-mono ml-2">
+                                  {item.id}
+                                </span>
                               </h5>
                               <div className="mt-1 flex items-center space-x-3 text-xs text-gray-500">
                                 <span>Qty: {item.quantity}</span>
                                 {item.size && <span>Size: {item.size}</span>}
                                 {item.color && <span>Color: {item.color}</span>}
+                              </div>
+                              
+                              {/* Estimated Delivery Input */}
+                              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Estimated Delivery:
+                                </label>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="text"
+                                    value={item.manual_estimated_delivery || ''}
+                                    onChange={(e) => handleEstimatedDeliveryChange(item.id, e.target.value, false)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.stopPropagation()}
+                                    placeholder="October 18–23"
+                                    pattern="[A-Za-z]+ [0-9]+[–-][0-9]+"
+                                    title="Format: Month Day–Day (e.g., October 18–23)"
+                                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      if (item.manual_estimated_delivery && item.manual_estimated_delivery.trim()) {
+                                        handleEstimatedDeliveryChange(item.id, item.manual_estimated_delivery, true)
+                                      }
+                                    }}
+                                    disabled={!item.manual_estimated_delivery || !item.manual_estimated_delivery.trim()}
+                                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    Send
+                                  </button>
+                                </div>
                               </div>
                             </div>
                             
@@ -496,7 +665,10 @@ export default function AdminOrdersPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="ml-4 flex items-center">
+                    <div 
+                      className="ml-4 flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                      onClick={() => toggleOrderExpansion(order.id)}
+                    >
                       <div className="text-right mr-4">
                         <div className="text-lg font-bold text-gray-900">
                           {formatCurrency(order.total_amount, order.currency)}
@@ -568,20 +740,43 @@ export default function AdminOrdersPage() {
                         </div>
                       </div>
 
-                      {/* Printful Information - Temporarily disabled */}
-                      {/* TODO: Re-enable when Printful integration is restored
-                      {(order.printful_order_id || order.printful_external_id) && (
+                      {/* Printful Information - Updated for per-item tracking */}
+                      {order.order_items.some(item => 
+                        item.printful_item_id || 
+                        item.printful_tracking_number || 
+                        item.printful_status
+                      ) && (
                         <div className="bg-blue-50 p-3 rounded-lg">
-                          <h4 className="font-medium text-gray-900 mb-1">Printful Information</h4>
-                          <p className="text-sm text-gray-600">
-                            <strong>Printful Order ID:</strong> {order.printful_order_id || 'N/A'}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <strong>External ID:</strong> {order.printful_external_id || 'N/A'}
-                          </p>
+                          <h4 className="font-medium text-gray-900 mb-2">Printful Information</h4>
+                          {order.order_items.map((item, index) => (
+                            <div key={item.id} className="mb-3 last:mb-0">
+                              <div className="text-sm font-medium text-gray-700 mb-1">
+                                {item.product_name} ({item.size}, {item.color})
+                              </div>
+                              <div className="text-xs text-gray-600 space-y-1">
+                                {item.printful_item_id && (
+                                  <p><strong>Item ID:</strong> {item.printful_item_id}</p>
+                                )}
+                                {item.printful_tracking_number && (
+                                  <p><strong>Tracking:</strong> {item.printful_tracking_number}</p>
+                                )}
+                                {item.printful_status && (
+                                  <p><strong>Status:</strong> {item.printful_status}</p>
+                                )}
+                                {item.printful_fulfillment_status && (
+                                  <p><strong>Fulfillment:</strong> {item.printful_fulfillment_status}</p>
+                                )}
+                                {item.printful_error_message && (
+                                  <p className="text-red-600"><strong>Error:</strong> {item.printful_error_message}</p>
+                                )}
+                                {item.printful_retry_count > 0 && (
+                                  <p><strong>Retries:</strong> {item.printful_retry_count}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
-                      */}
                     </div>
                   </div>
                 )}

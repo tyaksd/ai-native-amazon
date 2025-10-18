@@ -85,6 +85,7 @@
 
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 
 export const runtime = 'nodejs'
 
@@ -119,6 +120,9 @@ export async function POST(req: NextRequest) {
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json({ error: 'STRIPE_SECRET_KEY not configured' }, { status: 500 })
     }
+
+    // Get Clerk user ID if authenticated
+    const { userId } = await auth()
 
     const body = await req.json().catch(() => ({}))
     const { items } = body as {
@@ -178,6 +182,7 @@ export async function POST(req: NextRequest) {
             color: it.color ?? '',
           }))
         ),
+        clerk_id: userId || '', // Include Clerk user ID if authenticated
       },
     })
 

@@ -152,14 +152,14 @@ export default function SoraPage() {
   };
 
   // Render content with clickable links
-  const renderContentWithLinks = (content: string, platform?: string) => {
+  const renderContentWithLinks = (content: string) => {
     if (!selectedBrand) {
       return <span className="whitespace-pre-wrap">{content}</span>;
     }
     
-    // Different link handling for X (Twitter) vs Instagram
+    // Link handling for both platforms
     const linkPattern = /(godship\.io)/g;
-    const linkUrl = platform === 'X' ? 'https://www.godship.io/brands' : `https://godship.io/${selectedBrand.id}`;
+    const linkUrl = 'https://godship.io';
     
     const parts = content.split(linkPattern);
     return (
@@ -174,7 +174,7 @@ export default function SoraPage() {
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 underline"
               >
-                {platform === 'X' ? '@https://www.godship.io/brands' : part}
+                {part}
               </a>
             );
           }
@@ -366,7 +366,7 @@ export default function SoraPage() {
                           </button>
                         </div>
                         <div className="bg-white p-3 rounded border text-sm text-gray-700">
-                          {renderContentWithLinks(generatedContent.instagram!, 'Instagram')}
+                          {renderContentWithLinks(generatedContent.instagram!)}
                         </div>
                       </div>
                     )}
@@ -388,7 +388,7 @@ export default function SoraPage() {
                           </button>
                         </div>
                         <div className="bg-white p-3 rounded border text-sm text-gray-700">
-                          {renderContentWithLinks(generatedContent.x!, 'X')}
+                          {renderContentWithLinks(generatedContent.x!)}
                         </div>
                       </div>
                     )}

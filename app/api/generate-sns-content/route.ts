@@ -71,30 +71,41 @@ async function generateInstagramContent(brand: { id: string; name: string; descr
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     {
       role: 'system',
-      content: 'You are a social media marketing expert specializing in short-form video content for Instagram Reels and TikTok. Create VERY SHORT, punchy captions optimized for both platforms that drive engagement and brand awareness. Focus on driving traffic to the godship.io e-commerce store. Do NOT use emojis. IMPORTANT: Keep captions under 500 characters for better engagement.'
+      content: 'You are a social media marketing expert specializing in Instagram content. Create engaging captions with EXTENSIVE hashtag strategy to maximize reach and brand awareness. Focus on driving traffic to the godship.io e-commerce store. Use strategic hashtag combinations for maximum visibility.'
     },
     {
       role: 'user',
-      content: `Create a VERY SHORT caption for the brand "${brand.name}" that works for both Instagram Reels and TikTok.
+      content: `Create an Instagram caption for the brand "${brand.name}" with extensive hashtag strategy.
 
 Brand Information:
 - Name: ${brand.name}
 - Description: ${brand.description || 'A unique fashion brand'}
 - Category: ${brand.category || 'Fashion'}
+- Design Concept: ${brand.design_concept || 'Modern, stylish design'}
+- Target Audience: ${brand.target_audience || 'Fashion-forward individuals'}
 
 Requirements:
-- Write for short-form video content (Instagram Reels and TikTok compatible)
-- Include 3-5 relevant hashtags maximum
-- NO EMOJIS - keep it clean and professional
+- Write 2-3 engaging sentences (50-100 words)
+- Include 15-25 strategic hashtags for maximum reach
+- Use a mix of popular, niche, and branded hashtags
+- Include trending fashion hashtags
+- Add location-based hashtags if relevant
+- Include brand-specific hashtags
 - Focus on viral potential and engagement
-- Be extremely concise and punchy
 - Include a call-to-action to visit godship.io
 - Make it feel authentic and engaging
-- Avoid generic marketing language
-- CRITICAL: Keep under 500 characters total
+- Use emojis strategically (3-5 emojis)
+- CRITICAL: Keep under 2,200 characters total
 - IMPORTANT: End with "https://godship.io" at the very end
 
-Format the response as a complete short-form video caption ready to post.`
+Hashtag Strategy:
+- 5-8 popular fashion hashtags (#fashion #style #ootd #fashionista #styleinspo)
+- 3-5 niche hashtags related to brand category
+- MANDATORY branded hashtags: #godship #${brand.name.replace(/\s+/g, '')} (MUST include these)
+- 3-5 trending hashtags
+- 2-3 location hashtags if applicable
+
+Format the response as a complete Instagram caption ready to post.`
     }
   ]
 
@@ -102,7 +113,7 @@ Format the response as a complete short-form video caption ready to post.`
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      max_completion_tokens: 150,
+      max_completion_tokens: 300,
       temperature: 0.8
     })
     
@@ -110,24 +121,24 @@ Format the response as a complete short-form video caption ready to post.`
     
     // Add godship.io brand page link at the end if not already present
     if (!content.toLowerCase().includes('godship.io')) {
-      content += `\n\ngodship.io`
+      content += `\n\nhttps://godship.io`
     }
     
-    // Ensure content is under 500 characters
-    if (content.length > 500) {
-      return content.substring(0, 497) + '...'
+    // Ensure content is under 2,200 characters (Instagram limit)
+    if (content.length > 2200) {
+      return content.substring(0, 2197) + '...'
     }
     
     return content
   } catch (error) {
     console.error('Instagram content generation error:', error)
-    return `${brand.name}: ${brand.description || 'Unique fashion that stands out'}
+    return `✨ Introducing ${brand.name}! ${brand.description || 'Unique fashion that stands out'} 
 
-Discover more brands on godship.io
+Discover more brands at godship.io
 
-#${brand.name.replace(/\s+/g, '')} #Fashion #Style
+#${brand.name.replace(/\s+/g, '')} #godship #fashion #style #ootd #fashionista #styleinspo #trendy #outfit #clothing #design #brand #streetwear #urban #contemporary #modern #fashionblogger #instafashion #fashiontok #stylegoals #fashionforward #trending #viral #fashionlover #styleinspiration #fashiontrends #outfitideas #fashionstyle #styleup #fashionaddict
 
-godship.io`
+https://godship.io`
   }
 }
 
@@ -148,7 +159,8 @@ Brand Information:
 
 Requirements:
 - CRITICAL: Must be under 200 characters (leave room for godship.io)
-- Include 1-2 relevant hashtags maximum
+- MUST include these hashtags: #godship #${brand.name.replace(/\s+/g, '')}
+- Include 1-2 additional relevant hashtags maximum
 - NO EMOJIS - keep it clean and professional
 - Make it engaging and shareable
 - Be extremely concise and impactful
@@ -183,7 +195,7 @@ Format the response as a complete X post ready to tweet.`
     return content
   } catch (error) {
     console.error('X content generation error:', error)
-    return `${brand.name}: ${brand.description || 'Unique fashion'} Available on godship.io #${brand.name.replace(/\s+/g, '')} godship.io/brands`
+    return `${brand.name}: ${brand.description || 'Unique fashion'} Available on godship.io #godship #${brand.name.replace(/\s+/g, '')} godship.io/brands`
   }
 }
 

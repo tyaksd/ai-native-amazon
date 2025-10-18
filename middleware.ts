@@ -1,32 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { checkAuth, isProtectedRoute, isProduction } from '@/lib/auth-middleware'
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export function middleware(request: NextRequest) {
-  // Only apply authentication in production
-  if (!isProduction()) {
-    return NextResponse.next()
-  }
-
-  // Check if the route is protected
-  if (!isProtectedRoute(request.nextUrl.pathname)) {
-    return NextResponse.next()
-  }
-
-  // Check authentication
-  const authResult = checkAuth(request)
-  
-  if (!authResult.isAuthenticated) {
-    return authResult.response!
-  }
-
-  return NextResponse.next()
-}
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
-    '/oiu/:path*',
-    '/lkj/:path*',
-    '/sora/:path*', // sora2 re-enabled
-    '/sns/:path*', // sns re-enabled
-  ]
-}
+    // Skip Next.js internals and all static files, unless found in search params
+    "/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
+};

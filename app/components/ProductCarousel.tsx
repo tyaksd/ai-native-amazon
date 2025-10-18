@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
 import { Product } from "@/lib/data";
 import { useEffect, useRef } from "react";
@@ -196,12 +197,13 @@ export default function ProductCarousel({ products, title = "You might also like
               >
                 {product.images?.length ? (
                   <div className="aspect-square overflow-hidden">
-                    <Image
+                    <OptimizedImage
                       src={product.images[0]}
                       alt={product.name}
                       width={800}
                       height={800}
                       className="w-full h-full object-cover"
+                      isImportant={true}
                     />
                   </div>
                 ) : (
@@ -252,12 +254,13 @@ export default function ProductCarousel({ products, title = "You might also like
               >
                 {product.images?.length ? (
                   <div className="aspect-square overflow-hidden">
-                    <Image
+                    <OptimizedImage
                       src={product.images[0]}
                       alt={product.name}
                       width={800}
                       height={800}
                       className="w-full h-full object-cover"
+                      isImportant={true}
                     />
                   </div>
                 ) : (

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from "next/image";
+import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from 'react'
 import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
@@ -314,11 +315,12 @@ export default function Home() {
                       <div className="relative rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full min-h-[210px]">
                         {/* Full background image */}
                         {brand.background_image ? (
-                          <Image 
+                          <OptimizedImage 
                             src={brand.background_image} 
                             alt={`${brand.name} background`} 
                             fill
                             className="object-cover"
+                            isImportant={true}
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
@@ -327,11 +329,13 @@ export default function Home() {
                         {/* Brand icon */}
                         <div className="absolute top-4 left-4">
                           <div className="w-20 h-20 bg-white/60 backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
-                            <Image 
+                            <OptimizedImage 
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
                               className="object-cover"
+                              width={80}
+                              height={80}
                             />
                           </div>
                         </div>
@@ -404,7 +408,7 @@ export default function Home() {
                           const randomImage = getRandomImageForProduct(p)
                           return randomImage ? (
                             <div className="aspect-square overflow-hidden">
-                              <Image src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+                              <OptimizedImage src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" isImportant={true} />
                             </div>
                           ) : (
                             <div className="aspect-square bg-gray-200 flex items-center justify-center">
@@ -461,7 +465,7 @@ export default function Home() {
                               )
                             }}
                           >
-                            <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
+                            <OptimizedImage src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                           </Link>
                         </div>
                         <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>
@@ -606,7 +610,7 @@ export default function Home() {
                       const randomImage = getRandomImageForProduct(p)
                       return randomImage ? (
                         <div className="aspect-square overflow-hidden">
-                          <Image src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" />
+                          <OptimizedImage src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" isImportant={true} />
                         </div>
                       ) : (
                         <div className="aspect-square bg-gray-200 flex items-center justify-center">
@@ -664,7 +668,7 @@ export default function Home() {
                           )
                         }}
                       >
-                        <Image src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={30} height={30} className="rounded bg-white" />
+                        <OptimizedImage src={(brands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={30} height={30} className="rounded bg-white" />
                       </Link>
                     </div>
                     <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>
