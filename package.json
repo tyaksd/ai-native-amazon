@@ -13,11 +13,11 @@
   "dependencies": {
     "@clerk/nextjs": "^6.33.6",
     "@stripe/stripe-js": "^7.9.0",
-    "@supabase/supabase-js": "^2.58.0",
+    "@supabase/supabase-js": "^2.75.1",
     "cloudinary": "^2.7.0",
     "lucide-react": "^0.545.0",
     "next": "15.5.4",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.10.1",
     "openai": "^6.1.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",

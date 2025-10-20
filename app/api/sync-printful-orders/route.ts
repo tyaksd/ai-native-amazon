@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { sendEmail, renderOrderStatusEmail } from '@/lib/mailer'
 
 // Printful API client for fetching order status (unused but kept for potential future use)
 /*
@@ -132,6 +133,95 @@ async function getPrintfulOrderByExternalId(externalId: string) {
   return matchingOrder
 }
 
+// Send email notification for status updates
+async function sendStatusUpdateEmail(orderItemId: string, printfulData: any) {
+  try {
+    // Check if we should send an email for this status change
+    const shouldSendEmail = 
+      printfulData.status === 'fulfilled' || 
+      printfulData.fulfillment_status === 'shipped' || 
+      printfulData.fulfillment_status === 'delivered'
+
+    if (!shouldSendEmail) {
+      console.log(`📧 No email needed for status: ${printfulData.status}, fulfillment: ${printfulData.fulfillment_status}`)
+      return
+    }
+
+    console.log(`📧 Sending status update email for order item: ${orderItemId}`)
+
+    // Get order and customer information
+    const { data: orderItem, error: orderItemError } = await supabaseAdmin
+      .from('order_items')
+      .select(`
+        id,
+        product_name,
+        size,
+        color,
+        orders!inner (
+          id,
+          clerk_id,
+          customer_email
+        )
+      `)
+      .eq('id', orderItemId)
+      .single()
+
+    if (orderItemError || !orderItem) {
+      console.error('Failed to fetch order item for email:', orderItemError)
+      return
+    }
+
+    if (!orderItem.orders?.customer_email) {
+      console.log('No customer email found for order item:', orderItemId)
+      return
+    }
+
+    // Get product image if available
+    let productImage = null
+    try {
+      const { data: products } = await supabaseAdmin
+        .from('products')
+        .select('images')
+        .eq('name', orderItem.product_name)
+        .limit(1)
+        .single()
+
+      if (products?.images && products.images.length > 0) {
+        productImage = products.images[0]
+      }
+    } catch (error) {
+      console.log('Could not fetch product image:', error)
+    }
+
+    // Generate email content
+    const html = renderOrderStatusEmail({
+      orderId: orderItem.orders.id,
+      customerEmail: orderItem.orders.customer_email,
+      productName: orderItem.product_name,
+      status: printfulData.status || 'unknown',
+      fulfillmentStatus: printfulData.fulfillment_status || 'unknown',
+      trackingNumber: printfulData.tracking_number,
+      estimatedDelivery: printfulData.estimated_delivery_date,
+      size: orderItem.size,
+      color: orderItem.color,
+      productImage
+    })
+
+    // Send email
+    await sendEmail({
+      to: orderItem.orders.customer_email,
+      subject: `Order Update - ${orderItem.orders.id}`,
+      html
+    })
+
+    console.log(`✅ Status update email sent to: ${orderItem.orders.customer_email}`)
+
+  } catch (error) {
+    console.error('Failed to send status update email:', error)
+    // Don't throw error to avoid breaking the sync
+  }
+}
+
 export async function POST() {
   try {
     console.log('=== Starting Printful Order Sync ===')
@@ -158,6 +248,9 @@ export async function POST() {
         
         // Update the order item with new status
         await updateOrderItemStatus(item.id, printfulData)
+        
+        // Send email notification if status changed to important states
+        await sendStatusUpdateEmail(item.id, printfulData)
         
         results.updated++
         console.log(`✅ Updated order item ${item.id}: ${printfulData.status}`)

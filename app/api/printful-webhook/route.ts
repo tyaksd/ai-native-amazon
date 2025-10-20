@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { sendEmail, renderOrderStatusEmail } from '@/lib/mailer'
 import crypto from 'crypto'
 
 // Verify Printful webhook signature
@@ -123,6 +124,98 @@ async function updateOrderItemStatus(
   console.log(`✅ Successfully updated order item ${externalId}`)
   if (estimatedDeliveryDate) {
     console.log(`📅 Estimated delivery: ${estimatedDeliveryDate}`)
+  }
+
+  // Send email notification for status changes
+  await sendStatusUpdateEmail(externalId, printfulData)
+}
+
+// Send email notification for status updates
+async function sendStatusUpdateEmail(externalId: string, printfulData: PrintfulData) {
+  try {
+    // Check if we should send an email for this status change
+    const shouldSendEmail = 
+      printfulData.status === 'fulfilled' || 
+      printfulData.fulfillment_status === 'shipped' || 
+      printfulData.fulfillment_status === 'delivered'
+
+    if (!shouldSendEmail) {
+      console.log(`📧 No email needed for status: ${printfulData.status}, fulfillment: ${printfulData.fulfillment_status}`)
+      return
+    }
+
+    console.log(`📧 Sending status update email for order item: ${externalId}`)
+
+    // Get order and customer information
+    const { data: orderItem, error: orderItemError } = await supabaseAdmin
+      .from('order_items')
+      .select(`
+        id,
+        product_name,
+        size,
+        color,
+        orders!inner (
+          id,
+          clerk_id,
+          customer_email
+        )
+      `)
+      .eq('id', externalId)
+      .single()
+
+    if (orderItemError || !orderItem) {
+      console.error('Failed to fetch order item for email:', orderItemError)
+      return
+    }
+
+    if (!orderItem.orders?.customer_email) {
+      console.log('No customer email found for order item:', externalId)
+      return
+    }
+
+    // Get product image if available
+    let productImage = null
+    try {
+      const { data: products } = await supabaseAdmin
+        .from('products')
+        .select('images')
+        .eq('name', orderItem.product_name)
+        .limit(1)
+        .single()
+
+      if (products?.images && products.images.length > 0) {
+        productImage = products.images[0]
+      }
+    } catch (error) {
+      console.log('Could not fetch product image:', error)
+    }
+
+    // Generate email content
+    const html = renderOrderStatusEmail({
+      orderId: orderItem.orders.id,
+      customerEmail: orderItem.orders.customer_email,
+      productName: orderItem.product_name,
+      status: printfulData.status || 'unknown',
+      fulfillmentStatus: printfulData.fulfillment_status || 'unknown',
+      trackingNumber: printfulData.tracking_number,
+      estimatedDelivery: printfulData.estimated_delivery_date,
+      size: orderItem.size,
+      color: orderItem.color,
+      productImage
+    })
+
+    // Send email
+    await sendEmail({
+      to: orderItem.orders.customer_email,
+      subject: `Order Update - ${orderItem.orders.id}`,
+      html
+    })
+
+    console.log(`✅ Status update email sent to: ${orderItem.orders.customer_email}`)
+
+  } catch (error) {
+    console.error('Failed to send status update email:', error)
+    // Don't throw error to avoid breaking the webhook
   }
 }
 
