@@ -64,8 +64,16 @@ export async function POST(req: NextRequest) {
       productId: orderItem.product_id
     })
 
-    // Handle the orders relationship (it's an array due to inner join)
-    const order = Array.isArray(orderItem.orders) ? orderItem.orders[0] : orderItem.orders
+    // Handle the orders relationship - check if it's an array or object
+    let order
+    if (Array.isArray(orderItem.orders)) {
+      order = orderItem.orders[0]
+    } else if (orderItem.orders && typeof orderItem.orders === 'object') {
+      order = orderItem.orders
+    } else {
+      order = null
+    }
+    
     const customerEmail = order?.customer_email
     console.log('📧 Customer email:', customerEmail)
     console.log('📧 Orders data:', orderItem.orders)
@@ -89,21 +97,40 @@ export async function POST(req: NextRequest) {
       productImage
     })
 
-    await sendEmail({
-      to: customerEmail,
-      subject: 'Your Order Estimated Delivery Update - Godship',
-      html: emailHtml,
-    })
+    try {
+      await sendEmail({
+        to: customerEmail,
+        subject: 'Your Order Estimated Delivery Update - Godship',
+        html: emailHtml,
+      })
 
-    console.log(`✅ Estimated delivery email sent to ${customerEmail} for order item ${orderItemId}`)
-
-    return NextResponse.json({ success: true, message: 'Email sent successfully' })
+      console.log(`✅ Estimated delivery email sent to ${customerEmail} for order item ${orderItemId}`)
+      return NextResponse.json({ success: true, message: 'Email sent successfully' })
+    } catch (emailError) {
+      console.error('❌ SMTP Error:', emailError)
+      
+      // Check if it's an SPF record error
+      if (emailError instanceof Error && emailError.message.includes('SPF Record')) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Email sending failed due to SPF record configuration',
+          details: 'This is a development environment limitation. Email will work in production.',
+          spfError: true
+        }, { status: 200 }) // Return 200 to not break the UI
+      }
+      
+      throw emailError // Re-throw other errors
+    }
 
   } catch (error) {
-    console.error('Error sending estimated delivery email:', error)
+    console.error('❌ Error sending estimated delivery email:', error)
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    console.error('❌ Error details:', JSON.stringify(error, null, 2))
+    
     return NextResponse.json({ 
       error: 'Failed to send email',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 }
