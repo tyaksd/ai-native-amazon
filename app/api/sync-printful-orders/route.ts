@@ -57,6 +57,9 @@ async function updateOrderItemStatus(
 
 // Get all order items that need status updates
 async function getOrderItemsToSync() {
+  // Get items that are not fulfilled and haven't been updated in the last 6 hours
+  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+  
   const { data, error } = await supabaseAdmin
     .from('order_items')
     .select(`
@@ -64,10 +67,13 @@ async function getOrderItemsToSync() {
       printful_item_id,
       printful_last_updated,
       printful_status,
+      printful_fulfillment_status,
       printful_retry_count
     `)
     .not('printful_item_id', 'is', null)
-    .or('printful_status.is.null,printful_status.neq.fulfilled')
+    .or(`printful_status.is.null,printful_status.neq.fulfilled,printful_fulfillment_status.is.null,printful_fulfillment_status.neq.delivered`)
+    .or(`printful_last_updated.is.null,printful_last_updated.lt.${sixHoursAgo}`)
+    .lt('printful_retry_count', 5) // Don't retry items that have failed too many times
 
   if (error) {
     throw error

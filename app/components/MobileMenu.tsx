@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
 export default function MobileMenu() {
@@ -85,20 +86,33 @@ export default function MobileMenu() {
                         </SignUpButton>
                       </div>
                     </SignedOut>
+                    <SignedIn>
+                      <div className="space-y-3">
+                        {/* User Profile Link */}
+                        <Link 
+                          href="/user" 
+                          className="w-full inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-3 text-sm text-white hover:bg-gray-800 transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 mr-2">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          My Profile
+                        </Link>
+                        
+                        {/* Clerk UserButton */}
+                        <div className="flex items-center justify-center">
+                          <UserButton 
+                            appearance={{
+                              elements: {
+                                avatarBox: "w-10 h-10"
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </SignedIn>
                   </>
-                )}
-                {clerkLoaded && (
-                  <SignedIn>
-                    <div className="flex items-center justify-center">
-                      <UserButton 
-                        appearance={{
-                          elements: {
-                            avatarBox: "w-10 h-10"
-                          }
-                        }}
-                      />
-                    </div>
-                  </SignedIn>
                 )}
               </div>
             </div>
