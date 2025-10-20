@@ -172,7 +172,9 @@ async function sendStatusUpdateEmail(orderItemId: string, printfulData: Printful
       return
     }
 
-    if (!orderItem.orders?.customer_email) {
+    // Handle the orders relationship (it's an array due to inner join)
+    const order = Array.isArray(orderItem.orders) ? orderItem.orders[0] : orderItem.orders
+    if (!order?.customer_email) {
       console.log('No customer email found for order item:', orderItemId)
       return
     }
@@ -196,8 +198,8 @@ async function sendStatusUpdateEmail(orderItemId: string, printfulData: Printful
 
     // Generate email content
     const html = renderOrderStatusEmail({
-      orderId: orderItem.orders.id,
-      customerEmail: orderItem.orders.customer_email,
+      orderId: order.id,
+      customerEmail: order.customer_email,
       productName: orderItem.product_name,
       status: printfulData.status || 'unknown',
       fulfillmentStatus: printfulData.fulfillment_status || 'unknown',
@@ -210,12 +212,12 @@ async function sendStatusUpdateEmail(orderItemId: string, printfulData: Printful
 
     // Send email
     await sendEmail({
-      to: orderItem.orders.customer_email,
-      subject: `Order Update - ${orderItem.orders.id}`,
+      to: order.customer_email,
+      subject: `Order Update - ${order.id}`,
       html
     })
 
-    console.log(`✅ Status update email sent to: ${orderItem.orders.customer_email}`)
+    console.log(`✅ Status update email sent to: ${order.customer_email}`)
 
   } catch (error) {
     console.error('Failed to send status update email:', error)
