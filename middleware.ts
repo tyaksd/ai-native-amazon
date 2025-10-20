@@ -2,15 +2,7 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { checkAuth, isProtectedRoute } from "@/lib/auth-middleware";
 
-export default function middleware(request: NextRequest) {
-  // First, run Clerk middleware
-  const clerkResponse = clerkMiddleware()(request);
-  
-  // If Clerk middleware returns a response (redirect, etc.), use it
-  if (clerkResponse && clerkResponse.status !== 200) {
-    return clerkResponse;
-  }
-  
+export default clerkMiddleware((auth, request) => {
   // Check admin authentication for protected routes
   const authResult = checkAuth(request);
   
@@ -20,7 +12,7 @@ export default function middleware(request: NextRequest) {
   
   // If everything is fine, continue with the request
   return NextResponse.next();
-}
+})
 
 export const config = {
   matcher: [
