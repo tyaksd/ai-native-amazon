@@ -64,7 +64,9 @@ export async function POST(req: NextRequest) {
       productId: orderItem.product_id
     })
 
-    const customerEmail = (orderItem.orders as { customer_email: string }[])?.[0]?.customer_email
+    // Handle the orders relationship (it's an array due to inner join)
+    const order = Array.isArray(orderItem.orders) ? orderItem.orders[0] : orderItem.orders
+    const customerEmail = order?.customer_email
     console.log('📧 Customer email:', customerEmail)
     console.log('📧 Orders data:', orderItem.orders)
     
@@ -83,7 +85,7 @@ export async function POST(req: NextRequest) {
       size: orderItem.size,
       color: orderItem.color,
       estimatedDelivery,
-      currency: orderItem.orders && orderItem.orders.length > 0 ? orderItem.orders[0].currency : 'USD',
+      currency: order?.currency || 'USD',
       productImage
     })
 
