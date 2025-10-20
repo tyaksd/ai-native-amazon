@@ -760,7 +760,7 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 async function compositeDesignOnTshirt(
   plainTshirtUrl: string, 
   designPngUrl: string, 
-  _outputName: string
+  _outputName: string // eslint-disable-line @typescript-eslint/no-unused-vars
 ): Promise<string> {
   try {
     const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME

@@ -39,6 +39,7 @@ interface OrderItem {
   } | null
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface OrderItemWithProducts extends OrderItem {
   products?: {
     id: string

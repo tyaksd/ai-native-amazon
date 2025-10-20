@@ -31,6 +31,7 @@ interface PrintfulOrderData {
   tracking_number?: string;
   shipment_id?: string;
   error_message?: string;
+  estimated_delivery_date?: string;
 }
 
 // Update order item with Printful status
@@ -134,7 +135,7 @@ async function getPrintfulOrderByExternalId(externalId: string) {
 }
 
 // Send email notification for status updates
-async function sendStatusUpdateEmail(orderItemId: string, printfulData: any) {
+async function sendStatusUpdateEmail(orderItemId: string, printfulData: PrintfulOrderData) {
   try {
     // Check if we should send an email for this status change
     const shouldSendEmail = 

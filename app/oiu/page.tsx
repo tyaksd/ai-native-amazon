@@ -32,7 +32,7 @@ export default function AdminPage() {
 
   // AI Brands form states
   const [aiBrandQuantity, setAiBrandQuantity] = useState('')
-  const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0)
+  const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0) // eslint-disable-line @typescript-eslint/no-unused-vars
   // Note: generatedBrandsCount is used in the UI but ESLint doesn't detect it
 
   // Batch Products form states
