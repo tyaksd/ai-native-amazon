@@ -57,8 +57,8 @@ export async function GET(req: NextRequest) {
       printfulItemId: orderItem.printful_item_id,
       printfulVariantId: orderItem.printful_variant_id,
       printfulProductId: orderItem.printful_product_id,
-      customerEmail: orderItem.orders?.customer_email,
-      orderCreated: orderItem.orders?.created_at
+      customerEmail: orderItem.orders?.[0]?.customer_email,
+      orderCreated: orderItem.orders?.[0]?.created_at
     })
 
     return NextResponse.json({
@@ -77,10 +77,10 @@ export async function GET(req: NextRequest) {
         color: orderItem.color,
         quantity: orderItem.quantity,
         unitPrice: orderItem.unit_price,
-        customerEmail: orderItem.orders?.customer_email,
-        currency: orderItem.orders?.currency,
-        totalAmount: orderItem.orders?.total_amount,
-        orderCreated: orderItem.orders?.created_at
+        customerEmail: orderItem.orders?.[0]?.customer_email,
+        currency: orderItem.orders?.[0]?.currency,
+        totalAmount: orderItem.orders?.[0]?.total_amount,
+        orderCreated: orderItem.orders?.[0]?.created_at
       }
     })
 

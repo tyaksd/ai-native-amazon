@@ -38,7 +38,7 @@ export async function GET() {
     console.log(`✅ Found ${productsData.result?.length || 0} products`)
 
     // Find Gildan 64000 products
-    const gildanProducts = productsData.result?.filter((product: any) => 
+    const gildanProducts = productsData.result?.filter((product: { name?: string }) => 
       product.name?.toLowerCase().includes('gildan') && 
       product.name?.toLowerCase().includes('64000')
     ) || []
@@ -89,13 +89,13 @@ export async function GET() {
     console.log(`✅ Found ${variants.length} variants for Gildan 64000`)
 
     // Organize variants by size and color
-    const variantsBySize = variants.reduce((acc: any, variant: any) => {
+    const variantsBySize = variants.reduce((acc: Record<string, Array<{ id: number; name: string; size: string; color: string; color_code: string; price: string; in_stock: boolean }>>, variant: { size?: string; id: number; name: string; color: string; color_code: string; price: string; in_stock: boolean }) => {
       const size = variant.size || 'Unknown'
       if (!acc[size]) acc[size] = []
       acc[size].push({
         id: variant.id,
         name: variant.name,
-        size: variant.size,
+        size: variant.size || 'Unknown',
         color: variant.color,
         color_code: variant.color_code,
         price: variant.price,
@@ -105,8 +105,8 @@ export async function GET() {
     }, {})
 
     // Get unique colors
-    const uniqueColors = [...new Set(variants.map((v: any) => v.color).filter(Boolean))]
-    const uniqueSizes = [...new Set(variants.map((v: any) => v.size).filter(Boolean))]
+    const uniqueColors = [...new Set(variants.map((v: { color?: string }) => v.color).filter(Boolean))]
+    const uniqueSizes = [...new Set(variants.map((v: { size?: string }) => v.size).filter(Boolean))]
 
     return NextResponse.json({
       success: true,
@@ -121,7 +121,7 @@ export async function GET() {
           price: gildanProduct.price,
           in_stock: gildanProduct.in_stock
         },
-        variants: variants.map((variant: any) => ({
+        variants: variants.map((variant: { id: number; name: string; size: string; color: string; color_code: string; price: string; in_stock: boolean }) => ({
           id: variant.id,
           name: variant.name,
           size: variant.size,
@@ -136,8 +136,8 @@ export async function GET() {
         totalVariants: variants.length,
         // Common size/color combinations for easy reference
         commonCombinations: variants
-          .filter((v: any) => ['S', 'M', 'L', 'XL'].includes(v.size) && ['Black', 'White', 'Navy'].includes(v.color))
-          .map((v: any) => ({
+          .filter((v: { size?: string; color?: string }) => ['S', 'M', 'L', 'XL'].includes(v.size || '') && ['Black', 'White', 'Navy'].includes(v.color || ''))
+          .map((v: { size?: string; color?: string; id: number; in_stock: boolean }) => ({
             size: v.size,
             color: v.color,
             variant_id: v.id,

@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       itemId: updatedItem.printful_item_id,
       variantId: updatedItem.printful_variant_id,
       productId: updatedItem.printful_product_id,
-      customerEmail: updatedItem.orders?.customer_email
+      customerEmail: updatedItem.orders?.[0]?.customer_email
     })
 
     return NextResponse.json({
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         variantId: updatedItem.printful_variant_id,
         productId: updatedItem.printful_product_id,
         lastUpdated: updatedItem.printful_last_updated,
-        customerEmail: updatedItem.orders?.customer_email
+        customerEmail: updatedItem.orders?.[0]?.customer_email
       }
     })
 

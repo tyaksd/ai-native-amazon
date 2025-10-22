@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Order item not found' }, { status: 404 })
     }
 
-    const customerEmail = orderItem.orders?.customer_email
+    const customerEmail = orderItem.orders?.[0]?.customer_email
     if (!customerEmail) {
       return NextResponse.json({ error: 'Customer email not found' }, { status: 400 })
     }
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       id: orderItem.id,
       productName: orderItem.product_name,
       status: orderItem.printful_status,
-      customerEmail: orderItem.orders?.customer_email
+      customerEmail: orderItem.orders?.[0]?.customer_email
     })
 
     // Create status update email
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
       fulfillmentStatus: orderItem.printful_fulfillment_status,
       trackingNumber: orderItem.printful_tracking_number,
       shipmentId: orderItem.printful_shipment_id,
-      currency: orderItem.orders?.currency || 'USD',
+      currency: orderItem.orders?.[0]?.currency || 'USD',
       productImage
     })
 

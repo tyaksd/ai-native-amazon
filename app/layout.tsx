@@ -64,9 +64,26 @@ export default function RootLayout({
     console.log('Clerk Publishable Key:', process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? 'Set' : 'Not set');
   }
 
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  if (!clerkKey) {
+    return (
+      <html lang="en">
+        <body className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans">
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Clerk Configuration Required</h1>
+              <p className="text-gray-600">Please set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      publishableKey={clerkKey}
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignInUrl="/"

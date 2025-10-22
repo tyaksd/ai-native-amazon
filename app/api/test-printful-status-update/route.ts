@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       productName: currentItem.product_name,
       currentStatus: currentItem.printful_status,
       currentFulfillment: currentItem.printful_fulfillment_status,
-      customerEmail: currentItem.orders?.customer_email
+      customerEmail: currentItem.orders?.[0]?.customer_email
     })
 
     // Update the printful status
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       newStatus: updatedItem.printful_status,
       newFulfillment: updatedItem.printful_fulfillment_status,
       trackingNumber: updatedItem.printful_tracking_number,
-      customerEmail: updatedItem.orders?.customer_email
+      customerEmail: updatedItem.orders?.[0]?.customer_email
     })
 
     return NextResponse.json({
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
         trackingNumber: updatedItem.printful_tracking_number,
         shipmentId: updatedItem.printful_shipment_id,
         lastUpdated: updatedItem.printful_last_updated,
-        customerEmail: updatedItem.orders?.customer_email
+        customerEmail: updatedItem.orders?.[0]?.customer_email
       }
     })
 
