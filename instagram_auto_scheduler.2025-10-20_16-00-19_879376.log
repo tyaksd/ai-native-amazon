@@ -1,0 +1,15 @@
+2025-10-20 16:00:19 | INFO | Starting scheduled Instagram brand post...
+2025-10-20 16:00:21 | INFO | Creating carousel with 5 images for brand: FerroLilt
+2025-10-20 16:00:22 | ERROR | ❌ Instagram brand post failed
+2025-10-20 16:00:22 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-21 01:16:25 | INFO | 🔄 Daily Instagram post count reset
+2025-10-21 01:16:25 | INFO | Starting scheduled Instagram brand post...
+2025-10-21 01:16:30 | WARNING | Not enough products for brand Riftloom, using available products
+2025-10-21 01:16:30 | INFO | Creating carousel with 2 images for brand: Riftloom
+2025-10-21 01:16:31 | ERROR | ❌ Instagram brand post failed
+2025-10-21 01:16:31 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-21 08:00:45 | INFO | Starting scheduled Instagram brand post...
+2025-10-21 08:00:47 | WARNING | Not enough products for brand SILTH, using available products
+2025-10-21 08:00:47 | INFO | Creating carousel with 2 images for brand: SILTH
+2025-10-21 08:00:47 | ERROR | ❌ Instagram brand post failed
+2025-10-21 08:00:47 | ERROR | ❌ Scheduled Instagram post failed

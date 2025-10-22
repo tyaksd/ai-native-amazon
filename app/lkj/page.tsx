@@ -27,6 +27,7 @@ interface OrderItem {
   printful_retry_count: number
   printful_last_updated: string | null
   manual_estimated_delivery: string | null
+  tracking_url: string | null
 }
 
 interface Order {
@@ -67,6 +68,7 @@ export default function AdminOrdersPage() {
   const [showTodayOnly, setShowTodayOnly] = useState(false)
   const [showYesterdayOnly, setShowYesterdayOnly] = useState(false)
   const [problemTexts, setProblemTexts] = useState<Record<string, string>>({})
+  const [trackingUrls, setTrackingUrls] = useState<Record<string, string>>({})
   const [showSavedBanner, setShowSavedBanner] = useState(false)
   const [showEmailSentBanner, setShowEmailSentBanner] = useState(false)
 
@@ -96,7 +98,8 @@ export default function AdminOrdersPage() {
             i_sent_to_printful,
             printful_sent,
             problem,
-            manual_estimated_delivery
+            manual_estimated_delivery,
+            tracking_url
           )
         `)
         .order('created_at', { ascending: false })
@@ -126,14 +129,19 @@ export default function AdminOrdersPage() {
 
       // 問題テキストの状態を初期化
       const problemTextsMap: Record<string, string> = {}
+      const trackingUrlsMap: Record<string, string> = {}
       ordersData?.forEach(order => {
         order.order_items?.forEach((item: OrderItem) => {
           if (item.problem) {
             problemTextsMap[item.id] = item.problem
           }
+          if (item.tracking_url) {
+            trackingUrlsMap[item.id] = item.tracking_url
+          }
         })
       })
       setProblemTexts(problemTextsMap)
+      setTrackingUrls(trackingUrlsMap)
 
       // 商品情報を取得
       const productIds = new Set<string>()
@@ -355,6 +363,96 @@ export default function AdminOrdersPage() {
     return pattern.test(text.trim())
   }
 
+  const handleTrackingUrlChange = async (orderItemId: string, url: string, sendEmail: boolean = false) => {
+    try {
+      console.log('Updating tracking URL:', { orderItemId, url, sendEmail })
+      
+      const { data, error } = await supabase
+        .from('order_items')
+        .update({ tracking_url: url })
+        .eq('id', orderItemId)
+        .select('id, tracking_url')
+
+      if (error) {
+        console.error('Error updating tracking URL:', error)
+        return
+      }
+
+      console.log('✅ Tracking URL update successful')
+      console.log('Updated tracking URL data:', data)
+
+      // Send email notification only if sendEmail is true
+      if (sendEmail && url && url.trim()) {
+        try {
+          console.log('Sending tracking URL email notification...')
+          const response = await fetch('/api/send-tracking-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderItemId,
+              trackingUrl: url.trim()
+            })
+          })
+
+          if (response.ok) {
+            const responseData = await response.json()
+            console.log('✅ Tracking URL email response:', responseData)
+            
+            if (responseData.success) {
+              console.log('✅ Tracking URL email sent successfully')
+              // Show email sent banner
+              setShowEmailSentBanner(true)
+              setTimeout(() => {
+                setShowEmailSentBanner(false)
+              }, 3000) // Hide after 3 seconds
+             } else if (responseData.dnsError) {
+               console.warn('⚠️ Email sending failed due to DNS configuration (development environment)')
+               // Still show success banner since the data was saved
+               setShowEmailSentBanner(true)
+               setTimeout(() => {
+                 setShowEmailSentBanner(false)
+               }, 3000)
+            } else {
+              console.error('❌ Email sending failed:', responseData)
+            }
+          } else {
+            const errorData = await response.json()
+            console.error('❌ Failed to send tracking URL email:', {
+              status: response.status,
+              statusText: response.statusText,
+              error: errorData
+            })
+          }
+        } catch (emailError) {
+          console.error('❌ Error sending tracking URL email:', emailError)
+          // Don't block the UI update if email fails
+        }
+      }
+
+      // Show saved banner
+      setShowSavedBanner(true)
+      setTimeout(() => {
+        setShowSavedBanner(false)
+      }, 2000) // Hide after 2 seconds
+
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(order => ({
+          ...order,
+          order_items: order.order_items?.map(item => 
+            item.id === orderItemId 
+              ? { ...item, tracking_url: url }
+              : item
+          ) || []
+        }))
+      )
+    } catch (err) {
+      console.error('Error updating tracking URL:', err)
+    }
+  }
+
   const handleEstimatedDeliveryChange = async (orderItemId: string, text: string, sendEmail: boolean = false) => {
     try {
       console.log('Updating estimated delivery:', { orderItemId, text, sendEmail })
@@ -405,13 +503,13 @@ export default function AdminOrdersPage() {
               setTimeout(() => {
                 setShowEmailSentBanner(false)
               }, 3000) // Hide after 3 seconds
-            } else if (responseData.spfError) {
-              console.warn('⚠️ Email sending failed due to SPF configuration (development environment)')
-              // Still show success banner since the data was saved
-              setShowEmailSentBanner(true)
-              setTimeout(() => {
-                setShowEmailSentBanner(false)
-              }, 3000)
+             } else if (responseData.dnsError) {
+               console.warn('⚠️ Email sending failed due to DNS configuration (development environment)')
+               // Still show success banner since the data was saved
+               setShowEmailSentBanner(true)
+               setTimeout(() => {
+                 setShowEmailSentBanner(false)
+               }, 3000)
             } else {
               console.error('❌ Email sending failed:', responseData)
             }
@@ -653,6 +751,42 @@ export default function AdminOrdersPage() {
                                     }}
                                     disabled={!item.manual_estimated_delivery || !item.manual_estimated_delivery.trim()}
                                     className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    Send
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Tracking URL Input */}
+                              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Track your shipment URL:
+                                </label>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="url"
+                                    value={trackingUrls[item.id] || item.tracking_url || ''}
+                                    onChange={(e) => {
+                                      setTrackingUrls(prev => ({
+                                        ...prev,
+                                        [item.id]: e.target.value
+                                      }))
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={(e) => e.stopPropagation()}
+                                    placeholder="https://tracking.example.com/your-shipment"
+                                    className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const url = trackingUrls[item.id] || item.tracking_url
+                                      if (url && url.trim()) {
+                                        handleTrackingUrlChange(item.id, url, true)
+                                      }
+                                    }}
+                                    disabled={!trackingUrls[item.id] && !item.tracking_url}
+                                    className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                                   >
                                     Send
                                   </button>

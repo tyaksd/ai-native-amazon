@@ -6,13 +6,13 @@ export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
   try {
-    const { orderItemId, estimatedDelivery } = await req.json()
+    const { orderItemId, trackingUrl } = await req.json()
 
-    console.log('📧 Email API called with:', { orderItemId, estimatedDelivery })
+    console.log('📧 Tracking Email API called with:', { orderItemId, trackingUrl })
 
-    if (!orderItemId || !estimatedDelivery) {
+    if (!orderItemId || !trackingUrl) {
       console.error('❌ Missing required parameters')
-      return NextResponse.json({ error: 'orderItemId and estimatedDelivery are required' }, { status: 400 })
+      return NextResponse.json({ error: 'orderItemId and trackingUrl are required' }, { status: 400 })
     }
 
     // Get order item details with customer email and product image
@@ -85,14 +85,14 @@ export async function POST(req: NextRequest) {
 
     console.log('🖼️ Product image:', productImage)
 
-    // Send estimated delivery email
-    const emailHtml = renderEstimatedDeliveryEmail({
+    // Send tracking email
+    const emailHtml = renderTrackingEmail({
       orderId: orderItem.id, // Use order_item ID instead of order ID
       customerEmail,
       productName: orderItem.product_name,
       size: orderItem.size,
       color: orderItem.color,
-      estimatedDelivery,
+      trackingUrl,
       currency: order?.currency || 'USD',
       productImage
     })
@@ -101,17 +101,17 @@ export async function POST(req: NextRequest) {
       // Enable SMTP logging for debugging
       process.env.LOG_SMTP = '1'
       
-      console.log('📧 Attempting to send email...')
+      console.log('📧 Attempting to send tracking email...')
       console.log('📧 To:', customerEmail)
-      console.log('📧 Subject: Your Order Estimated Delivery Update - Godship')
+      console.log('📧 Subject: Track your shipment - Godship')
       
       await sendEmail({
         to: customerEmail,
-        subject: 'Your Order Estimated Delivery Update - Godship',
+        subject: 'Track your shipment - Godship',
         html: emailHtml,
       })
 
-      console.log(`✅ Estimated delivery email sent to ${customerEmail} for order item ${orderItemId}`)
+      console.log(`✅ Tracking email sent to ${customerEmail} for order item ${orderItemId}`)
       return NextResponse.json({ success: true, message: 'Email sent successfully' })
     } catch (emailError) {
       console.error('❌ SMTP Error:', emailError)
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     }
 
   } catch (error) {
-    console.error('❌ Error sending estimated delivery email:', error)
+    console.error('❌ Error sending tracking email:', error)
     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     console.error('❌ Error details:', JSON.stringify(error, null, 2))
     
@@ -151,13 +151,13 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function renderEstimatedDeliveryEmail(params: {
+function renderTrackingEmail(params: {
   orderId: string
   customerEmail: string
   productName: string
   size: string | null
   color: string | null
-  estimatedDelivery: string
+  trackingUrl: string
   currency: string
   productImage: string | null
 }) {
@@ -173,10 +173,10 @@ function renderEstimatedDeliveryEmail(params: {
         <h1 style="color:#111827;margin:0;font-size:28px;">Godship</h1>
       </div>
       
-      <h2 style="margin:0 0 20px;color:#111827;font-size:24px;">Estimated Delivery Update</h2>
+      <h2 style="margin:0 0 20px;color:#111827;font-size:24px;">Track your shipment</h2>
       
       <p style="margin:0 0 20px;color:#374151;font-size:16px;">
-        Hello! We have an important update about your order.
+        Your order is on its way! You can now track your shipment using the link below.
       </p>
       
       <div style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:20px 0;">
@@ -191,9 +191,14 @@ function renderEstimatedDeliveryEmail(params: {
             <p style="margin:0;color:#374151;"><strong>Product:</strong> ${params.productName}${metaText}</p>
           </div>
         </div>
-        <p style="margin:0 0 0;color:#374151;"><strong>Estimated Delivery:</strong> <span style="color:#059669;font-weight:600;">${params.estimatedDelivery}</span></p>
       </div>
       
+      <div style="text-align:center;margin:30px 0;">
+        <a href="${params.trackingUrl}" 
+           style="display:inline-block;background-color:#059669;color:white;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:16px;transition:background-color 0.2s;">
+          Track your shipment
+        </a>
+      </div>
       
       <p style="margin:20px 0 0;color:#6b7280;font-size:14px;">
         If you have any questions about your order, please contact us through our website.

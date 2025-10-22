@@ -1,13 +1,5 @@
-2025-10-19 16:18:25 | INFO | Starting scheduled Instagram brand post...
-2025-10-19 16:18:25 | ERROR | No brands found
-2025-10-19 16:18:25 | ERROR | ❌ Scheduled Instagram post failed
-2025-10-20 00:00:44 | INFO | 🔄 Daily Instagram post count reset
-2025-10-20 00:00:44 | INFO | Starting scheduled Instagram brand post...
-2025-10-20 00:00:46 | WARNING | Not enough products for brand PLAZM, using available products
-2025-10-20 00:00:46 | INFO | Creating carousel with 2 images for brand: PLAZM
-2025-10-20 00:00:47 | ERROR | ❌ Instagram brand post failed
-2025-10-20 00:00:47 | ERROR | ❌ Scheduled Instagram post failed
-2025-10-20 08:00:08 | INFO | Starting scheduled Instagram brand post...
-2025-10-20 08:00:11 | INFO | Creating carousel with 5 images for brand: ZYPHON
-2025-10-20 08:00:11 | ERROR | ❌ Instagram brand post failed
-2025-10-20 08:00:11 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-22 16:00:57 | INFO | Starting scheduled Instagram brand post...
+2025-10-22 16:00:59 | WARNING | Not enough products for brand Nivara, using available products
+2025-10-22 16:00:59 | INFO | Creating carousel with 2 images for brand: Nivara
+2025-10-22 16:01:00 | ERROR | ❌ Instagram brand post failed
+2025-10-22 16:01:00 | ERROR | ❌ Scheduled Instagram post failed

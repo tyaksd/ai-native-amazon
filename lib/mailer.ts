@@ -17,7 +17,13 @@ function getTransport() {
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
   // まずは FROM を送信ユーザーと同一でテスト（表示名は後で戻す）
+  // For development, use a fallback email if SPF is not configured
   const from = process.env.MAIL_FROM?.trim() || user || 'jack@godship.io'
+  
+  // If using godship.io domain and no SPF record, suggest using a different domain
+  if (from.includes('godship.io') && process.env.NODE_ENV === 'development') {
+    console.warn('⚠️ Using godship.io domain without SPF record may cause delivery issues')
+  }
 
   if (process.env.LOG_SMTP === '1') {
     console.log('SMTP_HOST', host)
