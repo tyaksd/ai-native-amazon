@@ -57,9 +57,9 @@ export const metadata: Metadata = {
     initialScale: 1,
     viewportFit: "cover",
   },
-  themeColor: "transparent",
   other: {
-    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-capable": "yes",
   },
 };
 
@@ -99,10 +99,15 @@ export default function RootLayout({
       afterSignUpUrl="/"
     >
       <html lang="en">
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+        </head>
         <body
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
         >
-       <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20">
+       <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)'}}>
           <div className="mx-auto max-w-7xl px-4 sm:px-10 py-3 flex items-center gap-4 justify-center md:justify-between relative">
             <MobileMenu />
             <LogoLink />
