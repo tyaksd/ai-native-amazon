@@ -103,6 +103,7 @@ export default function RootLayout({
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="theme-color" content="#000000" />
         </head>
         <body
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
