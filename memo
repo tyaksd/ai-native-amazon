@@ -65,6 +65,11 @@ git push origin main -f
 <<<<<教訓>>>>>>>.
 データを新しく作るときはsupabase sqlコードを忘れるな
 
+注文来たらやること
+支払われたら、そんtシャツのdesign-IMageを、printfulの新規オーダーとして作り、情報も送る。(終わったらI sentにチェック)
+estimated deliveryとtracking urlを/lkjで送信する
+
+
 <
 git add .
 git commit -m "changes"

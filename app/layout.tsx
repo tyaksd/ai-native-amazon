@@ -52,6 +52,15 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Godship",
   },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+  },
+  themeColor: "transparent",
+  other: {
+    "apple-mobile-web-app-status-bar-style": "default",
+  },
 };
 
 export default function RootLayout({
