@@ -1,0 +1,12 @@
+2025-10-22 16:00:57 | INFO | Starting scheduled Instagram brand post...
+2025-10-22 16:00:59 | WARNING | Not enough products for brand Nivara, using available products
+2025-10-22 16:00:59 | INFO | Creating carousel with 2 images for brand: Nivara
+2025-10-22 16:01:00 | ERROR | ❌ Instagram brand post failed
+2025-10-22 16:01:00 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-23 00:06:36 | INFO | 🔄 Daily Instagram post count reset
+2025-10-23 00:06:36 | INFO | Starting scheduled Instagram brand post...
+2025-10-23 00:06:38 | ERROR | No brands found
+2025-10-23 00:06:38 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-23 08:02:47 | INFO | Starting scheduled Instagram brand post...
+2025-10-23 08:02:47 | ERROR | No brands found
+2025-10-23 08:02:47 | ERROR | ❌ Scheduled Instagram post failed

@@ -67,6 +67,7 @@ export default function AdminOrdersPage() {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set())
   const [showTodayOnly, setShowTodayOnly] = useState(false)
   const [showYesterdayOnly, setShowYesterdayOnly] = useState(false)
+  const [showNotSentOnly, setShowNotSentOnly] = useState(false)
   const [problemTexts, setProblemTexts] = useState<Record<string, string>>({})
   const [trackingUrls, setTrackingUrls] = useState<Record<string, string>>({})
   const [showSavedBanner, setShowSavedBanner] = useState(false)
@@ -549,11 +550,22 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const filteredOrders = showTodayOnly 
+  // Filter orders by date
+  let filteredOrders = showTodayOnly 
     ? orders.filter(order => isToday(order.created_at))
     : showYesterdayOnly
     ? orders.filter(order => isYesterday(order.created_at))
     : orders
+
+  // Filter orders to show only those with items that haven't been sent
+  if (showNotSentOnly) {
+    filteredOrders = filteredOrders
+      .map(order => ({
+        ...order,
+        order_items: order.order_items?.filter(item => !item.i_sent_to_printful) || []
+      }))
+      .filter(order => order.order_items.length > 0) // Only show orders with unsent items
+  }
 
   if (loading) {
     return (
@@ -637,6 +649,15 @@ export default function AdminOrdersPage() {
               />
               <span className="ml-2 text-sm font-medium text-gray-700">Yesterday</span>
             </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showNotSentOnly}
+                onChange={(e) => setShowNotSentOnly(e.target.checked)}
+                className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
+              />
+              <span className="ml-2 text-sm font-medium text-gray-700">I didn't send</span>
+            </label>
           </div>
         </div>
 
@@ -645,6 +666,7 @@ export default function AdminOrdersPage() {
             <div className="text-gray-500 text-lg">
               {showTodayOnly ? 'No orders found for today' : 
                showYesterdayOnly ? 'No orders found for yesterday' : 
+               showNotSentOnly ? 'No unsent items found' :
                'No orders found'}
             </div>
           </div>
@@ -663,18 +685,30 @@ export default function AdminOrdersPage() {
                         </p>
                       </div>
                       {order.order_items?.map((item) => (
-                        <div key={item.id} className="bg-gray-50 rounded-lg mb-1">
+                        <div key={item.id} className={`rounded-lg mb-1 transition-colors ${
+                          item.i_sent_to_printful 
+                            ? 'bg-green-50 border border-green-200' 
+                            : 'bg-gray-50 border border-gray-200'
+                        }`}>
                           <div className="flex items-center space-x-1 p-2">
                             {/* Printful Status Checkboxes */}
                             <div className="flex flex-col space-y-1" onClick={(e) => e.stopPropagation()}>
-                              <label className="flex items-center space-x-2 text-sm">
+                              <label className={`flex items-center space-x-2 text-sm ${
+                                item.i_sent_to_printful ? 'font-semibold' : ''
+                              }`}>
                                 <input
                                   type="checkbox"
                                   checked={item.i_sent_to_printful}
                                   onChange={(e) => handleCheckboxChange(item.id, 'i_sent_to_printful', e.target.checked)}
-                                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                                  className={`w-4 h-4 rounded focus:ring-2 ${
+                                    item.i_sent_to_printful 
+                                      ? 'text-green-600 bg-green-100 border-green-300 focus:ring-green-500' 
+                                      : 'text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500'
+                                  }`}
                                 />
-                                <span className="text-gray-600">I sent</span>
+                                <span className={`${
+                                  item.i_sent_to_printful ? 'text-green-700 font-semibold' : 'text-gray-600'
+                                }`}>I sent</span>
                               </label>
                               <label className="flex items-center space-x-2 text-sm">
                                 <input
