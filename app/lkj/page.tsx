@@ -656,7 +656,7 @@ export default function AdminOrdersPage() {
                 onChange={(e) => setShowNotSentOnly(e.target.checked)}
                 className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
               />
-              <span className="ml-2 text-sm font-medium text-gray-700">I didn't send</span>
+              <span className="ml-2 text-sm font-medium text-gray-700">I didn&apos;t send</span>
             </label>
           </div>
         </div>
