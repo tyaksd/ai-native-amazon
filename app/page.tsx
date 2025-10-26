@@ -29,7 +29,7 @@ export default function Home() {
   const [features, setFeatures] = useState<Feature[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [searchCurrentPage, setSearchCurrentPage] = useState(1)
-  const itemsPerPage = 100
+  const itemsPerPage = 80
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
