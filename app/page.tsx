@@ -449,7 +449,7 @@ export default function Home() {
             {features.length > 1 && (
               <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-transparent hover:bg-white/20 rounded-full p-2 md:p-3 transition-all"
                 aria-label="Previous slide"
               >
                 <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -462,7 +462,7 @@ export default function Home() {
             {features.length > 1 && (
               <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-transparent hover:bg-white/20 rounded-full p-2 md:p-3 transition-all"
                 aria-label="Next slide"
               >
                 <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
