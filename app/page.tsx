@@ -51,12 +51,15 @@ export default function Home() {
   useEffect(() => {
     if (features.length === 0) return
 
+    // 1枚目は1.75秒、それ以降は2秒
+    const duration = currentSlide === 0 ? 1750 : 2000
+    
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % features.length)
-    }, 1750) // 1.75秒ごとに自動スライド
+    }, duration)
 
     return () => clearInterval(interval)
-  }, [features.length])
+  }, [features.length, currentSlide])
 
   // スワイプジェスチャーのサポート
   const [touchStart, setTouchStart] = useState<number | null>(null)
