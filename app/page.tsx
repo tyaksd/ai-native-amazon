@@ -3,7 +3,7 @@
 import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from 'react'
-import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, Brand, Product } from '@/lib/data'
+import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, getFeatures, Brand, Product, Feature } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
 import analytics from '@/lib/analytics'
@@ -25,9 +25,70 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [searchResults, setSearchResults] = useState<{products: Product[], brands: Brand[]} | null>(null)
   const [, setIsSearching] = useState(false) // Using underscore to indicate intentionally unused
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [features, setFeatures] = useState<Feature[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [searchCurrentPage, setSearchCurrentPage] = useState(1)
+  const itemsPerPage = 100
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % features.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + features.length) % features.length)
+  }
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index)
+  }
+
+  // 自動スライド機能
+  useEffect(() => {
+    if (features.length === 0) return
+
+    // 最初のスライドは1秒、それ以降は2秒
+    const duration = currentSlide === 0 ? 1000 : 2000
+    
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % features.length)
+    }, duration)
+
+    return () => clearInterval(interval)
+  }, [features.length, currentSlide])
+
+  // スワイプジェスチャーのサポート
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+    
+    if (isLeftSwipe) {
+      nextSlide()
+    } else if (isRightSwipe) {
+      prevSlide()
+    }
+  }
+
   const shuffleProducts = (items: Product[]) => {
     const arr = [...items]
     for (let i = arr.length - 1; i > 0; i--) {
@@ -69,14 +130,16 @@ export default function Home() {
         // Initialize analytics
         await analytics.initialize()
         
-        const [productsData, brandsData, mainCategoriesData] = await Promise.all([
+        const [productsData, brandsData, mainCategoriesData, featuresData] = await Promise.all([
           getVisibleProducts(),
           getBrands(),
-          getMainCategories()
+          getMainCategories(),
+          getFeatures()
         ])
         setProducts(shuffleProducts(productsData))
         setBrands(brandsData)
         setMainCategories(mainCategoriesData)
+        setFeatures(featuresData)
         
         // Check favorites for all products at once
         if (productsData.length > 0) {
@@ -99,6 +162,7 @@ export default function Home() {
     }
 
     setIsSearching(true)
+    setSearchCurrentPage(1) // Reset search page when new search is performed
     
     try {
       const [productsData, brandsData] = await Promise.all([
@@ -229,6 +293,7 @@ export default function Home() {
   // フィルターが変更された時に商品を更新
   useEffect(() => {
     const loadFilteredProducts = async () => {
+      setCurrentPage(1) // Reset to first page when filters change
       if (selectedMainCategory === 'All') {
         const productsData = await getVisibleProducts()
         setProducts(shuffleProducts(productsData))
@@ -248,6 +313,65 @@ export default function Home() {
     }
     loadFilteredProducts()
   }, [selectedMainCategory, selectedGender, selectedType])
+  
+  // Calculate pagination for main products
+  const totalPages = Math.ceil(products.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentProducts = products.slice(startIndex, endIndex)
+  
+  // Calculate pagination for search results
+  const searchTotalPages = searchResults ? Math.ceil(searchResults.products.length / itemsPerPage) : 0
+  const searchStartIndex = (searchCurrentPage - 1) * itemsPerPage
+  const searchEndIndex = searchStartIndex + itemsPerPage
+  const currentSearchProducts = searchResults ? searchResults.products.slice(searchStartIndex, searchEndIndex) : []
+  
+  // Function to generate page numbers to display
+  const getPageNumbers = (currentPageNum: number, totalPagesNum: number) => {
+    const pages: (number | string)[] = []
+    const maxPagesToShow = 5
+    
+    if (totalPagesNum <= maxPagesToShow) {
+      // Show all pages if total is less than max
+      for (let i = 1; i <= totalPagesNum; i++) {
+        pages.push(i)
+      }
+    } else {
+      // Always show first page
+      pages.push(1)
+      
+      // Calculate range around current page
+      let start = Math.max(2, currentPageNum - 1)
+      let end = Math.min(totalPagesNum - 1, currentPageNum + 1)
+      
+      // Adjust range if at the beginning or end
+      if (currentPageNum <= 3) {
+        end = 4
+      } else if (currentPageNum >= totalPagesNum - 2) {
+        start = totalPagesNum - 3
+      }
+      
+      // Add ellipsis if needed
+      if (start > 2) {
+        pages.push('...')
+      }
+      
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      
+      // Add ellipsis if needed
+      if (end < totalPagesNum - 1) {
+        pages.push('...')
+      }
+      
+      // Always show last page
+      pages.push(totalPagesNum)
+    }
+    
+    return pages
+  }
 
   if (loading) {
     return (
@@ -258,29 +382,99 @@ export default function Home() {
   }
   return (
     <div className="bg-black">
-      {/* Hero Section */}
-      <div className="relative py-3 md:py-10 text-center overflow-hidden bg-black">
-        
-        {/* Content */}
-        <div className="relative z-10 px-8 sm:px-0">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            <div className="block md:inline">
-              <span className="animated-gradient-1">Created by AI.</span>
+      {/* Hero Carousel Section */}
+      {features.length > 0 && (
+        <div className="relative w-full overflow-hidden bg-black">
+          <div className="relative mx-auto" style={{ maxWidth: '1400px' }}>
+            {/* カルーセルコンテナ */}
+            <div 
+              className="relative h-[240px] md:h-[320px] overflow-hidden"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
+              {/* スライド */}
+              <div 
+                className="flex transition-transform duration-500 ease-out h-full"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {features.map((feature) => (
+                  <div key={feature.id} className="min-w-full h-full relative">
+                    <Link href={feature.link_url} className="block w-full h-full">
+                      {/* 背景画像 */}
+                      <div className="relative w-full h-full">
+                        <OptimizedImage 
+                          src={feature.image_url} 
+                          alt={feature.title}
+                          fill
+                          className="object-cover"
+                          isImportant={true}
+                        />
+                        {/* オーバーレイ */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                      </div>
+                      
+                      {/* テキストコンテンツ */}
+                      <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16">
+                        <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                          {feature.title}
+                        </h2>
+                        <p className="text-base md:text-xl text-white drop-shadow-lg">
+                          {feature.subtitle}
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </div>
-            <span className="hidden md:inline"> </span>
-            <div className="block md:inline">
-              <span className="animated-gradient-2">Loved by You.</span>
-            </div>
-            <span className="hidden md:inline"> </span>
-            <div className="block md:inline">
-              Discover Now!
-            </div>
-          </h1>
-          <p className="text-lg text-white max-w-2xl mx-auto">
-            {/* Explore creations born from your taste, crafted on demand. */}
-          </p>
+
+            {/* 左ナビゲーションボタン */}
+            {features.length > 1 && (
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all"
+                aria-label="Previous slide"
+              >
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* 右ナビゲーションボタン */}
+            {features.length > 1 && (
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all"
+                aria-label="Next slide"
+              >
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+
+            {/* ドットインジケーター */}
+            {features.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+                {features.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      currentSlide === index 
+                        ? 'bg-white w-6' 
+                        : 'bg-white/50 hover:bg-white/75'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="">
         {searchResults ? (
@@ -376,7 +570,7 @@ export default function Home() {
               <div>
                 <h3 className="text-lg font-medium mb-4 text-white">Products</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
-                  {searchResults.products.map((p, index) => (
+                  {currentSearchProducts.map((p, index) => (
                     <div key={p.id} className="group relative">
                       <Link 
                         href={`/${p.brand_id}/${p.id}`} 
@@ -472,6 +666,77 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Search Results Pagination */}
+                {searchTotalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8 px-3">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => {
+                        if (searchCurrentPage > 1) {
+                          setSearchCurrentPage(searchCurrentPage - 1)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }
+                      }}
+                      disabled={searchCurrentPage === 1}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        searchCurrentPage === 1
+                          ? 'text-gray-500 cursor-not-allowed'
+                          : 'text-white hover:bg-white/20'
+                      }`}
+                      aria-label="Previous page"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Page Numbers */}
+                    {getPageNumbers(searchCurrentPage, searchTotalPages).map((page, index) => (
+                      typeof page === 'number' ? (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setSearchCurrentPage(page)
+                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                          }}
+                          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                            searchCurrentPage === page
+                              ? 'bg-white text-black'
+                              : 'text-white hover:bg-white/20'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ) : (
+                        <span key={index} className="px-2 text-gray-500">
+                          {page}
+                        </span>
+                      )
+                    ))}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => {
+                        if (searchCurrentPage < searchTotalPages) {
+                          setSearchCurrentPage(searchCurrentPage + 1)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }
+                      }}
+                      disabled={searchCurrentPage === searchTotalPages}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        searchCurrentPage === searchTotalPages
+                          ? 'text-gray-500 cursor-not-allowed'
+                          : 'text-white hover:bg-white/20'
+                      }`}
+                      aria-label="Next page"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -584,7 +849,7 @@ export default function Home() {
               )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
-              {products.map((p, index) => (
+              {currentProducts.map((p, index) => (
                 <div key={p.id} className="group relative">
                   <Link 
                     href={`/${p.brand_id}/${p.id}`} 
@@ -675,6 +940,77 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8 px-3">
+                {/* Previous Button */}
+                <button
+                  onClick={() => {
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1)
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    currentPage === 1
+                      ? 'text-gray-500 cursor-not-allowed'
+                      : 'text-white hover:bg-white/20'
+                  }`}
+                  aria-label="Previous page"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                {/* Page Numbers */}
+                {getPageNumbers(currentPage, totalPages).map((page, index) => (
+                  typeof page === 'number' ? (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentPage(page)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-white text-black'
+                          : 'text-white hover:bg-white/20'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ) : (
+                    <span key={index} className="px-2 text-gray-500">
+                      {page}
+                    </span>
+                  )
+                ))}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => {
+                    if (currentPage < totalPages) {
+                      setCurrentPage(currentPage + 1)
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                  }}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    currentPage === totalPages
+                      ? 'text-gray-500 cursor-not-allowed'
+                      : 'text-white hover:bg-white/20'
+                  }`}
+                  aria-label="Next page"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

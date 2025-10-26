@@ -31,6 +31,18 @@ export type Product = {
   updated_at: string;
 };
 
+export type Feature = {
+  id: string;
+  title: string;
+  subtitle: string;
+  image_url: string;
+  link_url: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export async function getBrands(): Promise<Brand[]> {
   const { data, error } = await supabase
     .from('brands')
@@ -458,6 +470,22 @@ export async function getProductsByCategoryAndGender(category: string, gender: s
 
   if (error) {
     console.error('Error fetching products by category and gender:', error)
+    return []
+  }
+
+  return data || []
+}
+
+// Features management functions
+export async function getFeatures(): Promise<Feature[]> {
+  const { data, error } = await supabase
+    .from('features')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching features:', error)
     return []
   }
 
