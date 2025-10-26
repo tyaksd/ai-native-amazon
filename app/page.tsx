@@ -2,7 +2,7 @@
 
 import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, getFeatures, Brand, Product, Feature } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
@@ -30,6 +30,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchCurrentPage, setSearchCurrentPage] = useState(1)
   const itemsPerPage = 80
+  const [productImageCache, setProductImageCache] = useState<Record<string, string>>({})
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
@@ -95,31 +96,46 @@ export default function Home() {
     return arr
   }
 
-  // 商品の色に基づいてランダムに画像を選択する関数
-  const getRandomImageForProduct = (product: Product): string | null => {
+  // 商品の色に基づいてランダムに画像を選択する関数（キャッシュ機能付き）
+  const getRandomImageForProduct = useCallback((product: Product): string | null => {
+    // キャッシュに存在する場合は、キャッシュされた画像を返す
+    if (productImageCache[product.id]) {
+      return productImageCache[product.id]
+    }
+
     if (!product.images || product.images.length === 0) {
       return null
     }
     
+    let selectedImage: string
+    
     if (!product.colors || product.colors.length === 0) {
       // 色情報がない場合は最初の画像を返す
-      return product.images[0]
+      selectedImage = product.images[0]
+    } else {
+      // 利用可能な色から最初の2つを取得（black, white, red, blue の例では black, white）
+      const availableColors = product.colors.slice(0, 2)
+      
+      // 利用可能な色からランダムに1つ選択
+      const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)]
+      
+      // 選択された色に対応する画像のインデックスを取得
+      const colorIndex = product.colors.indexOf(randomColor)
+      
+      // 色のインデックスに対応する画像を返す（画像が足りない場合は循環）
+      const imageIndex = colorIndex % product.images.length
+      
+      selectedImage = product.images[imageIndex]
     }
     
-    // 利用可能な色から最初の2つを取得（black, white, red, blue の例では black, white）
-    const availableColors = product.colors.slice(0, 2)
+    // キャッシュに保存
+    setProductImageCache(prev => ({
+      ...prev,
+      [product.id]: selectedImage
+    }))
     
-    // 利用可能な色からランダムに1つ選択
-    const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)]
-    
-    // 選択された色に対応する画像のインデックスを取得
-    const colorIndex = product.colors.indexOf(randomColor)
-    
-    // 色のインデックスに対応する画像を返す（画像が足りない場合は循環）
-    const imageIndex = colorIndex % product.images.length
-    
-    return product.images[imageIndex]
-  }
+    return selectedImage
+  }, [productImageCache])
 
   useEffect(() => {
     const loadData = async () => {
