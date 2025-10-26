@@ -83,7 +83,15 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Feature ID is required' }, { status: 400 })
     }
 
-    const updateData: any = {}
+    const updateData: {
+      title?: string
+      subtitle?: string
+      image_url?: string
+      link_url?: string
+      display_order?: number
+      is_active?: boolean
+      updated_at?: string
+    } = {}
     if (title !== undefined) updateData.title = title
     if (subtitle !== undefined) updateData.subtitle = subtitle
     if (image_url !== undefined) updateData.image_url = image_url
