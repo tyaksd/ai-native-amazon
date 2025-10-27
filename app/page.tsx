@@ -51,8 +51,8 @@ export default function Home() {
   useEffect(() => {
     if (features.length === 0) return
 
-    // 1枚目は1.75秒、それ以降は2秒
-    const duration = currentSlide === 0 ? 1750 : 2000
+    // 1枚目は2秒、それ以降は2.5秒
+    const duration = currentSlide === 0 ? 2000 : 2500
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % features.length)

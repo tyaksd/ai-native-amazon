@@ -12,3 +12,13 @@
 2025-10-26 16:00:58 | INFO | Creating carousel with 2 images for brand: HUSHRAK
 2025-10-26 16:01:01 | ERROR | ❌ Instagram brand post failed
 2025-10-26 16:01:01 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-27 00:09:59 | INFO | 🔄 Daily Instagram post count reset
+2025-10-27 00:09:59 | INFO | Starting scheduled Instagram brand post...
+2025-10-27 00:10:02 | INFO | Creating carousel with 5 images for brand: GhostWeft
+2025-10-27 00:10:03 | ERROR | ❌ Instagram brand post failed
+2025-10-27 00:10:03 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-27 08:00:41 | INFO | Starting scheduled Instagram brand post...
+2025-10-27 08:00:44 | WARNING | Not enough products for brand OboroFlux, using available products
+2025-10-27 08:00:44 | INFO | Creating carousel with 2 images for brand: OboroFlux
+2025-10-27 08:00:44 | ERROR | ❌ Instagram brand post failed
+2025-10-27 08:00:44 | ERROR | ❌ Scheduled Instagram post failed
