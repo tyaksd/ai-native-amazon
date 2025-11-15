@@ -10,24 +10,24 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    // 画像処理のタイムアウトを延長
+    // Extend image processing timeout
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // 画像最適化のタイムアウトを延長
+    // Extend image optimization timeout
     loader: 'custom',
     loaderFile: './lib/imageLoader.ts',
     
-    // コスト最適化設定
-    // キャッシュ期間を31日に設定（画像が1ヶ月以内に変更されない場合）
-    minimumCacheTTL: 2678400, // 31日（秒）
+    // Cost optimization settings
+    // Set cache period to 31 days (if images are not changed within a month)
+    minimumCacheTTL: 2678400, // 31 days (seconds)
     
-    // 画像フォーマットをWebPのみに制限（変換数を削減）
+    // Limit image format to WebP only (reduce number of conversions)
     formats: ['image/webp'],
     
-    // デバイスサイズを制限（不要なサイズの変換を削減）
+    // Limit device sizes (reduce unnecessary size conversions)
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     
-    // 画像サイズを制限
+    // Limit image sizes
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 };

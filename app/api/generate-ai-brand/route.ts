@@ -10,11 +10,14 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     console.log('Starting AI brand generation...')
-    const { brandStyle, quantity = 1 } = await request.json()
-    console.log('Brand style:', brandStyle, 'Quantity:', quantity)
+    const { brandStyle, quantity = 1, customDescription } = await request.json()
+    console.log('Brand style:', brandStyle, 'Quantity:', quantity, 'Custom description:', customDescription ? 'provided' : 'not provided')
 
-    if (!brandStyle || !['street', 'casual'].includes(brandStyle)) {
-      return NextResponse.json({ error: 'Invalid brand style' }, { status: 400 })
+    // If customDescription is provided, ignore brandStyle validation
+    if (!customDescription) {
+      if (!brandStyle || !['street', 'casual'].includes(brandStyle)) {
+        return NextResponse.json({ error: 'Invalid brand style' }, { status: 400 })
+      }
     }
 
     const quantityNum = Number(quantity)
@@ -23,7 +26,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate multiple unique brands
-    console.log(`Generating ${quantityNum} unique ${brandStyle} brands...`)
+    const styleLabel = customDescription ? 'custom' : brandStyle
+    console.log(`Generating ${quantityNum} unique ${styleLabel} brands...`)
     
     const generatedBrands = []
     
@@ -33,7 +37,14 @@ export async function POST(request: NextRequest) {
       // Create style-specific prompts - completely separate for each style
       let basePrompt: string
       
-      if (brandStyle === 'street') {
+      if (customDescription) {
+        // Custom description provided - use it to generate brand
+        basePrompt = `Role and Task: "Act as an avant-garde fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new fashion brand launching on an e-commerce platform based on the following custom description:
+
+${customDescription}
+
+CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands being generated. Each brand must be COMPLETELY UNIQUE and DIFFERENT from all others. Avoid any similarities in names, concepts, colors, or aesthetics.`
+      } else if (brandStyle === 'street') {
         basePrompt = `Role and Task: "Act as an avant-garde street fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new streetwear brand launching on an e-commerce platform."
 
 STREETWEAR FOCUS: Create bold, edgy, urban-inspired brands that embody rebellion, youth culture, and underground aesthetics. Think graffiti, skate culture, hip-hop, punk, and urban subcultures.
@@ -52,7 +63,59 @@ CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands
       // Create the complete prompt with style-specific content
       let prompt: string
       
-      if (brandStyle === 'street') {
+      if (customDescription) {
+        // Custom description prompt
+        prompt = basePrompt + `
+
+IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
+
+— Brand Name —
+Invent an original, memorable word or phrase that captures the brand's distinct tone and emotion based on the custom description provided.
+Avoid generic words. Draw from unexpected cultural or emotional sources.
+The name should feel fresh, ownable, and globally distinctive.
+→ Be more spontaneous, experimental, and even chaotic.
+Let intuition override logic.
+Embrace imperfection, randomness, and subconscious inspiration — the name can sound irrational, misspelled, or strangely beautiful.
+Focus on raw emotion over reason.
+
+— Brand Concept —
+Write a detailed and emotionally resonant description of around **90 words** that captures the brand's worldview, visual philosophy, and emotional tone based on the custom description.
+It should describe how the brand *feels* — its rhythm, aesthetic, and underlying story — not just what it sells.
+Blend poetic abstraction with visual precision.
+Avoid clichés and create a fresh, vivid image that feels cinematic and conceptually bold.
+
+— Design Concept —
+Describe the visual DNA of the brand: color schemes, shapes, typography, and motifs based on the custom description.
+Blend unexpected design schools.
+Encourage unusual materials, hybrid inspirations, and experimental layout approaches.
+Focus on originality and sensory impact.
+
+— Target Audience —
+Define the subculture or mindset of the audience based on the custom description.
+They can be: experimental fashion followers, digital natives, art students, or any relevant audience that aligns with the custom description.
+Each audience description must sound culturally distinct and emotionally resonant.
+
+— Logo Design —
+Create a simple, iconic symbol that reflects the brand's visual identity and can adapt to collaborations.
+Focus on visual elements, shapes, and typography.
+Generate a minimalist logo image with the emblem or symbol positioned precisely at the center of the canvas.
+Avoid any extraneous objects, backgrounds, or text; focus solely on the primary logo shape.
+Use crisp lines and balanced proportions so that the design remains clear when scaled down.
+The style should resemble vector art with high contrast and a limited color palette.
+The logo color should be the most representative color that reflects the brand concept — not necessarily black or white, but the color that best embodies the brand's identity and aesthetic.
+Leave generous white space around the logo to emphasize its central placement and ensure the overall composition feels uncluttered.
+
+IMPORTANT: There is a 70% chance the logo should be text-based rather than a symbol/icon.
+If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept.
+The text should be the main focus, positioned centrally with generous white space around it.
+
+— Background Image —
+Describe a striking header background that embodies the brand's atmosphere and emotional tone based on the custom description.
+The scene should visually translate the brand concept into space, light, and texture.
+The image must feel like an immersive world where the brand lives — poetic, cinematic, and conceptually aligned with its design DNA.
+The image should be high-resolution, visually sharp, and production-ready, suitable for use as a large-scale e-commerce header.
+It must directly reflect the unique emotional core and aesthetic philosophy of the specific brand concept based on the custom description.`
+      } else if (brandStyle === 'street') {
         prompt = basePrompt + `
 
 IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
@@ -341,12 +404,21 @@ Please provide the response in the following JSON format:
 
       // Create brand in database
       console.log(`Creating brand ${i + 1} in database...`)
+      // Determine category based on custom description or brandStyle
+      let category = 'Casual'
+      if (customDescription) {
+        // For custom descriptions, default to Streetwear
+        category = 'Streetwear'
+      } else {
+        category = brandStyle === 'street' ? 'Streetwear' : 'Casual'
+      }
+      
       const newBrand = await createBrand({
         name: brandContent.name,
         description: brandContent.description,
         icon: uploadedLogoUrl,
         background_image: uploadedBackgroundUrl,
-        category: brandStyle === 'street' ? 'Streetwear' : 'Casual',
+        category: category,
         design_concept: brandContent.design_concept,
         target_audience: brandContent.target_audience,
         logo_design: brandContent.logo_design,

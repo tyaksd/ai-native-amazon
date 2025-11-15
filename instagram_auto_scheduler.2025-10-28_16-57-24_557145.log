@@ -1,0 +1,14 @@
+2025-10-28 16:57:24 | INFO | Starting scheduled Instagram brand post...
+2025-10-28 16:57:25 | ERROR | No brands found
+2025-10-28 16:57:25 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-29 00:10:52 | INFO | 🔄 Daily Instagram post count reset
+2025-10-29 00:10:52 | INFO | Starting scheduled Instagram brand post...
+2025-10-29 00:10:53 | WARNING | Not enough products for brand Plumea, using available products
+2025-10-29 00:10:53 | INFO | Creating carousel with 2 images for brand: Plumea
+2025-10-29 00:10:54 | ERROR | ❌ Instagram brand post failed
+2025-10-29 00:10:54 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-29 08:00:19 | INFO | Starting scheduled Instagram brand post...
+2025-10-29 08:00:21 | WARNING | Not enough products for brand SILTRUM, using available products
+2025-10-29 08:00:21 | INFO | Creating carousel with 2 images for brand: SILTRUM
+2025-10-29 08:00:22 | ERROR | ❌ Instagram brand post failed
+2025-10-29 08:00:22 | ERROR | ❌ Scheduled Instagram post failed

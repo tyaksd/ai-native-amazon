@@ -21,13 +21,13 @@ export default function cloudinaryLoader({ src, width, quality }: {
     const publicIdIndex = urlParts.findIndex(part => part === 'upload') + 1
     const publicId = urlParts.slice(publicIdIndex).join('/').split('.')[0]
 
-    // コスト最適化のための変換設定
+    // Transformation settings for cost optimization
     const transformations = [
       `w_${width}`,
-      `q_${quality || 80}`, // デフォルト品質を80に設定
-      'f_webp', // WebPフォーマットに固定（変換数を削減）
-      'c_limit', // アスペクト比を保持
-      'fl_progressive' // プログレッシブJPEG（読み込み速度向上）
+      `q_${quality || 80}`, // Set default quality to 80
+      'f_webp', // Fixed to WebP format (reduce number of conversions)
+      'c_limit', // Preserve aspect ratio
+      'fl_progressive' // Progressive JPEG (improve loading speed)
     ].join(',')
 
     return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}`

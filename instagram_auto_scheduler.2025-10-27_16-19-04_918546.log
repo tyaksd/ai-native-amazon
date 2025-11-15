@@ -1,0 +1,15 @@
+2025-10-27 16:19:04 | INFO | Starting scheduled Instagram brand post...
+2025-10-27 16:19:07 | INFO | Creating carousel with 5 images for brand: ZYVØR
+2025-10-27 16:19:08 | ERROR | ❌ Instagram brand post failed
+2025-10-27 16:19:08 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-28 00:12:33 | INFO | 🔄 Daily Instagram post count reset
+2025-10-28 00:12:33 | INFO | Starting scheduled Instagram brand post...
+2025-10-28 00:12:36 | WARNING | Not enough products for brand RIFTOK, using available products
+2025-10-28 00:12:36 | INFO | Creating carousel with 2 images for brand: RIFTOK
+2025-10-28 00:12:37 | ERROR | ❌ Instagram brand post failed
+2025-10-28 00:12:37 | ERROR | ❌ Scheduled Instagram post failed
+2025-10-28 08:00:57 | INFO | Starting scheduled Instagram brand post...
+2025-10-28 08:01:00 | WARNING | Not enough products for brand OboroFlux, using available products
+2025-10-28 08:01:00 | INFO | Creating carousel with 2 images for brand: OboroFlux
+2025-10-28 08:01:01 | ERROR | ❌ Instagram brand post failed
+2025-10-28 08:01:01 | ERROR | ❌ Scheduled Instagram post failed

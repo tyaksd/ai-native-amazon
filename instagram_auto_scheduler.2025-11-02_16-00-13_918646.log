@@ -1,0 +1,13 @@
+2025-11-02 16:00:13 | INFO | Starting scheduled Instagram brand post...
+2025-11-02 16:00:13 | ERROR | Error fetching brands: HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/brands (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103debc10>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-11-02 16:00:13 | ERROR | No brands found
+2025-11-02 16:00:13 | ERROR | ❌ Scheduled Instagram post failed
+2025-11-03 00:10:41 | INFO | 🔄 Daily Instagram post count reset
+2025-11-03 00:10:41 | INFO | Starting scheduled Instagram brand post...
+2025-11-03 00:10:41 | ERROR | Error fetching brands: HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/brands (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103f699a0>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-11-03 00:10:41 | ERROR | No brands found
+2025-11-03 00:10:41 | ERROR | ❌ Scheduled Instagram post failed
+2025-11-03 08:00:45 | INFO | Starting scheduled Instagram brand post...
+2025-11-03 08:00:45 | ERROR | Error fetching brands: HTTPConnectionPool(host='localhost', port=3000): Max retries exceeded with url: /api/brands (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x103e24520>: Failed to establish a new connection: [Errno 61] Connection refused'))
+2025-11-03 08:00:45 | ERROR | No brands found
+2025-11-03 08:00:45 | ERROR | ❌ Scheduled Instagram post failed

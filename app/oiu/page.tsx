@@ -29,11 +29,13 @@ export default function AdminPage() {
   const [quantity, setQuantity] = useState('')
   const [brandSearchQuery, setBrandSearchQuery] = useState('')
   const [showBrandDropdown, setShowBrandDropdown] = useState(false)
+  const [customDesignDescription, setCustomDesignDescription] = useState('')
 
   // AI Brands form states
   const [aiBrandQuantity, setAiBrandQuantity] = useState('')
   const [generatedBrandsCount, setGeneratedBrandsCount] = useState(0) // eslint-disable-line @typescript-eslint/no-unused-vars
   // Note: generatedBrandsCount is used in the UI but ESLint doesn't detect it
+  const [customBrandDescription, setCustomBrandDescription] = useState('')
 
   // Batch Products form states
   const [isBatchGenerating, setIsBatchGenerating] = useState(false)
@@ -429,7 +431,8 @@ export default function AdminPage() {
           productType: selectedProductType,
           colors: selectedColors,
           gender: aiProductGender,
-          quantity: quantityNum
+          quantity: quantityNum,
+          customDesignDescription: customDesignDescription.trim() || undefined
         }),
         signal: AbortSignal.timeout(300000), // 5 minutes timeout
       })
@@ -453,6 +456,7 @@ export default function AdminPage() {
         setSelectedColors([])
         setAiProductGender('Unisex')
         setQuantity('')
+        setCustomDesignDescription('')
       } else {
         throw new Error('Failed to generate products')
       }
@@ -482,15 +486,23 @@ export default function AdminPage() {
     try {
       const selectedStyle = (document.querySelector('input[name="brandStyle"]:checked') as HTMLInputElement)?.value || 'street'
       
+      // If custom description is provided, use it and ignore brandStyle
+      const requestBody: { quantity: number; brandStyle?: string; customDescription?: string } = {
+        quantity: quantityNum
+      }
+      
+      if (customBrandDescription.trim()) {
+        requestBody.customDescription = customBrandDescription.trim()
+      } else {
+        requestBody.brandStyle = selectedStyle
+      }
+      
       const response = await fetch('/api/generate-ai-brand', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          brandStyle: selectedStyle,
-          quantity: quantityNum 
-        }),
+        body: JSON.stringify(requestBody),
         signal: AbortSignal.timeout(300000), // 5 minutes timeout for multiple brands
       })
 
@@ -509,6 +521,7 @@ export default function AdminPage() {
         
         // Reset form
         setAiBrandQuantity('')
+        setCustomBrandDescription('')
       } else {
         throw new Error('Failed to generate brands')
       }
@@ -1304,6 +1317,25 @@ export default function AdminPage() {
                       </div>
                     </div>
                     
+                    {/* Custom Design Description */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Design Description (Optional)
+                      </label>
+                      <textarea
+                        value={customDesignDescription}
+                        onChange={(e) => setCustomDesignDescription(e.target.value)}
+                        rows={4}
+                        placeholder="Describe the design you want to create. This description will be added to the design generation prompt."
+                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 px-3 py-2"
+                      />
+                      {customDesignDescription.trim() && (
+                        <p className="mt-2 text-sm text-purple-600">
+                          Custom design description is entered. This description will be reflected in the design generation.
+                        </p>
+                      )}
+                    </div>
+                    
                     {/* Generate Button */}
                     <div className="mt-6 flex justify-center">
                       <button 
@@ -1337,8 +1369,9 @@ export default function AdminPage() {
                             value="street"
                             className="mr-3 text-indigo-600 focus:ring-indigo-500 w-5 h-5"
                             defaultChecked
+                            disabled={!!customBrandDescription.trim()}
                           />
-                          <span className="text-lg font-medium text-gray-700">Street</span>
+                          <span className={`text-lg font-medium ${customBrandDescription.trim() ? 'text-gray-400' : 'text-gray-700'}`}>Street</span>
                         </label>
                         <label className="flex items-center cursor-pointer">
                           <input
@@ -1346,9 +1379,29 @@ export default function AdminPage() {
                             name="brandStyle"
                             value="casual"
                             className="mr-3 text-indigo-600 focus:ring-indigo-500 w-5 h-5"
+                            disabled={!!customBrandDescription.trim()}
                           />
-                          <span className="text-lg font-medium text-gray-700">Casual</span>
+                          <span className={`text-lg font-medium ${customBrandDescription.trim() ? 'text-gray-400' : 'text-gray-700'}`}>Casual</span>
                         </label>
+                      </div>
+                      
+                      {/* Custom Brand Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Custom Brand Description (Optional)
+                        </label>
+                        <textarea
+                          value={customBrandDescription}
+                          onChange={(e) => setCustomBrandDescription(e.target.value)}
+                          rows={4}
+                          placeholder="Describe the brand you want to create. If a description is provided, the Street/Casual selection above will be ignored."
+                          className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2"
+                        />
+                        {customBrandDescription.trim() && (
+                          <p className="mt-2 text-sm text-indigo-600">
+                            Custom description is entered. The Street/Casual selection will be ignored.
+                          </p>
+                        )}
                       </div>
                       
                       {/* Quantity Input */}

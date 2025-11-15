@@ -47,11 +47,11 @@ export default function Home() {
     setCurrentSlide(index)
   }
 
-  // 自動スライド機能
+  // Automatic slide feature
   useEffect(() => {
     if (features.length === 0) return
 
-    // 1枚目は2秒、それ以降は2.5秒
+    // First slide is 2 seconds, subsequent slides are 2.5 seconds
     const duration = currentSlide === 0 ? 2000 : 2500
     
     const interval = setInterval(() => {
@@ -61,7 +61,7 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [features.length, currentSlide])
 
-  // スワイプジェスチャーのサポート
+  // Support for swipe gestures
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [touchEnd, setTouchEnd] = useState<number | null>(null)
 
@@ -99,9 +99,9 @@ export default function Home() {
     return arr
   }
 
-  // 商品の色に基づいてランダムに画像を選択する関数（キャッシュ機能付き）
+  // Function to randomly select images based on product color (with caching)
   const getRandomImageForProduct = useCallback((product: Product): string | null => {
-    // キャッシュに存在する場合は、キャッシュされた画像を返す
+    // Return cached image if it exists in cache
     if (productImageCache[product.id]) {
       return productImageCache[product.id]
     }
@@ -113,25 +113,25 @@ export default function Home() {
     let selectedImage: string
     
     if (!product.colors || product.colors.length === 0) {
-      // 色情報がない場合は最初の画像を返す
+      // Return first image if no color information
       selectedImage = product.images[0]
     } else {
-      // 利用可能な色から最初の2つを取得（black, white, red, blue の例では black, white）
+      // Get first 2 available colors (e.g., black and white from black, white, red, blue)
       const availableColors = product.colors.slice(0, 2)
       
-      // 利用可能な色からランダムに1つ選択
+      // Randomly select one from available colors
       const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)]
       
-      // 選択された色に対応する画像のインデックスを取得
+      // Get image index corresponding to selected color
       const colorIndex = product.colors.indexOf(randomColor)
       
-      // 色のインデックスに対応する画像を返す（画像が足りない場合は循環）
+      // Return image corresponding to color index (cycles if not enough images)
       const imageIndex = colorIndex % product.images.length
       
       selectedImage = product.images[imageIndex]
     }
     
-    // キャッシュに保存
+    // Save to cache
     setProductImageCache(prev => ({
       ...prev,
       [product.id]: selectedImage
@@ -220,7 +220,7 @@ export default function Home() {
       setSearchQuery(searchParam)
       handleSearch(searchParam)
     } else {
-      // 検索パラメータがない場合は、検索結果のみをクリア（フィルターは保持）
+      // Clear only search results if no search parameter (keep filters)
       setSearchQuery('')
       setSearchResults(null)
     }
@@ -236,7 +236,7 @@ export default function Home() {
         setSearchQuery(searchParam)
         handleSearch(searchParam)
       } else if (!searchParam && (searchResults || searchQuery)) {
-        // 検索パラメータがない場合は検索状態のみをクリア（フィルターは保持）
+        // Clear only search state if no search parameter (keep filters)
         setSearchResults(null)
         setSearchQuery('')
       }
@@ -253,26 +253,26 @@ export default function Home() {
     }
   }, [searchQuery, searchResults, handleSearch])
 
-  // 追加: URLパラメータの変更をより頻繁に監視
+  // Additional: Monitor URL parameter changes more frequently
   useEffect(() => {
     const checkUrlParams = () => {
       const urlParams = new URLSearchParams(window.location.search)
       const searchParam = urlParams.get('search')
       
-      // 検索パラメータがない場合、検索状態をクリア（フィルターは保持）
+      // Clear search state if no search parameter (keep filters)
       if (!searchParam && (searchResults || searchQuery)) {
         setSearchResults(null)
         setSearchQuery('')
       }
     }
 
-    // 定期的にURLパラメータをチェック（ロゴクリック時のナビゲーションを検知）
+    // Periodically check URL parameters (detect navigation from logo click)
     const interval = setInterval(checkUrlParams, 100)
     
     return () => clearInterval(interval)
   }, [searchQuery, searchResults])
 
-  // 大分類が変更された時に性別を更新
+  // Update gender when main category changes
   useEffect(() => {
     const loadGenders = async () => {
       if (selectedMainCategory === 'All') {
@@ -291,7 +291,7 @@ export default function Home() {
     loadGenders()
   }, [selectedMainCategory])
 
-  // 性別が変更された時にタイプを更新
+  // Update type when gender changes
   useEffect(() => {
     const loadTypes = async () => {
       if (selectedMainCategory === 'All' || selectedGender === 'All') {
@@ -306,7 +306,7 @@ export default function Home() {
     loadTypes()
   }, [selectedMainCategory, selectedGender])
 
-  // フィルターが変更された時に商品を更新
+  // Update products when filters change
   useEffect(() => {
     const loadFilteredProducts = async () => {
       setCurrentPage(1) // Reset to first page when filters change
@@ -314,15 +314,15 @@ export default function Home() {
         const productsData = await getVisibleProducts()
         setProducts(shuffleProducts(productsData))
       } else if (selectedGender === 'All') {
-        // 大分類のみで絞り込み
+        // Filter by main category only
         const productsData = await getProductsByCategory(selectedMainCategory)
         setProducts(shuffleProducts(productsData))
       } else if (selectedType === 'All') {
-        // 大分類と性別で絞り込み
+        // Filter by main category and gender
         const productsData = await getProductsByCategoryAndGender(selectedMainCategory, selectedGender)
         setProducts(shuffleProducts(productsData))
       } else {
-        // 大分類、性別、タイプで絞り込み
+        // Filter by main category, gender, and type
         const productsData = await getProductsByCategoryGenderAndType(selectedMainCategory, selectedGender, selectedType)
         setProducts(shuffleProducts(productsData))
       }
@@ -402,14 +402,14 @@ export default function Home() {
       {features.length > 0 && (
         <div className="relative w-full overflow-hidden bg-black">
           <div className="relative mx-auto" style={{ maxWidth: '1400px' }}>
-            {/* カルーセルコンテナ */}
+            {/* Carousel container */}
             <div 
               className="relative h-[240px] md:h-[320px] overflow-hidden"
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* スライド */}
+              {/* Slides */}
               <div 
                 className="flex transition-transform duration-500 ease-out h-full"
                 style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -417,7 +417,7 @@ export default function Home() {
                 {features.map((feature) => (
                   <div key={feature.id} className="min-w-full h-full relative">
                     <Link href={feature.link_url} className="block w-full h-full">
-                      {/* 背景画像 */}
+                      {/* Background image */}
                       <div className="relative w-full h-full">
                         <OptimizedImage 
                           src={feature.image_url} 
@@ -426,11 +426,11 @@ export default function Home() {
                           className="object-cover"
                           isImportant={true}
                         />
-                        {/* オーバーレイ */}
+                        {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                       </div>
                       
-                      {/* テキストコンテンツ */}
+                      {/* Text content */}
                       <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16">
                         <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
                           {feature.title}
@@ -445,7 +445,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 左ナビゲーションボタン */}
+            {/* Left navigation button */}
             {features.length > 1 && (
               <button
                 onClick={prevSlide}
@@ -458,7 +458,7 @@ export default function Home() {
               </button>
             )}
 
-            {/* 右ナビゲーションボタン */}
+            {/* Right navigation button */}
             {features.length > 1 && (
               <button
                 onClick={nextSlide}
@@ -471,7 +471,7 @@ export default function Home() {
               </button>
             )}
 
-            {/* ドットインジケーター */}
+            {/* Dot indicators */}
             {features.length > 1 && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
                 {features.map((_, index) => (
@@ -780,7 +780,7 @@ export default function Home() {
                 </Link>
               </div>
               
-              {/* 大分類フィルター */}
+              {/* Main category filter */}
               <div className="mt-3 mb-3">
                 <div className="flex flex-wrap gap-2">
                   {["All", ...mainCategories].map((c) => (
@@ -807,7 +807,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 性別フィルター */}
+              {/* Gender filter */}
               {selectedMainCategory !== 'All' && genders.length > 0 && (
                 <div className="mt-3">
                   <div className="flex flex-wrap gap-2">
@@ -835,7 +835,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* タイプフィルター */}
+              {/* Type filter */}
               {selectedMainCategory !== 'All' && selectedGender !== 'All' && types.length > 0 && (
                 <div className="mt-3">
                   <div className="flex flex-wrap gap-2">

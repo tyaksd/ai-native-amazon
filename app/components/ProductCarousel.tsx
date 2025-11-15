@@ -24,7 +24,7 @@ export default function ProductCarousel({ products, title = "You might also like
   const dragStartXRef = useRef<number>(0);
   const dragStartScrollLeftRef = useRef<number>(0);
   const resumeTimerRef = useRef<number | null>(null);
-  const dragThreshold = 5; // ドラッグとクリックを区別する閾値（ピクセル）
+  const dragThreshold = 5; // Threshold to distinguish drag from click (pixels)
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
@@ -43,10 +43,10 @@ export default function ProductCarousel({ products, title = "You might also like
 
     let rafId = 0;
     let scrollPosition = el.scrollLeft || 0;
-    const SPEED = 0.6; // 自動スクロール速度(px/フレーム)
+    const SPEED = 0.6; // Auto scroll speed (px/frame)
 
     const animate = () => {
-      // 複製込み全幅の半分 = 元セット1周分
+      // Half of total width including duplicates = one full cycle of original set
       const originalWidth = (el.scrollWidth || 0) / 2;
 
       if (originalWidth > 0) {
@@ -55,7 +55,7 @@ export default function ProductCarousel({ products, title = "You might also like
           if (scrollPosition >= originalWidth) scrollPosition -= originalWidth;
           el.scrollLeft = scrollPosition;
         } else {
-          // ユーザー操作中は現在位置を基準にしておく
+          // Use current position as reference during user interaction
           const mod = el.scrollLeft % originalWidth;
           scrollPosition = mod >= 0 ? mod : mod + originalWidth;
         }
@@ -63,7 +63,7 @@ export default function ProductCarousel({ products, title = "You might also like
       rafId = requestAnimationFrame(animate);
     };
 
-    // タブが非表示のときは止める（省電力）
+    // Stop when tab is hidden (power saving)
     const onVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(rafId);
@@ -73,7 +73,7 @@ export default function ProductCarousel({ products, title = "You might also like
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // ユーザー操作ハンドラ
+    // User interaction handlers
     const pauseAuto = () => {
       isPausedRef.current = true;
       if (resumeTimerRef.current) {
@@ -97,7 +97,7 @@ export default function ProductCarousel({ products, title = "You might also like
     const onPointerDown = (e: PointerEvent) => {
       if (!el) return;
       pauseAuto();
-      isDraggingRef.current = false; // 最初はドラッグではない
+      isDraggingRef.current = false; // Not dragging initially
       el.setPointerCapture(e.pointerId);
       dragStartXRef.current = e.clientX;
       dragStartScrollLeftRef.current = el.scrollLeft;
@@ -107,7 +107,7 @@ export default function ProductCarousel({ products, title = "You might also like
       if (!el) return;
       const dx = Math.abs(e.clientX - dragStartXRef.current);
       
-      // 閾値を超えた場合のみドラッグ開始
+      // Start dragging only when threshold is exceeded
       if (dx > dragThreshold && !isDraggingRef.current) {
         isDraggingRef.current = true;
         (el as HTMLElement).style.cursor = 'grabbing';
@@ -128,9 +128,9 @@ export default function ProductCarousel({ products, title = "You might also like
         try { el.releasePointerCapture(e.pointerId); } catch {}
       }
       
-      // ドラッグしていなかった場合のみリンクを有効にする
+      // Enable link only if not dragging
       if (!wasDragging) {
-        // クリックイベントを許可するために少し遅延
+        // Delay a bit to allow click event
         setTimeout(() => {
           resumeAutoAfterIdle();
         }, 10);
@@ -145,8 +145,8 @@ export default function ProductCarousel({ products, title = "You might also like
     el.addEventListener('pointerup', endDrag);
     el.addEventListener('pointercancel', endDrag);
 
-    // 画像ロードやリサイズで幅が変わっても、毎フレーム originalWidth を参照するので追加処理不要
-    rafId = requestAnimationFrame(animate); // ★ 即起動
+    // No additional processing needed as originalWidth is referenced every frame even if width changes due to image load or resize
+    rafId = requestAnimationFrame(animate); // Immediate start
 
     return () => {
       cancelAnimationFrame(rafId);
@@ -181,14 +181,14 @@ export default function ProductCarousel({ products, title = "You might also like
           className="flex overflow-x-auto scrollbar-hide pb-4 cursor-grab"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {/* 元セット */}
+          {/* Original set */}
           {products.map((product) => (
             <div key={product.id} className="group relative flex-shrink-0 w-48 sm:w-56">
               <Link 
                 href={`/product/${product.id}`} 
                 className="block"
                 onClick={(e) => {
-                  // ドラッグ中でない場合のみナビゲーションを許可
+                  // Allow navigation only if not dragging
                   if (isDraggingRef.current) {
                     e.preventDefault();
                   }
@@ -224,7 +224,7 @@ export default function ProductCarousel({ products, title = "You might also like
                     href={`/product/${product.id}`} 
                     className="block font-medium text-white truncate hover:underline"
                     onClick={(e) => {
-                      // ドラッグ中でない場合のみナビゲーションを許可
+                      // Allow navigation only if not dragging
                       if (isDraggingRef.current) {
                         e.preventDefault();
                       }
@@ -238,14 +238,14 @@ export default function ProductCarousel({ products, title = "You might also like
             </div>
           ))}
 
-          {/* 複製セット（シームレスループ用） */}
+          {/* Duplicate set (for seamless loop) */}
           {products.map((product) => (
             <div key={`dup-${product.id}`} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">
               <Link 
                 href={`/product/${product.id}`} 
                 className="block"
                 onClick={(e) => {
-                  // ドラッグ中でない場合のみナビゲーションを許可
+                  // Allow navigation only if not dragging
                   if (isDraggingRef.current) {
                     e.preventDefault();
                   }
@@ -274,7 +274,7 @@ export default function ProductCarousel({ products, title = "You might also like
                     href={`/product/${product.id}`} 
                     className="block font-medium text-white truncate hover:underline"
                     onClick={(e) => {
-                      // ドラッグ中でない場合のみナビゲーションを許可
+                      // Allow navigation only if not dragging
                       if (isDraggingRef.current) {
                         e.preventDefault();
                       }
@@ -288,7 +288,7 @@ export default function ProductCarousel({ products, title = "You might also like
             </div>
           ))}
 
-          {/* ※ 商品数が少なくて横幅が足りない場合はもう1周分を追加してください */}
+          {/* Note: Add one more cycle if there are few products and not enough width */}
           {/* {products.map((product) => (
             <div key={`dup2-${product.id}`} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">...</div>
           ))} */}

@@ -6,14 +6,14 @@ import { createPortal } from 'react-dom'
 
 export default function MobileSearch() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [headerHeight, setHeaderHeight] = useState(64) // フォールバック
+  const [headerHeight, setHeaderHeight] = useState(64) // Fallback
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   // const router = useRouter() // Removed unused router
 
   useEffect(() => setMounted(true), [])
 
-  // 画面サイズを検出してモバイルかどうかを判定
+  // Detect screen size to determine if mobile
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768) // md breakpoint
@@ -24,7 +24,7 @@ export default function MobileSearch() {
     return () => window.removeEventListener('resize', checkIsMobile)
   }, [])
 
-  // ヘッダー高さを計測（初回＆リサイズ）
+  // Measure header height (initial & resize)
   useLayoutEffect(() => {
     const el = document.getElementById('site-header')
     const measure = () => {
@@ -37,7 +37,7 @@ export default function MobileSearch() {
     return () => window.removeEventListener('resize', measure)
   }, [])
 
-  // Esc で閉じる（任意）
+  // Close with Esc (optional)
   useEffect(() => {
     if (!isSearchOpen) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsSearchOpen(false) }
@@ -50,7 +50,7 @@ export default function MobileSearch() {
     const formData = new FormData(e.currentTarget)
     const query = (formData.get('search') as string) ?? ''
     if (query.trim()) {
-      // SPA にしたい場合は router.push に変更
+      // Change to router.push if you want SPA
       window.location.href = `/?search=${encodeURIComponent(query)}`
       // router.push(`/?search=${encodeURIComponent(query)}`)
     }
@@ -58,7 +58,7 @@ export default function MobileSearch() {
 
   return (
     <>
-      {/* ヘッダー内のトリガーボタン */}
+      {/* Trigger button in header */}
       <button
         onClick={() => setIsSearchOpen(true)}
         aria-label="Search"
@@ -69,17 +69,17 @@ export default function MobileSearch() {
         </svg>
       </button>
 
-      {/* 検索UIは body 直下へポータル（モバイルのみ） */}
+      {/* Portal search UI directly under body (mobile only) */}
       {mounted && isSearchOpen && isMobile && createPortal(
         <>
-          {/* 検索欄（ヘッダー上に被せる） */}
+          {/* Search bar (overlay on header) */}
           <div className="fixed  left-0 right-0 top-0 z-[100]">
             <div className="w-full">
                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md shadow-lg p-2 border border-white/20">
                 <form
                   onSubmit={handleSearch}
                   className="w-full flex items-center gap-2"
-                  onClick={(e) => e.stopPropagation()} // 検索欄内クリックでは閉じない
+                  onClick={(e) => e.stopPropagation()} // Don't close on click inside search bar
                 >
                   <input
                     name="search"
@@ -93,13 +93,13 @@ export default function MobileSearch() {
             </div>
           </div>
 
-          {/* ヘッダー“以外”クリックで閉じるバックドロップ（透明） */}
+          {/* Backdrop to close on click outside header (transparent) */}
           <div
             className="fixed inset-x-0 bottom-0 z-[90]"
             style={{ top: headerHeight }}
             onClick={() => setIsSearchOpen(false)}
           />
-          {/* デバッグ時: ↑に bg-black/10 を一時的に追加すると領域確認しやすい */}
+          {/* For debugging: temporarily add bg-black/10 to above to easily see the area */}
         </>,
         document.body
       )}

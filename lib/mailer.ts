@@ -9,14 +9,14 @@ type SendEmailOptions = {
 
 function getTransport() {
   const host = process.env.SMTP_HOST || 'smtp.titan.email'
-  const port = Number(process.env.SMTP_PORT || '465')  // 587から465に変更
-  // .env は文字列なので厳密に変換
+  const port = Number(process.env.SMTP_PORT || '465')  // Changed from 587 to 465
+  // .env is a string so convert strictly
   const secure =
     (process.env.SMTP_SECURE ?? '').toLowerCase() === 'true' || port === 465
 
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
-  // まずは FROM を送信ユーザーと同一でテスト（表示名は後で戻す）
+  // First test with FROM same as sending user (return display name later)
   // For development, use a fallback email if SPF is not configured
   const from = process.env.MAIL_FROM?.trim() || user || 'jack@godship.io'
   
@@ -44,12 +44,12 @@ function getTransport() {
     host,
     port,
     secure,                          // 587=false / 465=true
-    requireTLS: !secure,             // 587(STARTTLS)ならTLS必須
+    requireTLS: !secure,             // TLS required for 587(STARTTLS)
     tls: { 
       minVersion: 'TLSv1.2',
-      rejectUnauthorized: false      // 証明書検証を緩和
+      rejectUnauthorized: false      // Relax certificate verification
     },
-    authMethod: 'LOGIN',             // LOGINに戻す
+    authMethod: 'LOGIN',             // Return to LOGIN
     auth: { user, pass },
     logger: true, 
     debug: true,
@@ -60,7 +60,7 @@ function getTransport() {
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions) {
   const { transporter, from } = getTransport()
-  // 認証失敗を早期に把握
+  // Early detection of authentication failure
   await transporter.verify()
   await transporter.sendMail({ from, to, subject, html })
 }
@@ -163,7 +163,7 @@ export function renderOrderEmail(params: {
       if (it.color) meta.push(`Color: ${it.color}`)
       const metaText = meta.length ? ` <small>(${meta.join(', ')})</small>` : ''
       
-      // 商品画像を追加
+      // Add product image
       const imageHtml = it.image ? 
         `<img src="${it.image}" alt="${it.name}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-right:12px;vertical-align:middle;">` : 
         `<div style="width:60px;height:60px;background-color:#f3f4f6;border-radius:4px;margin-right:12px;display:inline-block;vertical-align:middle;"></div>`

@@ -23,18 +23,18 @@ export default function About() {
           setDisplayText(fullText.slice(0, displayText.length + 1));
         }, 80);
       } else {
-        // タイピング完了後、少し待ってから点滅開始
+        // Wait a bit after typing completes, then start blinking
         setTimeout(() => {
           setIsTyping(false);
           setIsBlinking(true);
         }, 200);
       }
     } else if (isBlinking) {
-      // 点滅アニメーション（2回点滅）
+      // Blinking animation (2 blinks)
       let blinkCount = 0;
       const blinkInterval = setInterval(() => {
         blinkCount++;
-        if (blinkCount >= 4) { // 2回点滅（表示・非表示）
+        if (blinkCount >= 4) { // 2 blinks (show/hide)
           clearInterval(blinkInterval);
           setIsBlinking(false);
           setDisplayText('');

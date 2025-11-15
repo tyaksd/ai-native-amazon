@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { getProductById, Product } from "@/lib/data";
 import { loadStripe } from '@stripe/stripe-js';
 
-// Apple Payの型定義
+// Type definition for Apple Pay
 declare global {
   interface Window {
     ApplePaySession?: {
@@ -65,7 +65,7 @@ export default function Cart() {
       const stripeInstance = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
       setStripe(stripeInstance);
       
-      // Apple Payの利用可能性をチェック（SafariとiOSデバイスで利用可能）
+      // Check Apple Pay availability (available on Safari and iOS devices)
       const isApplePaySupported = () => {
         return typeof window !== 'undefined' && 
                window.ApplePaySession && 
@@ -147,7 +147,7 @@ export default function Cart() {
         return;
       }
 
-      // Stripe Checkoutにリダイレクト（Apple Payが自動的に表示される）
+      // Redirect to Stripe Checkout (Apple Pay will be displayed automatically)
       window.location.href = data.url;
     } catch (e) {
       console.error('Apple Pay error:', e);

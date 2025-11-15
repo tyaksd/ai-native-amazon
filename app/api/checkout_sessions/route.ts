@@ -89,29 +89,29 @@ import { auth } from '@clerk/nextjs/server'
 
 export const runtime = 'nodejs'
 
-// 1) 配送許可国（広めの“ほぼ全世界”セット。要件に合わせて増減してください）
+// 1) Allowed shipping countries (a broad "almost worldwide" set. Adjust according to requirements)
 const ALLOWED_COUNTRIES: Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] = [
-  // 北米
+  // North America
   'US','CA','MX',
-  // 中南米
+  // Central and South America
   'AR','BR','CL','CO','PE','UY','EC','PA','CR','GT','HN','NI','SV','BO','PY','DO','JM','TT','BS','BB','BZ','GY','SR',
-  // 欧州（EU/EEA含む主要国＋周辺）
+  // Europe (main EU/EEA countries + surrounding)
   'GB','IE','FR','DE','NL','BE','LU','IT','ES','PT','AT','SE','NO','DK','FI','IS',
   'PL','CZ','SK','HU','RO','BG','SI','HR','GR','EE','LV','LT','MT','CY',
   'CH','LI','MC','SM','VA','AD','GI','IM','GG','JE','AL','MK','RS','BA','XK',
-  // 中東・アフリカ
+  // Middle East & Africa
   'AE','SA','QA','KW','BH','OM','JO','LB','TR','IL',
   'EG','MA','TN','DZ','ZA','KE','NG','GH','TZ','UG','CM','CI','SN','ET','ZM','ZW','MU','RE','YT',
-  // アジア
+  // Asia
   'JP','KR','CN','TW','HK','MO','SG','MY','TH','VN','PH','ID','BN','KH','LA','IN','PK','BD','LK','NP','MV','MM',
-  // オセアニア
+  // Oceania
   'AU','NZ','PF','NC','WS','TO','FJ','PG'
 ]
 
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY
   if (!key) throw new Error('STRIPE_SECRET_KEY not configured')
-  // 2) 将来日付のバージョンはエラーになることが多いので安定版に
+  // 2) Future-dated versions often cause errors, so use stable version
   return new Stripe(key, { apiVersion: "2025-08-27.basil" })
 }
 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       mode: 'payment',
       payment_method_types: ['card'],
 
-      // 3) Billing & Shipping を収集
+      // 3) Collect Billing & Shipping
       billing_address_collection: 'required',
       shipping_address_collection: { allowed_countries: ALLOWED_COUNTRIES },
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 
-// このルートは Node.js ランタイムで実行（Edge だと Buffer 等で詰まりやすい）
+// This route runs on Node.js runtime (Edge tends to have issues with Buffer etc.)
 export const runtime = 'nodejs'
 
 const supabase = createClient(
@@ -18,7 +18,7 @@ const openai = new OpenAI({
 // Cloudinary upload helpers
 // ----------------------------
 
-// 画像URLを Cloudinary へアップロード
+// Upload image URL to Cloudinary
 async function uploadToCloudinary(imageUrl: string, filename = 'product-image.png'): Promise<string> {
   const res = await fetch(imageUrl)
   if (!res.ok) {
@@ -42,10 +42,10 @@ async function uploadToCloudinary(imageUrl: string, filename = 'product-image.pn
   return uploadResult.secure_url
 }
 
-// dataURL(base64) を Cloudinary へアップロード
+// Upload dataURL(base64) to Cloudinary
 async function uploadToCloudinaryFromDataUrl(dataUrl: string, filename = 'image.png'): Promise<string> {
   const formData = new FormData()
-  // Cloudinary は data URL をそのまま file に渡せる
+  // Cloudinary can pass data URL directly to file
   formData.append('file', dataUrl)
   formData.append('public_id', filename.replace(/\.(png|jpg|jpeg|webp)$/i, ''))
   formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!)
@@ -61,22 +61,22 @@ async function uploadToCloudinaryFromDataUrl(dataUrl: string, filename = 'image.
   return json.secure_url
 }
 
-// Cloudinaryの secure_url から public_id を安全に抽出
+// Safely extract public_id from Cloudinary's secure_url
 function getPublicIdFromUrl(url: string): string | null {
-  // 形式: https://res.cloudinary.com/<cloud>/image/upload/v<version>/<public_id>.<ext>
+  // Format: https://res.cloudinary.com/<cloud>/image/upload/v<version>/<public_id>.<ext>
   try {
     const u = new URL(url)
     const parts = u.pathname.split('/').filter(Boolean) // ["<cloudinary>", "image", "upload", "v12345", "<public_id>.<ext>"]
     const last = parts[parts.length - 1] || ''
     const publicIdWithExt = decodeURIComponent(last)
     const withoutExt = publicIdWithExt.replace(/\.[a-z0-9]+$/i, '')
-    // public_id がサブフォルダを含む場合は、"upload/" 以降〜末尾までをスライス
+    // If public_id contains subfolders, slice from after "upload/" to the end
     const uploadIndex = parts.findIndex(p => p === 'upload')
     if (uploadIndex >= 0) {
       const pathAfterUpload = parts.slice(uploadIndex + 1) // ["v12345", "<public_id>.<ext>"] or ["v12345","folder","id.png"]
-      // v<version> を除外
+      // Exclude v<version>
       const afterVersion = pathAfterUpload[0]?.startsWith('v') ? pathAfterUpload.slice(1) : pathAfterUpload
-      // 末尾の <public_id>.<ext> を withoutExt に置き換え
+      // Replace trailing <public_id>.<ext> with withoutExt
       if (afterVersion.length > 0) {
         const lastIdx = afterVersion.length - 1
         afterVersion[lastIdx] = withoutExt
@@ -258,7 +258,8 @@ async function generateDetailedDesignDescription(
   brandDescription: string,
   brandConcept: string,
   targetAudience: string,
-  productIndex?: number // 商品のインデックスを追加
+  productIndex?: number, // 商品のインデックスを追加
+  customDesignDescription?: string // カスタムデザイン説明を追加
 ): Promise<string> {
   const colorList = colors.join(', ')
 
@@ -327,6 +328,7 @@ Create a design that:
 - Tells a visual story that connects with the target audience
 - ${randomElement}
 - Embodies ${indexElement}
+${customDesignDescription ? `\n# Custom Design Requirements\nIMPORTANT: The following custom design description must be incorporated into the design:\n${customDesignDescription}\n\nPlease ensure the design reflects these specific requirements while maintaining brand consistency.` : ''}
 
 # Important Design Notes
 - The brand name does NOT need to be included in the design
@@ -544,7 +546,8 @@ function generateImageSpecificPrompt(
   gender: string,
   designElements: ReturnType<typeof extractDesignElementsFromDescription>,
   designStyle?: string,
-  productIndex?: number // 商品インデックスを追加
+  productIndex?: number, // 商品インデックスを追加
+  customDesignDescription?: string // カスタムデザイン説明を追加
 ): string {
   const genderContext = gender === 'Men' 
     ? 'masculine, bold, strong silhouette, tailored fit'
@@ -630,6 +633,7 @@ function generateImageSpecificPrompt(
 - Focus on visual concepts, patterns, and artistic elements
 - Create a design that represents the brand's essence without text
 - Let the visual design speak for itself
+${customDesignDescription ? `\n# Custom Design Requirements\nCRITICAL: The following custom design description must be visually incorporated into the design:\n${customDesignDescription}\n\nEnsure the design artwork directly reflects these specific visual requirements and design elements.` : ''}
 
 Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, common, overused, cliché, predictable, brand name, text, typography, words`
 }
@@ -803,7 +807,8 @@ async function generateProductImages(
   gender: string,
   productDescription: string,          // ★ 新商品の説明文を追加
   designStyle?: string,
-  productIndex?: number // 商品インデックスを追加
+  productIndex?: number, // 商品インデックスを追加
+  customDesignDescription?: string // カスタムデザイン説明を追加
 ): Promise<{ productImages: string[]; designPng: string }> {
   const productImages: string[] = []
   let designPng = ''
@@ -820,7 +825,8 @@ async function generateProductImages(
     gender,
     designElements,
     designStyle,
-    productIndex
+    productIndex,
+    customDesignDescription
   )
 
   console.log(`[DesignPNG] Generating design for ${productName}...`)
@@ -907,7 +913,7 @@ async function generateProductImages(
 // ----------------------------
 export async function POST(request: NextRequest) {
   try {
-    const { brandId, productType, colors, gender, quantity } = await request.json()
+    const { brandId, productType, colors, gender, quantity, customDesignDescription } = await request.json()
 
     if (!brandId || !productType || !colors || !Array.isArray(colors) || !quantity) {
       return NextResponse.json(
@@ -952,7 +958,8 @@ export async function POST(request: NextRequest) {
           brand.description || 'A unique streetwear brand',
           brand.design_concept || 'Bold, edgy design with urban aesthetics',
           brand.target_audience || 'Fashion-forward individuals',
-          i // 商品インデックスを追加
+          i, // 商品インデックスを追加
+          customDesignDescription // カスタムデザイン説明を追加
         )
         console.log(`[Product ${i + 1}] Design description length: ${designDescription.length} characters`)
 
@@ -1010,7 +1017,8 @@ export async function POST(request: NextRequest) {
           productGender,
           designDescription, // ← 詳細デザイン説明文を渡す
           undefined, // デザインスタイルを事前定義しない
-          i // 商品インデックスを追加
+          i, // 商品インデックスを追加
+          customDesignDescription // カスタムデザイン説明を追加
         )
 
         console.log(`[Product ${i + 1}] Generated ${productImages.length} product images, design PNG: ${designPng ? 'Yes' : 'No'}`)

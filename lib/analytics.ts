@@ -278,7 +278,7 @@ class AnalyticsClient {
       console.log('Analytics initialized successfully')
     } catch (error) {
       console.error('Analytics initialization failed:', error)
-      // エラーが発生しても基本的な追跡は継続
+      // Continue basic tracking even if error occurs
       this.setupEventListeners()
       this.setupErrorTracking()
     }

@@ -17,10 +17,10 @@ interface OptimizedImageProps {
 }
 
 /**
- * コスト最適化されたImageコンポーネント
- * - 小さな画像やSVG、GIFはunoptimizedで表示
- * - 品質を画像サイズに応じて最適化
- * - 優先度を適切に設定
+ * Cost-optimized Image component
+ * - Display small images, SVGs, and GIFs with unoptimized
+ * - Optimize quality based on image size
+ * - Set priority appropriately
  */
 export default function OptimizedImage({
   src,
@@ -34,16 +34,16 @@ export default function OptimizedImage({
   sizes,
   isImportant = false
 }: OptimizedImageProps) {
-  // 最適化を避けるべき画像かどうかを判定
+  // Determine if image should skip optimization
   const shouldSkip = shouldSkipOptimization(src, width, height)
   
-  // 品質を最適化（指定されていない場合）
+  // Optimize quality (if not specified)
   const optimizedQuality = quality || getOptimizedQuality(width, height)
   
-  // 優先度を最適化
+  // Optimize priority
   const optimizedPriority = priority || getImagePriority(isImportant)
   
-  // 最適化を避ける画像の場合はunoptimizedで表示
+  // Display with unoptimized for images that should skip optimization
   if (shouldSkip) {
     return (
       <Image
@@ -60,7 +60,7 @@ export default function OptimizedImage({
     )
   }
   
-  // 通常の画像は最適化して表示
+  // Display normal images with optimization
   return (
     <Image
       src={src}

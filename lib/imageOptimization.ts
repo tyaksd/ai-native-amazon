@@ -1,8 +1,8 @@
-// 画像最適化のユーティリティ関数
-// 小さな画像やSVG、GIFにunoptimizedプロパティを適用してコストを削減
+// Image optimization utility functions
+// Apply unoptimized property to small images, SVGs, and GIFs to reduce costs
 
 /**
- * 画像URLからファイル拡張子を取得
+ * Get file extension from image URL
  */
 export function getImageExtension(src: string): string {
   const url = new URL(src, 'https://example.com')
@@ -12,31 +12,31 @@ export function getImageExtension(src: string): string {
 }
 
 /**
- * 画像が最適化を避けるべきかどうかを判定
- * - SVGファイル（ベクター画像）
- * - GIFファイル（アニメーション画像）
- * - 小さな画像（10KB以下と推定される画像）
+ * Determine if image should skip optimization
+ * - SVG files (vector images)
+ * - GIF files (animated images)
+ * - Small images (estimated to be 10KB or less)
  */
 export function shouldSkipOptimization(src: string, width?: number, height?: number): boolean {
   const extension = getImageExtension(src)
   
-  // SVGファイルは最適化を避ける
+  // Skip optimization for SVG files
   if (extension === 'svg') {
     return true
   }
   
-  // GIFファイルは最適化を避ける（アニメーションが壊れる可能性）
+  // Skip optimization for GIF files (animation may break)
   if (extension === 'gif') {
     return true
   }
   
-  // 小さな画像は最適化を避ける（10KB以下と推定）
-  // 16x16以下の画像は最適化の恩恵が少ない
+  // Skip optimization for small images (estimated to be 10KB or less)
+  // Images 16x16 or smaller have little benefit from optimization
   if (width && height && width <= 16 && height <= 16) {
     return true
   }
   
-  // アイコンサイズの画像（32x32以下）も最適化を避ける
+  // Also skip optimization for icon-sized images (32x32 or smaller)
   if (width && height && width <= 32 && height <= 32) {
     return true
   }
@@ -45,31 +45,31 @@ export function shouldSkipOptimization(src: string, width?: number, height?: num
 }
 
 /**
- * 画像の品質を最適化
- * 大きな画像は高品質、小さな画像は低品質で十分
+ * Optimize image quality
+ * High quality for large images, low quality is sufficient for small images
  */
 export function getOptimizedQuality(width?: number, height?: number): number {
   if (!width || !height) return 80
   
   const area = width * height
   
-  // 大きな画像（1920x1080以上）は高品質
+  // High quality for large images (1920x1080 or larger)
   if (area >= 1920 * 1080) {
     return 85
   }
   
-  // 中サイズの画像（800x600以上）は標準品質
+  // Standard quality for medium-sized images (800x600 or larger)
   if (area >= 800 * 600) {
     return 80
   }
   
-  // 小さな画像は低品質で十分
+  // Low quality is sufficient for small images
   return 75
 }
 
 /**
- * 画像の優先度を設定
- * 重要な画像は高品質、装飾的な画像は低品質
+ * Set image priority
+ * High quality for important images, low quality for decorative images
  */
 export function getImagePriority(isImportant: boolean = false): boolean {
   return isImportant

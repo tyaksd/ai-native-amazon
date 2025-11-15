@@ -120,7 +120,7 @@ export default function ProductDetail({ params }: PageProps) {
           const brandData = await getBrandById(productData.brand_id)
           setBrand(brandData)
           
-          // 同じブランドの他の商品を取得（現在の商品を除く）
+          // Get other products from the same brand (excluding current product)
           const allBrandProducts = await getProductsByBrand(productData.brand_id)
           const otherBrandProducts = allBrandProducts.filter(p => p.id !== productData.id).slice(0, 4)
           setBrandProducts(otherBrandProducts)
@@ -207,7 +207,7 @@ export default function ProductDetail({ params }: PageProps) {
       )}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-5 mt-0 px-3">
         <div className="space-y-4 md:col-span-3 md:pl-16 ">
-          {/* メイン画像 */}
+          {/* Main image */}
           <div className="aspect-square bg-gradient-to-br from-gray-50 to-white flex items-center justify-center rounded-xl border border-gray-200 ring-1 ring-black/5 overflow-hidden max-w-lg mx-auto md:mx-0 mt-8">
             {product.images && product.images.length > 0 ? (
               <Image 
@@ -223,7 +223,7 @@ export default function ProductDetail({ params }: PageProps) {
             )}
           </div>
           
-          {/* サムネイル画像 */}
+          {/* Thumbnail images */}
           {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-1 max-w-md mx-auto md:mx-0">
               {product.images.map((image, index) => (
@@ -248,7 +248,7 @@ export default function ProductDetail({ params }: PageProps) {
             </div>
           )}
           
-          {/* T-shirt specific information for desktop - 商品写真の下に表示（デスクトップのみ） */}
+          {/* T-shirt specific information for desktop - Display below product photos (desktop only) */}
           {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
             <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
               <div className="p-4 bg-gray-50 rounded-lg">
@@ -267,7 +267,7 @@ export default function ProductDetail({ params }: PageProps) {
             </div>
           )}
           
-          {/* Size Chart for desktop - 商品写真の下に表示（デスクトップのみ） */}
+          {/* Size Chart for desktop - Display below product photos (desktop only) */}
           {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
             <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
               <SizeChart />
@@ -591,7 +591,7 @@ export default function ProductDetail({ params }: PageProps) {
               </p>
             </div>
             
-            {/* T-shirt specific information for mobile - Made-to-Orderの下に表示 */}
+            {/* T-shirt specific information for mobile - Display below Made-to-Order */}
             {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
               <div className="mt-6 md:hidden">
                 <div className="p-4 bg-gray-50 rounded-lg">
@@ -610,7 +610,7 @@ export default function ProductDetail({ params }: PageProps) {
               </div>
             )}
             
-            {/* Size Chart for mobile - Made-to-Orderの下に表示 */}
+            {/* Size Chart for mobile - Display below Made-to-Order */}
             {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
               <div className="mt-6 md:hidden">
                 <SizeChart />
@@ -620,7 +620,7 @@ export default function ProductDetail({ params }: PageProps) {
         </div>
       </div>
       
-      {/* 同じブランドの他の商品セクション */}
+      {/* Section for other products from the same brand */}
       <div 
         className="mt-4"
         style={{
