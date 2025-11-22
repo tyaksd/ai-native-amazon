@@ -764,7 +764,8 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 async function compositeDesignOnTshirt(
   plainTshirtUrl: string, 
   designPngUrl: string, 
-  _outputName: string // eslint-disable-line @typescript-eslint/no-unused-vars
+  _outputName: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+  productType?: string
 ): Promise<string> {
   try {
     const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
@@ -773,19 +774,41 @@ async function compositeDesignOnTshirt(
     const designPublicId = getPublicIdFromUrl(designPngUrl)
     const basePublicId = getPublicIdFromUrl(plainTshirtUrl)
 
+    // Grey Hoodieの場合の特別なデバッグログ
+    if (plainTshirtUrl.includes('greyhoodie') || plainTshirtUrl.includes('Grey')) {
+      console.log(`[DEBUG Grey Hoodie Composite] plainTshirtUrl: ${plainTshirtUrl}`)
+      console.log(`[DEBUG Grey Hoodie Composite] basePublicId: ${basePublicId}`)
+      console.log(`[DEBUG Grey Hoodie Composite] designPngUrl: ${designPngUrl}`)
+      console.log(`[DEBUG Grey Hoodie Composite] designPublicId: ${designPublicId}`)
+    }
+
     if (!designPublicId || !basePublicId) {
+      console.error(`[Composite] Failed to parse public_id. design=${designPublicId}, base=${basePublicId}`)
+      console.error(`[Composite] plainTshirtUrl: ${plainTshirtUrl}`)
+      console.error(`[Composite] designPngUrl: ${designPngUrl}`)
       throw new Error(`Failed to parse public_id. design=${designPublicId}, base=${basePublicId}`)
     }
 
-    // デザインを相対 33% で中央より僅かに上に配置
+    // フーディーの場合はデザイン位置をより上に、少し左に配置
+    const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
+    const yOffset = isHoodie ? '-0.12' : '-0.05' // フーディーの場合はより上に
+    const xOffset = isHoodie ? '-0.015' : '0' // フーディーの場合は少し左に
+
+    // デザインを相対 29.7% (0.33 * 0.9) で中央より僅かに上に配置
     // 注: l_<public_id> は同一Cloudアカウントのアセットを参照
+    // Cloudinaryでは、g_パラメータを先に指定し、その後にx/yオフセットを指定する
+    const overlayParams = isHoodie 
+      ? `fl_relative,w_0.297,h_0.297,g_center,x_${xOffset},y_${yOffset}`
+      : `fl_relative,w_0.297,h_0.297,g_center,y_${yOffset}`
+    
     const compositeUrl =
       `https://res.cloudinary.com/${cloud}/image/upload` +
       `/w_800,h_800,c_fit` + // 出力サイズを小さくして処理を軽量化
-      `/l_${encodeURIComponent(designPublicId)},fl_relative,w_0.33,h_0.33,y_-0.05,g_center` + // オーバーレイ
+      `/l_${encodeURIComponent(designPublicId)},${overlayParams}` + // オーバーレイ
       `/${encodeURIComponent(basePublicId)}`
 
     // 変換URLを直接返す（再アップロードを避けてタイムアウトを防ぐ）
+    console.log(`[Composite] ProductType: ${productType}, isHoodie: ${isHoodie}, xOffset: ${xOffset}, yOffset: ${yOffset}`)
     console.log(`[Composite] Generated composite URL: ${compositeUrl}`)
     return compositeUrl
   } catch (error) {
@@ -830,6 +853,7 @@ async function generateProductImages(
   )
 
   console.log(`[DesignPNG] Generating design for ${productName}...`)
+  console.log(`[DesignPNG] Prompt: ${designPngPrompt.substring(0, 200)}...`)
   try {
     const designRes = await openai.images.generate({
       model: 'gpt-image-1',
@@ -843,8 +867,10 @@ async function generateProductImages(
     if (!d1) throw new Error('No image data for design PNG')
 
     if (d1.url) {
+      console.log(`[DesignPNG] Received image URL from OpenAI: ${d1.url}`)
       designPng = await uploadToCloudinary(d1.url, `${productName}-design.png`)
     } else if (d1.b64_json) {
+      console.log(`[DesignPNG] Received base64 image data (length: ${d1.b64_json.length})`)
       const dataUrl = `data:image/png;base64,${d1.b64_json}`
       designPng = await uploadToCloudinaryFromDataUrl(dataUrl, `${productName}-design.png`)
     } else {
@@ -853,56 +879,134 @@ async function generateProductImages(
     
     console.log(`[DesignPNG] Generated common design for all colors: ${designPng}`)
   } catch (err) {
-    console.error('[DesignPNG]', JSON.stringify(err, null, 2))
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorStack = err instanceof Error ? err.stack : undefined
+    const errorDetails = err && typeof err === 'object' ? {
+      message: errorMessage,
+      stack: errorStack,
+      ...(err as any)
+    } : { error: err }
+    
+    console.error('[DesignPNG] Error generating design:', errorMessage)
+    console.error('[DesignPNG] Error details:', JSON.stringify(errorDetails, null, 2))
+    console.warn('[DesignPNG] Design generation failed, will use plain t-shirt images')
     // デザインPNGが作れない場合は以下でプレーン画像を採用
   }
 
     // 事前にCloudinaryにアップロードされたプレーンなTシャツ画像のURL
     const plainTshirtUrls: { [key: string]: string } = {
-      'Black': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810178/hpkljewf536be7jxngaa.png',
-      'White': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810191/zkpqbj8tsq1mqh7wckqc.png',
-      'Navy': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810267/i5l0zsvfzvgfljjubxss.png',
-      'Grey': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810276/npsmoouflrbceq85of2w.png',
-      'Dark Heather': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810353/iubtkqcerwt5kgqbno6i.png',
-      'Red': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810325/z0yegssta7nhanoklrwe.png',
-      'Blue': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810315/ztu5e1sefadfrzmzmfdt.png',
-      'Sand': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810357/xdmbcpynuufwqetvcdza.png',
-      'Natural': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810398/ejx2nl18fr5vkps0menf.png',
-      'Military Green': 'https://res.cloudinary.com/dmoyeva1q/image/upload/v1759810402/aujulswo5bjdf8pshilu.png'
+      'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186899/black-plain_eycevr.png',
+      'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186982/white-plain_ohzbni.png',
+      'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187015/navy-plain_l6l4ky.png',
+      'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187078/grey-plain_l4a4pj.png',
+      'Dark Heather': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187206/dark-heather_iyj1xr.png',
+      'Red': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187046/red-plain_i0lkag.png',
+      'Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186952/blue-plain_no6w1x.png',
+      'Sand': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187100/sand-plain_jr6tsc.png',
+      'Natural': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187126/natural-plain_yaml1f.png',
+      'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187145/military-green-plain_lwf2t9.png'
+    }
+
+    // 事前にCloudinaryにアップロードされたプレーンなHoodie画像のURL
+    const plainHoodieUrls: { [key: string]: string } = {
+      'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623805/blackhoodie_tegpra.png',
+      'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623805/whitehoodie_vg8e1y.png',
+      'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623808/navyhoodie_z6xhbq.png',
+      'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763637373/greyhoodie_bgqpqe.png'
+    }
+
+    // Product Typeに応じて適切なベース画像マップを選択
+    const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
+    const baseImageMap = isHoodie ? plainHoodieUrls : plainTshirtUrls
+    const productTypeName = isHoodie ? 'Hoodie' : 'T-Shirt'
+
+    // デバッグ: ベース画像マップの内容をログ出力
+    console.log(`[BaseImageMap] ProductType: ${productType}, isHoodie: ${isHoodie}`)
+    console.log(`[BaseImageMap] Available colors: ${Object.keys(baseImageMap).join(', ')}`)
+    console.log(`[BaseImageMap] Grey URL: ${baseImageMap['Grey'] || 'NOT FOUND'}`)
+
+    // カラー名を正規化して定義済みカラー名にマッピング
+    function normalizeColorName(color: string, colorMap: { [key: string]: string }): string | null {
+      const normalized = color.trim()
+      
+      // 完全一致をチェック
+      if (colorMap[normalized]) {
+        return normalized
+      }
+      
+      // 大文字小文字を無視してチェック
+      const lowerColor = normalized.toLowerCase()
+      for (const [key] of Object.entries(colorMap)) {
+        if (key.toLowerCase() === lowerColor) {
+          return key
+        }
+      }
+      
+      // Grey/Grayの特殊マッピング
+      if (lowerColor === 'gray') {
+        return 'Grey'
+      }
+      
+      // 部分一致をチェック（例: "dark heather" → "Dark Heather"）
+      for (const [key] of Object.entries(colorMap)) {
+        if (key.toLowerCase().includes(lowerColor) || lowerColor.includes(key.toLowerCase())) {
+          return key
+        }
+      }
+      
+      return null
     }
 
   for (const color of colors) {
-    const plainTshirtUrl = plainTshirtUrls[color]
-    if (!plainTshirtUrl) {
-      console.error(`[PlainTshirt:${color}] No plain t-shirt image found for color: ${color}`)
+    // カラー名を正規化
+    const normalizedColor = normalizeColorName(color, baseImageMap)
+    console.log(`[ColorNormalize] Original: "${color}" → Normalized: "${normalizedColor}"`)
+    
+    if (!normalizedColor) {
+      console.error(`[Plain${productTypeName}:${color}] Color "${color}" not found in available colors, skipping...`)
+      console.error(`[Plain${productTypeName}:${color}] Available colors: ${Object.keys(baseImageMap).join(', ')}`)
       continue
     }
+    
+    const plainBaseUrl = baseImageMap[normalizedColor]
+    if (!plainBaseUrl) {
+      console.error(`[Plain${productTypeName}:${normalizedColor}] No plain ${productTypeName.toLowerCase()} image found for color: ${normalizedColor}`)
+      console.error(`[Plain${productTypeName}:${normalizedColor}] baseImageMap keys: ${Object.keys(baseImageMap).join(', ')}`)
+      console.error(`[Plain${productTypeName}:${normalizedColor}] baseImageMap[${normalizedColor}]: ${baseImageMap[normalizedColor]}`)
+      continue
+    }
+    
+    // Greyの場合の特別なデバッグログ
+    if (normalizedColor === 'Grey' && isHoodie) {
+      console.log(`[DEBUG Grey Hoodie] Found Grey hoodie URL: ${plainBaseUrl}`)
+      console.log(`[DEBUG Grey Hoodie] URL exists in map: ${!!baseImageMap['Grey']}`)
+    }
 
-    console.log(`[PlainTshirt:${color}] Using pre-made plain ${color} t-shirt: ${plainTshirtUrl}`)
+    console.log(`[Plain${productTypeName}:${normalizedColor}] Using pre-made plain ${normalizedColor} ${productTypeName.toLowerCase()}: ${plainBaseUrl} (original color: ${color})`)
 
     if (designPng) {
-      console.log(`[Composite:${color}] Compositing design onto ${color} t-shirt...`)
+      console.log(`[Composite:${normalizedColor}] Compositing design onto ${normalizedColor} ${productTypeName.toLowerCase()}...`)
       try {
         // タイムアウトを設定して合成処理を実行
         const compositeUrl = await Promise.race([
-          compositeDesignOnTshirt(plainTshirtUrl, designPng, `${productName}-${color}`),
+          compositeDesignOnTshirt(plainBaseUrl, designPng, `${productName}-${normalizedColor}`, productType),
           new Promise<string>((_, reject) => 
             setTimeout(() => reject(new Error('Composite timeout')), 30000) // 30秒タイムアウト
           )
         ])
         productImages.push(compositeUrl)
-        console.log(`[Composite:${color}] Design composited: ${compositeUrl}`)
+        console.log(`[Composite:${normalizedColor}] Design composited: ${compositeUrl}`)
       } catch (err) {
-        console.error(`[Composite:${color}] Composite failed, using plain t-shirt:`, err instanceof Error ? err.message : 'Unknown error')
-        productImages.push(plainTshirtUrl)
-        console.log(`[Composite:${color}] Using plain t-shirt: ${plainTshirtUrl}`)
+        console.error(`[Composite:${normalizedColor}] Composite failed, using plain ${productTypeName.toLowerCase()}:`, err instanceof Error ? err.message : 'Unknown error')
+        productImages.push(plainBaseUrl)
+        console.log(`[Composite:${normalizedColor}] Using plain ${productTypeName.toLowerCase()}: ${plainBaseUrl}`)
       }
     } else {
-      productImages.push(plainTshirtUrl)
-      console.log(`[PlainTshirt:${color}] Using plain t-shirt: ${plainTshirtUrl}`)
+      productImages.push(plainBaseUrl)
+      console.log(`[Plain${productTypeName}:${normalizedColor}] Using plain ${productTypeName.toLowerCase()}: ${plainBaseUrl}`)
     }
     
-    console.log(`[ProductPhoto:${color}] Generated: ${productImages[productImages.length - 1]}`)
+    console.log(`[ProductPhoto:${normalizedColor}] Generated: ${productImages[productImages.length - 1]}`)
   }
 
   return { productImages, designPng }
@@ -986,7 +1090,7 @@ export async function POST(request: NextRequest) {
          const price = productGender === 'Women' 
            ? 39.90 
            : productType.toLowerCase().includes('t-shirt') 
-             ? generateRandomPrice() 
+             ? 29.90 
              : 35
         
         // SEO用の商品説明文を生成（商品ページ表示用）

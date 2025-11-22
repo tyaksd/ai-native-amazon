@@ -86,7 +86,7 @@ export default function AdminPage() {
     description: '',
     category: 'Clothing',
     type: 'T-Shirt',
-    colors: [] as string[],
+    colors: ['Black', 'White', 'Navy', 'Grey'] as string[],
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
     gender: 'Unisex'
   })
@@ -271,9 +271,48 @@ export default function AdminPage() {
         alert('Please enter a product description.')
         return
       }
-      console.log('Creating product with:', newProduct)
+      
+      // カラーが選択されている場合、アップロードした画像を無地の商品画像（Tシャツ/Hoodie/Long Teeなど）に重ね合わせる
+      let finalImages = newProduct.images
+      if (newProduct.colors && newProduct.colors.length > 0 && newProduct.images.length > 0) {
+        try {
+          // 最初のアップロード画像を使用して、各カラーの無地商品画像に重ね合わせる
+          // productTypeに応じて適切な無地画像が選択される（T-Shirt, Hoodie, Long Teeなど）
+          const designImageUrl = newProduct.images[0]
+          const response = await fetch('/api/composite-product-images', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              designImageUrl: designImageUrl,
+              colors: newProduct.colors,
+              productType: newProduct.type
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to composite images')
+          }
+
+          const result = await response.json()
+          if (result.success && result.images) {
+            finalImages = result.images
+            console.log(`Composited ${result.images.length} images for colors: ${newProduct.colors.join(', ')}`)
+          } else {
+            console.warn('Image composition failed, using original images')
+          }
+        } catch (error) {
+          console.error('Error compositing images:', error)
+          // エラーが発生した場合は元の画像を使用
+          console.warn('Using original images due to composition error')
+        }
+      }
+      
+      console.log('Creating product with:', { ...newProduct, images: finalImages })
       const product = await createProduct({
         ...newProduct,
+        images: finalImages,
         price: Number(newProduct.price),
         is_visible: true
       })
@@ -287,7 +326,7 @@ export default function AdminPage() {
           description: '',
           category: 'Clothing',
           type: 'T-Shirt',
-          colors: [],
+          colors: ['Black', 'White', 'Navy', 'Grey'],
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
           gender: 'Unisex'
         })
@@ -1259,6 +1298,7 @@ export default function AdminPage() {
                         >
                           <option value="">Choose type</option>
                           <option value="T-Shirt">T-Shirt</option>
+                          <option value="Long Tee">Long Tee</option>
                           <option value="Hoodie">Hoodie</option>
                           <option value="Sweatshirt">Sweatshirt</option>
                           <option value="Jacket">Jacket</option>

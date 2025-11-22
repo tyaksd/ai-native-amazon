@@ -366,7 +366,7 @@ export async function getProductCategories(): Promise<string[]> {
 // カテゴリーとタイプのマッピング
 export function getCategoryTypeMapping(): Record<string, string[]> {
   return {
-    'Clothing': ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Jacket', 'Pants', 'Shorts'],
+    'Clothing': ['T-Shirt', 'Long Tee', 'Hoodie', 'Sweatshirt', 'Jacket', 'Pants', 'Shorts'],
     'Accessories': ['Bags'],
     'Hats': ['Hat'],
     'Others': ['Other']

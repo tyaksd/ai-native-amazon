@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useRef } from 'react'
 import { getProductById, getBrandById, getProductsByBrand, Product, Brand } from "@/lib/data";
 import ProductCarousel from "@/app/components/ProductCarousel";
 import FavoriteButton from "@/app/components/FavoriteButton";
@@ -104,6 +104,9 @@ export default function ProductDetail({ params }: PageProps) {
   const [showAdded, setShowAdded] = useState(false)
   const [addedMessage, setAddedMessage] = useState('')
   const [colorImageMap, setColorImageMap] = useState<{[key: string]: number}>({})
+  const [isImageTransitioning, setIsImageTransitioning] = useState(false)
+  const prevSelectedColorRef = useRef<string>('')
+  const selectedImageIndexRef = useRef<number>(0)
   
   // UUID validation regex - defined once at the top
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -161,12 +164,48 @@ export default function ProductDetail({ params }: PageProps) {
     }
   }, [product, selectedColor])
 
-  // Handle color selection and image switching
+  // Function to handle image switching with fade animation
+  const switchImageWithAnimation = (newImageIndex: number) => {
+    // Only trigger animation if the image index is actually changing
+    if (newImageIndex !== selectedImageIndexRef.current) {
+      // Start fade out
+      setIsImageTransitioning(true)
+      // After fade out completes, change image and fade in
+      setTimeout(() => {
+        setSelectedImageIndex(newImageIndex)
+        selectedImageIndexRef.current = newImageIndex
+        // Small delay before fade in to ensure smooth transition
+        setTimeout(() => {
+          setIsImageTransitioning(false)
+        }, 20)
+      }, 100) // Match the transition duration
+    }
+  }
+
+  // Handle color selection and image switching with fade animation
   useEffect(() => {
     if (selectedColor && colorImageMap[selectedColor] !== undefined) {
-      setSelectedImageIndex(colorImageMap[selectedColor])
+      const newImageIndex = colorImageMap[selectedColor]
+      // Only trigger animation if the color is actually changing
+      if (selectedColor !== prevSelectedColorRef.current) {
+        // Check if image index is actually changing
+        if (newImageIndex !== selectedImageIndexRef.current) {
+          switchImageWithAnimation(newImageIndex)
+        } else {
+          // Color changed but image index is the same, just update without animation
+          setSelectedImageIndex(newImageIndex)
+          selectedImageIndexRef.current = newImageIndex
+        }
+        // Update the ref to track the previous color
+        prevSelectedColorRef.current = selectedColor
+      }
     }
   }, [selectedColor, colorImageMap])
+  
+  // Update ref when selectedImageIndex changes (e.g., from thumbnail clicks)
+  useEffect(() => {
+    selectedImageIndexRef.current = selectedImageIndex
+  }, [selectedImageIndex])
 
   if (loading) {
     return (
@@ -215,7 +254,9 @@ export default function ProductDetail({ params }: PageProps) {
                 alt={product.name} 
                 width={320} 
                 height={320} 
-                className="w-full h-full object-contain transition-opacity duration-300"
+                className={`w-full h-full object-contain transition-opacity duration-100 ${
+                  isImageTransitioning ? 'opacity-0' : 'opacity-100'
+                }`}
                 key={`${product.id}-${selectedImageIndex}`}
               />
             ) : (
@@ -229,7 +270,7 @@ export default function ProductDetail({ params }: PageProps) {
               {product.images.map((image, index) => (
                 <button
                   key={index}
-                  onClick={() => setSelectedImageIndex(index)}
+                  onClick={() => switchImageWithAnimation(index)}
                   className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                     selectedImageIndex === index 
                       ? 'border-black ring-2 ring-black/20' 
@@ -260,17 +301,46 @@ export default function ProductDetail({ params }: PageProps) {
                   <li>• 100% ring-spun cotton</li>
                       <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
                       <li>• Dark Heather is 65% polyester, 35% cotton</li>
-                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
+                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
                 </div>
               </div>
             </div>
           )}
           
+          {/* Long Tee specific information for desktop - Display below product photos (desktop only) */}
+          {(product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')) && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
+                  <p><strong>Fabric composition:</strong></p>
+                  <ul className="ml-4 space-y-1">
+                    <li>・50% cotton, 50% polyester</li>
+                    <li>・Fabric weight: 8.0 oz/yd² (271 g/m²)</li>
+                    <li>・Pre-shrunk for lasting fit</li>
+                    <li>・Soft air-jet spun yarn</li>
+                  </ul>
+                  <p className="mt-2">Double-needle stitching for durability</p>
+                  <p className="mt-2">• Disclaimer: DWhite may appear slightly off-white depending on lighting.</p>
+                  <p>Orange may show slight hue variation.</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Size Chart for Long Tee desktop - Display below product photos (desktop only) */}
+          {(product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')) && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <SizeChart productType={product.type} />
+            </div>
+          )}
+          
           {/* Size Chart for desktop - Display below product photos (desktop only) */}
           {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
             <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
-              <SizeChart />
+              <SizeChart productType={product.type} />
             </div>
           )}
         </div>
@@ -319,8 +389,11 @@ export default function ProductDetail({ params }: PageProps) {
                   <button
                     key={index}
                     onClick={() => {
-                      setSelectedColor(color)
-                      // Image switching is handled by the useEffect above
+                      // Only change color if it's different to avoid unnecessary transitions
+                      if (selectedColor !== color) {
+                        setSelectedColor(color)
+                        // Image switching is handled by the useEffect above
+                      }
                     }}
                     className={`w-8 h-8 rounded-full shadow-sm cursor-pointer hover:scale-110 transition-transform ${
                       selectedColor === color ? 'ring-4 ring-blue-500 scale-110' : ''
@@ -573,7 +646,7 @@ export default function ProductDetail({ params }: PageProps) {
             
             {/* Free Shipping Text */}
             <div className="flex items-center justify-center gap-2 mt-3">
-              <Image src="/truck.png" alt="Truck" width={20} height={20} className="w-5 h-5" />
+              <Image src="/truck.png" alt="Truck" width={20} height={20} className="w-5 h-5" unoptimized />
               <span className="text-gray-600 text-sm">Free Shipping</span>
             </div>
             
@@ -603,17 +676,46 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• 100% ring-spun cotton</li>
                       <li>• Grey is 90% ring-spun cotton, 10% polyester</li>
                       <li>• Dark Heather is 65% polyester, 35% cotton</li>
-                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
+                      <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                     </ul>
                   </div>
                 </div>
               </div>
             )}
             
+            {/* Long Tee specific information for mobile - Display below Made-to-Order */}
+            {(product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')) && (
+              <div className="mt-6 md:hidden">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
+                    <p><strong>Fabric composition:</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>・50% cotton, 50% polyester</li>
+                      <li>・Fabric weight: 8.0 oz/yd² (271 g/m²)</li>
+                      <li>・Pre-shrunk for lasting fit</li>
+                      <li>・Soft air-jet spun yarn</li>
+                    </ul>
+                    <p className="mt-2">Double-needle stitching for durability</p>
+                    <p className="mt-2">• Disclaimer: DWhite may appear slightly off-white depending on lighting.</p>
+                    <p>Orange may show slight hue variation.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Size Chart for Long Tee mobile - Display below Made-to-Order */}
+            {(product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')) && (
+              <div className="mt-6 md:hidden">
+                <SizeChart productType={product.type} />
+              </div>
+            )}
+            
             {/* Size Chart for mobile - Display below Made-to-Order */}
             {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
               <div className="mt-6 md:hidden">
-                <SizeChart />
+                <SizeChart productType={product.type} />
               </div>
             )}
           </div>

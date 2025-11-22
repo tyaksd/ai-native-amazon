@@ -95,6 +95,12 @@ export default function TermsOfServicePage() {
             licensors and is protected by law. You may not copy, modify, distribute, or create
             derivative works without our written permission.
           </p>
+          <p className="mt-3 leading-7">
+            Users may not download, copy, reproduce, modify, or remake any product images or AI-generated designs from Godship for the purpose of manufacturing products outside the Godship ecosystem.
+          </p>
+          <p className="mt-3 leading-7">
+            Any unauthorized reproduction or production of AI-generated designs using external Print-on-Demand services is strictly prohibited.
+          </p>
         </section>
 
         <section>

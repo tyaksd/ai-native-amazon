@@ -4,13 +4,18 @@ import { useState } from 'react'
 
 interface SizeChartProps {
   className?: string
+  productType?: string
 }
 
-export default function SizeChart({ className = '' }: SizeChartProps) {
+export default function SizeChart({ className = '', productType }: SizeChartProps) {
   const [unit, setUnit] = useState<'inches' | 'cm'>('inches')
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const sizeData = {
+  const isLongTee = productType?.toLowerCase().includes('long tee') || 
+                    productType?.toLowerCase().includes('longtee') || 
+                    productType?.toLowerCase().includes('long-tee')
+
+  const tshirtSizeData = {
     inches: [
       { size: 'S', length: '28', width: '18', sleeveLength: '16 ¾' },
       { size: 'M', length: '29', width: '20', sleeveLength: '17 ⅞' },
@@ -29,6 +34,30 @@ export default function SizeChart({ className = '' }: SizeChartProps) {
     ]
   }
 
+  const longTeeSizeData = {
+    inches: [
+      { size: 'S', length: '27', width: '20', sleeveLength: '33 ½' },
+      { size: 'M', length: '28', width: '22', sleeveLength: '34 ½' },
+      { size: 'L', length: '29', width: '24', sleeveLength: '35 ½' },
+      { size: 'XL', length: '30', width: '26', sleeveLength: '36 ½' },
+      { size: '2XL', length: '31', width: '28', sleeveLength: '37 ½' },
+      { size: '3XL', length: '32', width: '30', sleeveLength: '38 ½' },
+      { size: '4XL', length: '33', width: '32', sleeveLength: '39 ½' },
+      { size: '5XL', length: '34', width: '34', sleeveLength: '40 ½' }
+    ],
+    cm: [
+      { size: 'S', length: '68.6', width: '50.8', sleeveLength: '85' },
+      { size: 'M', length: '71', width: '56', sleeveLength: '87.6' },
+      { size: 'L', length: '73.7', width: '61', sleeveLength: '90.2' },
+      { size: 'XL', length: '76.2', width: '66', sleeveLength: '92.7' },
+      { size: '2XL', length: '78.7', width: '71', sleeveLength: '95.3' },
+      { size: '3XL', length: '81.3', width: '76.2', sleeveLength: '97.8' },
+      { size: '4XL', length: '83.8', width: '81.3', sleeveLength: '100.3' },
+      { size: '5XL', length: '86.4', width: '86.4', sleeveLength: '103' }
+    ]
+  }
+
+  const sizeData = isLongTee ? longTeeSizeData : tshirtSizeData
   const currentData = sizeData[unit]
 
   return (

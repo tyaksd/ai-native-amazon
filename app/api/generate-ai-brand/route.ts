@@ -38,10 +38,15 @@ export async function POST(request: NextRequest) {
       let basePrompt: string
       
       if (customDescription) {
-        // Custom description provided - use it to generate brand
-        basePrompt = `Role and Task: "Act as an avant-garde fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new fashion brand launching on an e-commerce platform based on the following custom description:
+        // Custom description provided - use it to generate brand, ignoring any predefined brand style concepts
+        basePrompt = `Role and Task: "Act as an avant-garde fashion brand strategist. Generate a Brand Name, Brand Concept (Key Phrase), Design Concept, Target Audience, Logo Design, and Background Image for a new fashion brand launching on an e-commerce platform.
 
+CRITICAL: The following custom description is the PRIMARY and ONLY source for the brand concept. IGNORE any predefined brand style categories (streetwear, casual, etc.) and focus EXCLUSIVELY on expanding and developing the custom description provided below:
+
+CUSTOM DESCRIPTION:
 ${customDescription}
+
+Your task is to take this custom description and expand it into a complete brand identity. Use the custom description as the foundation and build upon it creatively. Do not apply any generic brand style templates or categories.
 
 CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands being generated. Each brand must be COMPLETELY UNIQUE and DIFFERENT from all others. Avoid any similarities in names, concepts, colors, or aesthetics.`
       } else if (brandStyle === 'street') {
@@ -64,57 +69,63 @@ CRITICAL UNIQUENESS REQUIREMENT: This is brand ${i + 1} of ${quantityNum} brands
       let prompt: string
       
       if (customDescription) {
-        // Custom description prompt
+        // Custom description prompt - expand the custom description exclusively
         prompt = basePrompt + `
 
 IMPORTANT: Focus ONLY on brand identity, visual design, and aesthetic concepts. DO NOT include real-world actions such as community events, funding, or workshops.
 
+REMEMBER: The custom description above is your PRIMARY source. Expand and develop it creatively. Do NOT apply any predefined brand style categories or templates.
+
 — Brand Name —
-Invent an original, memorable word or phrase that captures the brand's distinct tone and emotion based on the custom description provided.
-Avoid generic words. Draw from unexpected cultural or emotional sources.
+Invent an original, memorable word or phrase that directly reflects and expands upon the custom description provided above.
+The name should emerge naturally from the custom description's essence, tone, and vision.
+Avoid generic words. Draw from the specific elements, emotions, and concepts mentioned in the custom description.
 The name should feel fresh, ownable, and globally distinctive.
-→ Be more spontaneous, experimental, and even chaotic.
-Let intuition override logic.
-Embrace imperfection, randomness, and subconscious inspiration — the name can sound irrational, misspelled, or strangely beautiful.
-Focus on raw emotion over reason.
+→ Be spontaneous, experimental, and let the custom description guide your intuition.
+The name should feel like a natural extension of the custom description's core concept.
 
 — Brand Concept —
-Write a detailed and emotionally resonant description of around **90 words** that captures the brand's worldview, visual philosophy, and emotional tone based on the custom description.
-It should describe how the brand *feels* — its rhythm, aesthetic, and underlying story — not just what it sells.
-Blend poetic abstraction with visual precision.
+Write a detailed and emotionally resonant description of around **90 words** that EXPANDS and DEVELOPS the custom description provided above.
+Take the custom description as your starting point and build upon it to create a complete brand worldview.
+It should describe how the brand *feels* — its rhythm, aesthetic, and underlying story — directly derived from the custom description.
+Blend poetic abstraction with visual precision, staying true to the custom description's essence.
 Avoid clichés and create a fresh, vivid image that feels cinematic and conceptually bold.
+The brand concept should feel like a natural evolution and expansion of the custom description.
 
 — Design Concept —
-Describe the visual DNA of the brand: color schemes, shapes, typography, and motifs based on the custom description.
-Blend unexpected design schools.
-Encourage unusual materials, hybrid inspirations, and experimental layout approaches.
-Focus on originality and sensory impact.
+Describe the visual DNA of the brand: color schemes, shapes, typography, and motifs that directly translate the custom description into visual elements.
+Extract visual concepts from the custom description and develop them into a cohesive design language.
+Blend unexpected design schools that align with the custom description.
+Encourage unusual materials, hybrid inspirations, and experimental layout approaches that reflect the custom description.
+Focus on originality and sensory impact that stems from the custom description's unique vision.
 
 — Target Audience —
-Define the subculture or mindset of the audience based on the custom description.
-They can be: experimental fashion followers, digital natives, art students, or any relevant audience that aligns with the custom description.
-Each audience description must sound culturally distinct and emotionally resonant.
+Define the subculture or mindset of the audience that would naturally connect with the brand described in the custom description.
+The audience should be derived directly from the custom description's vision, values, and aesthetic.
+They can be any relevant audience that aligns with the custom description's specific concept and philosophy.
+Each audience description must sound culturally distinct and emotionally resonant, reflecting the unique nature of the custom description.
 
 — Logo Design —
-Create a simple, iconic symbol that reflects the brand's visual identity and can adapt to collaborations.
-Focus on visual elements, shapes, and typography.
+Create a simple, iconic symbol that visually represents the brand concept derived from the custom description.
+The logo should directly reflect the visual identity and aesthetic philosophy described in the custom description.
+Focus on visual elements, shapes, and typography that translate the custom description into a logo form.
 Generate a minimalist logo image with the emblem or symbol positioned precisely at the center of the canvas.
 Avoid any extraneous objects, backgrounds, or text; focus solely on the primary logo shape.
 Use crisp lines and balanced proportions so that the design remains clear when scaled down.
 The style should resemble vector art with high contrast and a limited color palette.
-The logo color should be the most representative color that reflects the brand concept — not necessarily black or white, but the color that best embodies the brand's identity and aesthetic.
+The logo color should be the most representative color that reflects the brand concept from the custom description — not necessarily black or white, but the color that best embodies the custom description's identity and aesthetic.
 Leave generous white space around the logo to emphasize its central placement and ensure the overall composition feels uncluttered.
 
 IMPORTANT: There is a 70% chance the logo should be text-based rather than a symbol/icon.
-If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept.
+If creating a text logo, use the brand name as the primary element and style the typography to perfectly reflect the brand concept derived from the custom description.
 The text should be the main focus, positioned centrally with generous white space around it.
 
 — Background Image —
-Describe a striking header background that embodies the brand's atmosphere and emotional tone based on the custom description.
-The scene should visually translate the brand concept into space, light, and texture.
-The image must feel like an immersive world where the brand lives — poetic, cinematic, and conceptually aligned with its design DNA.
+Describe a striking header background that visually embodies the custom description's atmosphere and emotional tone.
+The scene should directly translate the custom description into space, light, and texture.
+The image must feel like an immersive world where the brand described in the custom description lives — poetic, cinematic, and conceptually aligned with the custom description's design DNA.
 The image should be high-resolution, visually sharp, and production-ready, suitable for use as a large-scale e-commerce header.
-It must directly reflect the unique emotional core and aesthetic philosophy of the specific brand concept based on the custom description.`
+It must directly reflect the unique emotional core and aesthetic philosophy of the custom description provided above.`
       } else if (brandStyle === 'street') {
         prompt = basePrompt + `
 
