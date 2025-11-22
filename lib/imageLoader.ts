@@ -1,31 +1,7 @@
 // Custom image loader for Cloudinary images
 // This helps with timeout issues by optimizing image loading and reducing costs
 
-// Safely extract public_id from Cloudinary's secure_url (same logic as in API routes)
-function getPublicIdFromUrl(url: string): string | null {
-  try {
-    const u = new URL(url)
-    const parts = u.pathname.split('/').filter(Boolean)
-    const last = parts[parts.length - 1] || ''
-    const publicIdWithExt = decodeURIComponent(last)
-    const withoutExt = publicIdWithExt.replace(/\.[a-z0-9]+$/i, '')
-    const uploadIndex = parts.findIndex(p => p === 'upload')
-    if (uploadIndex >= 0) {
-      const pathAfterUpload = parts.slice(uploadIndex + 1)
-      const afterVersion = pathAfterUpload[0]?.startsWith('v') ? pathAfterUpload.slice(1) : pathAfterUpload
-      if (afterVersion.length > 0) {
-        const lastIdx = afterVersion.length - 1
-        afterVersion[lastIdx] = withoutExt
-        return afterVersion.join('/')
-      }
-    }
-    return withoutExt
-  } catch {
-    return null
-  }
-}
-
-export default function cloudinaryLoader({ src, width, quality }: {
+export default function cloudinaryLoader({ src, width: _width, quality: _quality }: {
   src: string
   width: number
   quality?: number

@@ -461,11 +461,12 @@ OUTPUT:
   return `${productName} is an official ${productType} from ${brandName}, created for ${targetAudience} with a street-ready attitude. The design channels the brand's ${brandConcept.toLowerCase()}—bold graphic energy with urban fashion edge—so the artwork feels expressive and built to stand out in daily rotation. Cut for a comfortable ${gender.toLowerCase()} fit, it delivers reliable durability for long wear. Easy to style from day to night. Machine wash cold; tumble dry low. True-to-size through the shoulders and chest. Discover the look and make it yours.`
 }
 
-function generateRandomPrice(): number {
-  const prices = [29.90, 34.90]
-  const randomIndex = Math.floor(Math.random() * prices.length)
-  return prices[randomIndex]
-}
+// Removed unused function
+// function generateRandomPrice(): number {
+//   const prices = [29.90, 34.90]
+//   const randomIndex = Math.floor(Math.random() * prices.length)
+//   return prices[randomIndex]
+// }
 
 // 商品説明文からデザイン・ビジュアル要素のみを抽出（SEO要素を除外）
 function extractDesignElementsFromDescription(description: string) {
@@ -764,7 +765,7 @@ Negative: garment, T-shirt, fabric, mannequin, background, shadows, generic, com
 async function compositeDesignOnTshirt(
   plainTshirtUrl: string, 
   designPngUrl: string, 
-  _outputName: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+  _outputName: string,
   productType?: string
 ): Promise<string> {
   try {
@@ -884,7 +885,7 @@ async function generateProductImages(
     const errorDetails = err && typeof err === 'object' ? {
       message: errorMessage,
       stack: errorStack,
-      ...(err as any)
+      ...(err as Record<string, unknown>)
     } : { error: err }
     
     console.error('[DesignPNG] Error generating design:', errorMessage)
