@@ -76,7 +76,7 @@ export default function AdminPage() {
     icon: '', 
     background_image: '', 
     description: '',
-    category: 'Casual'
+    category: 'Streetwear'
   })
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -245,7 +245,7 @@ export default function AdminPage() {
       })
       if (brand) {
         setBrands(prev => [...prev, brand])
-        setNewBrand({ name: '', icon: '', background_image: '', description: '', category: 'Casual' })
+        setNewBrand({ name: '', icon: '', background_image: '', description: '', category: 'Streetwear' })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)

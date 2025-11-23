@@ -51,8 +51,8 @@ export default function MobileSearch() {
     const query = (formData.get('search') as string) ?? ''
     if (query.trim()) {
       // Change to router.push if you want SPA
-      window.location.href = `/?search=${encodeURIComponent(query)}`
-      // router.push(`/?search=${encodeURIComponent(query)}`)
+      window.location.href = `/search?q=${encodeURIComponent(query)}`
+      // router.push(`/search?q=${encodeURIComponent(query)}`)
     }
   }
 

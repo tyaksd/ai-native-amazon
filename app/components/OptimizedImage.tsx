@@ -43,35 +43,28 @@ export default function OptimizedImage({
   // Optimize priority
   const optimizedPriority = priority || getImagePriority(isImportant)
   
-  // Display with unoptimized for images that should skip optimization
-  if (shouldSkip) {
-    return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        priority={optimizedPriority}
-        unoptimized={true}
-        fill={fill}
-        sizes={sizes}
-      />
-    )
-  }
-  
-  // Display normal images with optimization
+  // When fill is true, width and height should not be specified
+  const imageProps = fill
+    ? {
+        fill: true,
+        sizes: sizes,
+        className: className,
+        priority: optimizedPriority,
+        ...(shouldSkip ? { unoptimized: true } : { quality: optimizedQuality })
+      }
+    : {
+        width: width,
+        height: height,
+        className: className,
+        priority: optimizedPriority,
+        ...(shouldSkip ? { unoptimized: true } : { quality: optimizedQuality })
+      }
+
   return (
     <Image
       src={src}
       alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      priority={optimizedPriority}
-      quality={optimizedQuality}
-      fill={fill}
-      sizes={sizes}
+      {...imageProps}
     />
   )
 }

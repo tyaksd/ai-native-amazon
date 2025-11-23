@@ -343,6 +343,31 @@ export default function ProductDetail({ params }: PageProps) {
               <SizeChart productType={product.type} />
             </div>
           )}
+          
+          {/* Hoodie specific information for desktop - Display below product photos (desktop only) */}
+          {product.type?.toLowerCase().includes('hoodie') && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Fabric composition:</strong></p>
+                  <ul className="ml-4 space-y-1">
+                    <li>• 65% ring-spun cotton, 35% polyester</li>
+                    <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
+                    <li>• 100% cotton face</li>
+                    <li>• Front pouch pocket</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Size Chart for Hoodie desktop - Display below product photos (desktop only) */}
+          {product.type?.toLowerCase().includes('hoodie') && (
+            <div className="mt-6 max-w-lg mx-auto md:mx-0 hidden md:block">
+              <SizeChart productType={product.type} />
+            </div>
+          )}
         </div>
         <div className="md:ml-0 md:col-span-2 md:pt-16">
           <div>
@@ -714,6 +739,31 @@ export default function ProductDetail({ params }: PageProps) {
             
             {/* Size Chart for mobile - Display below Made-to-Order */}
             {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
+              <div className="mt-6 md:hidden">
+                <SizeChart productType={product.type} />
+              </div>
+            )}
+            
+            {/* Hoodie specific information for mobile - Display below Made-to-Order */}
+            {product.type?.toLowerCase().includes('hoodie') && (
+              <div className="mt-6 md:hidden">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p><strong>Fabric composition:</strong></p>
+                    <ul className="ml-4 space-y-1">
+                      <li>• 65% ring-spun cotton, 35% polyester</li>
+                      <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
+                      <li>• 100% cotton face</li>
+                      <li>• Front pouch pocket</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Size Chart for Hoodie mobile - Display below Made-to-Order */}
+            {product.type?.toLowerCase().includes('hoodie') && (
               <div className="mt-6 md:hidden">
                 <SizeChart productType={product.type} />
               </div>

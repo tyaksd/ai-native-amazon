@@ -216,13 +216,10 @@ export default function BrandPage({ params }: PageProps) {
                     <option value="T-Shirt">T-Shirt</option>
                     <option value="Hoodie">Hoodie</option>
                     <option value="Sweatshirt">Sweatshirt</option>
+                    <option value="Sweatshirt">Long Tee</option>
                     <option value="Jacket">Jacket</option>
-                    <option value="Pants">Pants</option>
-                    <option value="Shorts">Shorts</option>
                     <option value="Hat">Hat</option>
                     <option value="Accessories">Accessories</option>
-                    <option value="Shoes">Shoes</option>
-                    <option value="Other">Other</option>
                   </select>
                 </div>
               )}

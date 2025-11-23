@@ -25,6 +25,8 @@ export default function ProductCarousel({ products, title = "You might also like
   const dragStartScrollLeftRef = useRef<number>(0);
   const resumeTimerRef = useRef<number | null>(null);
   const dragThreshold = 5; // Threshold to distinguish drag from click (pixels)
+  const linkDragStartRef = useRef<{ x: number; y: number; productId: string } | null>(null);
+  const wasDraggingRef = useRef<{ [key: string]: boolean }>({});
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
@@ -96,6 +98,13 @@ export default function ProductCarousel({ products, title = "You might also like
 
     const onPointerDown = (e: PointerEvent) => {
       if (!el) return;
+      // Check if the target is a link or inside a link
+      const target = e.target as HTMLElement;
+      const isLink = target.closest('a');
+      if (isLink) {
+        // Don't interfere with link clicks - let the link handle it
+        return;
+      }
       pauseAuto();
       isDraggingRef.current = false; // Not dragging initially
       el.setPointerCapture(e.pointerId);
@@ -105,6 +114,13 @@ export default function ProductCarousel({ products, title = "You might also like
 
     const onPointerMove = (e: PointerEvent) => {
       if (!el) return;
+      // Check if the target is a link or inside a link
+      const target = e.target as HTMLElement;
+      const isLink = target.closest('a');
+      if (isLink) {
+        // Don't interfere with link interactions
+        return;
+      }
       const dx = Math.abs(e.clientX - dragStartXRef.current);
       
       // Start dragging only when threshold is exceeded
@@ -185,13 +201,43 @@ export default function ProductCarousel({ products, title = "You might also like
           {products.map((product) => (
             <div key={product.id} className="group relative flex-shrink-0 w-48 sm:w-56">
               <Link 
-                href={`/product/${product.id}`} 
+                href={`/${product.brand_id}/${product.id}`} 
                 className="block"
-                onClick={(e) => {
-                  // Allow navigation only if not dragging
-                  if (isDraggingRef.current) {
-                    e.preventDefault();
+                onPointerDown={(e) => {
+                  linkDragStartRef.current = { x: e.clientX, y: e.clientY, productId: product.id };
+                  wasDraggingRef.current[product.id] = false;
+                  e.stopPropagation();
+                }}
+                onPointerMove={(e) => {
+                  if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                    const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                    const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                    if (dx > dragThreshold || dy > dragThreshold) {
+                      wasDraggingRef.current[product.id] = true;
+                    }
                   }
+                  e.stopPropagation();
+                }}
+                onPointerUp={(e) => {
+                  if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                    const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                    const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                    // If moved more than threshold, it was a drag, not a click
+                    if (dx > dragThreshold || dy > dragThreshold) {
+                      wasDraggingRef.current[product.id] = true;
+                      e.preventDefault();
+                    }
+                    linkDragStartRef.current = null;
+                  }
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  // Prevent navigation if we were dragging
+                  if (wasDraggingRef.current[product.id]) {
+                    e.preventDefault();
+                    wasDraggingRef.current[product.id] = false;
+                  }
+                  e.stopPropagation();
                 }}
               >
                 {product.images?.length ? (
@@ -221,13 +267,41 @@ export default function ProductCarousel({ products, title = "You might also like
               <div className="pt-2 ml-2">
                 <div className="flex items-center justify-between gap-3">
                   <Link 
-                    href={`/product/${product.id}`} 
+                    href={`/${product.brand_id}/${product.id}`} 
                     className="block font-medium text-white truncate hover:underline"
-                    onClick={(e) => {
-                      // Allow navigation only if not dragging
-                      if (isDraggingRef.current) {
-                        e.preventDefault();
+                    onPointerDown={(e) => {
+                      linkDragStartRef.current = { x: e.clientX, y: e.clientY, productId: product.id };
+                      wasDraggingRef.current[product.id] = false;
+                      e.stopPropagation();
+                    }}
+                    onPointerMove={(e) => {
+                      if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                        const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                        const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                        if (dx > dragThreshold || dy > dragThreshold) {
+                          wasDraggingRef.current[product.id] = true;
+                        }
                       }
+                      e.stopPropagation();
+                    }}
+                    onPointerUp={(e) => {
+                      if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                        const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                        const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                        if (dx > dragThreshold || dy > dragThreshold) {
+                          wasDraggingRef.current[product.id] = true;
+                          e.preventDefault();
+                        }
+                        linkDragStartRef.current = null;
+                      }
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      if (wasDraggingRef.current[product.id]) {
+                        e.preventDefault();
+                        wasDraggingRef.current[product.id] = false;
+                      }
+                      e.stopPropagation();
                     }}
                   >
                     {product.name}
@@ -242,13 +316,41 @@ export default function ProductCarousel({ products, title = "You might also like
           {products.map((product) => (
             <div key={`dup-${product.id}`} className="group rounded-lg overflow-hidden flex-shrink-0 w-48 sm:w-56">
               <Link 
-                href={`/product/${product.id}`} 
+                href={`/${product.brand_id}/${product.id}`} 
                 className="block"
-                onClick={(e) => {
-                  // Allow navigation only if not dragging
-                  if (isDraggingRef.current) {
-                    e.preventDefault();
+                onPointerDown={(e) => {
+                  linkDragStartRef.current = { x: e.clientX, y: e.clientY, productId: product.id };
+                  wasDraggingRef.current[product.id] = false;
+                  e.stopPropagation();
+                }}
+                onPointerMove={(e) => {
+                  if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                    const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                    const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                    if (dx > dragThreshold || dy > dragThreshold) {
+                      wasDraggingRef.current[product.id] = true;
+                    }
                   }
+                  e.stopPropagation();
+                }}
+                onPointerUp={(e) => {
+                  if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                    const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                    const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                    if (dx > dragThreshold || dy > dragThreshold) {
+                      wasDraggingRef.current[product.id] = true;
+                      e.preventDefault();
+                    }
+                    linkDragStartRef.current = null;
+                  }
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  if (wasDraggingRef.current[product.id]) {
+                    e.preventDefault();
+                    wasDraggingRef.current[product.id] = false;
+                  }
+                  e.stopPropagation();
                 }}
               >
                 {product.images?.length ? (
@@ -271,13 +373,41 @@ export default function ProductCarousel({ products, title = "You might also like
               <div className="pt-2 ml-2">
                 <div className="flex items-center justify-between gap-3">
                   <Link 
-                    href={`/product/${product.id}`} 
+                    href={`/${product.brand_id}/${product.id}`} 
                     className="block font-medium text-white truncate hover:underline"
-                    onClick={(e) => {
-                      // Allow navigation only if not dragging
-                      if (isDraggingRef.current) {
-                        e.preventDefault();
+                    onPointerDown={(e) => {
+                      linkDragStartRef.current = { x: e.clientX, y: e.clientY, productId: product.id };
+                      wasDraggingRef.current[product.id] = false;
+                      e.stopPropagation();
+                    }}
+                    onPointerMove={(e) => {
+                      if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                        const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                        const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                        if (dx > dragThreshold || dy > dragThreshold) {
+                          wasDraggingRef.current[product.id] = true;
+                        }
                       }
+                      e.stopPropagation();
+                    }}
+                    onPointerUp={(e) => {
+                      if (linkDragStartRef.current && linkDragStartRef.current.productId === product.id) {
+                        const dx = Math.abs(e.clientX - linkDragStartRef.current.x);
+                        const dy = Math.abs(e.clientY - linkDragStartRef.current.y);
+                        if (dx > dragThreshold || dy > dragThreshold) {
+                          wasDraggingRef.current[product.id] = true;
+                          e.preventDefault();
+                        }
+                        linkDragStartRef.current = null;
+                      }
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      if (wasDraggingRef.current[product.id]) {
+                        e.preventDefault();
+                        wasDraggingRef.current[product.id] = false;
+                      }
+                      e.stopPropagation();
                     }}
                   >
                     {product.name}

@@ -10,12 +10,12 @@ export default function LogoLink() {
   const handleLogoClick = (e: React.MouseEvent) => {
     // 検索状態とフィルター状態をクリアするためにURLパラメータを削除
     e.preventDefault()
-    router.push('/')
+    router.push('/brands')
   }
 
   return (
     <Link 
-      href="/" 
+      href="/brands" 
       onClick={handleLogoClick}
       className="flex items-center gap-3 mx-auto md:mx-0 md:mr-auto"
     >

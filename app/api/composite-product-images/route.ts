@@ -48,15 +48,19 @@ function compositeDesignOnTshirt(
 
     // フーディーの場合はデザイン位置をより上に、少し左に配置
     const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
-    const yOffset = isHoodie ? '-0.12' : (isLongTee ? '-0.12' : '-0.05') // フーディーの場合はより上に、Long Teeは少し上に
+    const isSweatshirt = productType === 'Sweatshirt' || productType?.toLowerCase() === 'sweatshirt'
+    const yOffset = isHoodie ? '-0.12' : (isLongTee || isSweatshirt ? '-0.12' : '-0.05') // フーディーの場合はより上に、Long TeeとSweatshirtは少し上に
     const xOffset = isHoodie ? '-0.015' : '0' // フーディーの場合は少し左に
 
-    // デザインを相対 29.7% (0.33 * 0.9) で中央より僅かに上に配置
+    // デザインサイズ: Long Teeは33%、その他は29.7%
+    const designSize = isLongTee ? '0.33' : '0.297'
+
+    // デザインを相対サイズで中央より僅かに上に配置
     // 注: l_<public_id> は同一Cloudアカウントのアセットを参照
     // Cloudinaryでは、g_パラメータを先に指定し、その後にx/yオフセットを指定する
     const overlayParams = isHoodie 
-      ? `fl_relative,w_0.297,h_0.297,g_center,x_${xOffset},y_${yOffset}`
-      : `fl_relative,w_0.297,h_0.297,g_center,y_${yOffset}`
+      ? `fl_relative,w_${designSize},h_${designSize},g_center,x_${xOffset},y_${yOffset}`
+      : `fl_relative,w_${designSize},h_${designSize},g_center,y_${yOffset}`
     
     const compositeUrl =
       `https://res.cloudinary.com/${cloud}/image/upload` +
@@ -65,7 +69,7 @@ function compositeDesignOnTshirt(
       `/${encodeURIComponent(basePublicId)}`
 
     // 変換URLを直接返す（再アップロードを避けてタイムアウトを防ぐ）
-    console.log(`[Composite] ProductType: ${productType}, isHoodie: ${isHoodie}, isLongTee: ${isLongTee}, xOffset: ${xOffset}, yOffset: ${yOffset}`)
+    console.log(`[Composite] ProductType: ${productType}, isHoodie: ${isHoodie}, isLongTee: ${isLongTee}, isSweatshirt: ${isSweatshirt}, xOffset: ${xOffset}, yOffset: ${yOffset}`)
     console.log(`[Composite] Generated composite URL: ${compositeUrl}`)
     return compositeUrl
   } catch (error) {
@@ -92,10 +96,12 @@ const plainTshirtUrls: { [key: string]: string } = {
 
 // 事前にCloudinaryにアップロードされたプレーンなLong Tee画像のURL
 const plainLongTeeUrls: { [key: string]: string } = {
-  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610446/blacklong_nhzicq.png',
-  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610433/whitelong_vdydvl.png',
-  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610441/navylong_tisu5v.png',
-  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763611931/ChatGPT_Image_Nov_20_2025_01_12_00_PM_eyl3kk.png'
+  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886468/ChatGPT_Image_Nov_23_2025_05_27_41_PM_yasqda.png',
+  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886432/ChatGPT_Image_Nov_23_2025_05_27_05_PM_drasrd.png',
+  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886399/ChatGPT_Image_Nov_23_2025_05_26_32_PM_magpwm.png',
+  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886347/ChatGPT_Image_Nov_23_2025_05_25_35_PM_dembcw.png',
+  'Maroon': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763887850/ChatGPT_Image_Nov_23_2025_05_50_43_PM_lwotjm.png',
+  'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763888027/ChatGPT_Image_Nov_23_2025_05_53_40_PM_ezekfp.png'
 }
 
 // 事前にCloudinaryにアップロードされたプレーンなHoodie画像のURL
@@ -105,6 +111,17 @@ const plainHoodieUrls: { [key: string]: string } = {
   'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623808/navyhoodie_z6xhbq.png',
   'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763637373/greyhoodie_bgqpqe.png'
 }
+
+// 事前にCloudinaryにアップロードされたプレーンなSweatshirt画像のURL
+const plainSweatshirtUrls: { [key: string]: string } = {
+  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610446/blacklong_nhzicq.png',
+  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610433/whitelong_vdydvl.png',
+  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610441/navylong_tisu5v.png',
+  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763611931/ChatGPT_Image_Nov_20_2025_01_12_00_PM_eyl3kk.png'
+}
+
+
+
 
 // カラー名を正規化して定義済みカラー名にマッピング
 function normalizeColorName(color: string, colorMap: { [key: string]: string }): string | null {
@@ -152,6 +169,7 @@ export async function POST(request: NextRequest) {
     // Product Typeに応じて適切なベース画像マップを選択
     const isLongTee = productType === 'Long Tee'
     const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
+    const isSweatshirt = productType === 'Sweatshirt' || productType?.toLowerCase() === 'sweatshirt'
     let baseImageMap: { [key: string]: string }
     let productTypeName: string
     
@@ -161,6 +179,9 @@ export async function POST(request: NextRequest) {
     } else if (isHoodie) {
       baseImageMap = plainHoodieUrls
       productTypeName = 'Hoodie'
+    } else if (isSweatshirt) {
+      baseImageMap = plainSweatshirtUrls
+      productTypeName = 'Sweatshirt'
     } else {
       baseImageMap = plainTshirtUrls
       productTypeName = 'T-Shirt'

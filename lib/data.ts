@@ -304,7 +304,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .ilike('name', `${query}%`)
+    .ilike('name', `%${query}%`)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -319,7 +319,7 @@ export async function searchBrands(query: string): Promise<Brand[]> {
   const { data, error } = await supabase
     .from('brands')
     .select('*')
-    .ilike('name', `${query}%`)
+    .ilike('name', `%${query}%`)
     .order('name')
 
   if (error) {

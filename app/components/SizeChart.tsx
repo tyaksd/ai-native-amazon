@@ -15,6 +15,8 @@ export default function SizeChart({ className = '', productType }: SizeChartProp
                     productType?.toLowerCase().includes('longtee') || 
                     productType?.toLowerCase().includes('long-tee')
 
+  const isHoodie = productType?.toLowerCase().includes('hoodie')
+
   const tshirtSizeData = {
     inches: [
       { size: 'S', length: '28', width: '18', sleeveLength: '16 ¾' },
@@ -57,7 +59,26 @@ export default function SizeChart({ className = '', productType }: SizeChartProp
     ]
   }
 
-  const sizeData = isLongTee ? longTeeSizeData : tshirtSizeData
+  const hoodieSizeData = {
+    inches: [
+      { size: 'S', length: '27', width: '20', sleeveLength: '' },
+      { size: 'M', length: '28', width: '21', sleeveLength: '' },
+      { size: 'L', length: '29', width: '23', sleeveLength: '' },
+      { size: 'XL', length: '30', width: '25', sleeveLength: '' },
+      { size: '2XL', length: '31', width: '26 ½', sleeveLength: '' },
+      { size: '3XL', length: '32', width: '28', sleeveLength: '' }
+    ],
+    cm: [
+      { size: 'S', length: '68.6', width: '50.8', sleeveLength: '' },
+      { size: 'M', length: '71.1', width: '53.3', sleeveLength: '' },
+      { size: 'L', length: '73.7', width: '58.4', sleeveLength: '' },
+      { size: 'XL', length: '76.2', width: '63.5', sleeveLength: '' },
+      { size: '2XL', length: '78.7', width: '67.3', sleeveLength: '' },
+      { size: '3XL', length: '81.3', width: '71.1', sleeveLength: '' }
+    ]
+  }
+
+  const sizeData = isLongTee ? longTeeSizeData : isHoodie ? hoodieSizeData : tshirtSizeData
   const currentData = sizeData[unit]
 
   return (
@@ -113,7 +134,7 @@ export default function SizeChart({ className = '', productType }: SizeChartProp
                   <th className="text-left py-2 font-medium text-gray-900">SIZE LABEL</th>
                   <th className="text-left py-2 font-medium text-gray-900">LENGTH</th>
                   <th className="text-left py-2 font-medium text-gray-900">WIDTH</th>
-                  <th className="text-left py-2 font-medium text-gray-900">SLEEVE LENGTH</th>
+                  {!isHoodie && <th className="text-left py-2 font-medium text-gray-900">SLEEVE LENGTH</th>}
                 </tr>
               </thead>
               <tbody>
@@ -122,7 +143,7 @@ export default function SizeChart({ className = '', productType }: SizeChartProp
                     <td className="py-2 text-gray-900 font-medium">{row.size}</td>
                     <td className="py-2 text-gray-700">{row.length}</td>
                     <td className="py-2 text-gray-700">{row.width}</td>
-                    <td className="py-2 text-gray-700">{row.sleeveLength}</td>
+                    {!isHoodie && <td className="py-2 text-gray-700">{row.sleeveLength}</td>}
                   </tr>
                 ))}
               </tbody>
