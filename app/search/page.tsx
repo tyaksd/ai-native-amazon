@@ -2,8 +2,8 @@
 
 import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getBrands, searchProducts, searchBrands, Brand, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
@@ -13,9 +13,8 @@ function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [foundBrands, setFoundBrands] = useState<Brand[]>([])
   const [allBrands, setAllBrands] = useState<Brand[]>([])
@@ -473,6 +472,18 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
 
