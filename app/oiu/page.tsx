@@ -81,12 +81,12 @@ export default function AdminPage() {
   const [newProduct, setNewProduct] = useState({
     name: '',
     images: [] as string[],
-    price: '',
+    price: '29.90',
     brand_id: '',
     description: '',
     category: 'Clothing',
     type: 'T-Shirt',
-    colors: ['Black', 'White', 'Navy', 'Grey'] as string[],
+    colors: ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand'] as string[],
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
     gender: 'Unisex'
   })
@@ -321,12 +321,12 @@ export default function AdminPage() {
         setNewProduct({
           name: '',
           images: [],
-          price: '',
+          price: '29.90',
           brand_id: '',
           description: '',
           category: 'Clothing',
           type: 'T-Shirt',
-          colors: ['Black', 'White', 'Navy', 'Grey'],
+          colors: ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand'],
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
           gender: 'Unisex'
         })

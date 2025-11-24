@@ -229,42 +229,85 @@ export default function BrandPage({ params }: PageProps) {
               <div className="text-white text-center py-12 drop-shadow-lg">No products available for this brand.</div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
-                {displayedItems.map((p) => (
-                  <div key={p.id} className="group relative">
-                    <Link href={`/${p.brand_id}/${p.id}`} className="block">
-                      <div className="aspect-square bg-gray-50">
-                        {p.images && p.images.length > 0 ? (
-                          <Image src={p.images[0]} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 text-sm">No image</span>
-                          </div>
-                        )}
+                {displayedItems.map((p, index) => {
+                  // 黒と白を交互に選択する関数
+                  const getImageForProduct = (product: Product, productIndex: number): string | null => {
+                    if (!product.images || product.images.length === 0) {
+                      return null
+                    }
+                    
+                    // 黒と白が利用可能かチェック
+                    if (product.colors && product.colors.length > 0) {
+                      // インデックスに基づいて黒と白を交互に選択
+                      const targetColor = productIndex % 2 === 0 ? 'Black' : 'White'
+                      
+                      // カラー名の正規化（大文字小文字を無視）
+                      const normalizedColors = product.colors.map(c => c.trim())
+                      const blackIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'black')
+                      const whiteIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'white')
+                      
+                      // 黒または白が見つかった場合、対応する画像を使用
+                      if (targetColor === 'Black' && blackIndex >= 0) {
+                        const imageIndex = blackIndex % product.images.length
+                        return product.images[imageIndex]
+                      } else if (targetColor === 'White' && whiteIndex >= 0) {
+                        const imageIndex = whiteIndex % product.images.length
+                        return product.images[imageIndex]
+                      }
+                      
+                      // 交互に選択したいカラーが見つからない場合、もう一方を試す
+                      if (targetColor === 'Black' && whiteIndex >= 0) {
+                        const imageIndex = whiteIndex % product.images.length
+                        return product.images[imageIndex]
+                      } else if (targetColor === 'White' && blackIndex >= 0) {
+                        const imageIndex = blackIndex % product.images.length
+                        return product.images[imageIndex]
+                      }
+                    }
+                    
+                    // フォールバック: 最初の画像を使用
+                    return product.images[0]
+                  }
+                  
+                  const selectedImage = getImageForProduct(p, index)
+                  
+                  return (
+                    <div key={p.id} className="group relative">
+                      <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                        <div className="aspect-square bg-gray-50">
+                          {selectedImage ? (
+                            <Image src={selectedImage} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500 text-sm">No image</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                      {isNewProduct(p.created_at) && (
+                        <div className="absolute top-2 left-2">
+                          <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 z-10">
+                        <FavoriteButton 
+                          productId={p.id} 
+                          className="bg-white/80 hover:bg-white rounded-full p-1"
+                          initialFavoriteState={isFavorited(p.id)}
+                        />
                       </div>
-                    </Link>
-                    {isNewProduct(p.created_at) && (
-                      <div className="absolute top-2 left-2">
-                        <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
+                      <div className="mt-3 ml-2">
+                        <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
+                            {p.type}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute top-2 right-2 z-10">
-                      <FavoriteButton 
-                        productId={p.id} 
-                        className="bg-white/80 hover:bg-white rounded-full p-1"
-                        initialFavoriteState={isFavorited(p.id)}
-                      />
                     </div>
-                    <div className="mt-3 ml-2">
-                      <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
-                          {p.type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

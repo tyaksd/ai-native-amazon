@@ -794,8 +794,8 @@ async function compositeDesignOnTshirt(
     const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
     const isLongTee = productType === 'Long Tee'
     const isSweatshirt = productType === 'Sweatshirt' || productType?.toLowerCase() === 'sweatshirt'
-    const yOffset = isHoodie ? '-0.12' : (isLongTee || isSweatshirt ? '-0.12' : '-0.05') // フーディーの場合はより上に、Long TeeとSweatshirtは少し上に
-    const xOffset = isHoodie ? '-0.015' : '0' // フーディーの場合は少し左に
+    const yOffset = isHoodie ? '-0.12' : (isLongTee || isSweatshirt ? '-0.12' : '-0.08') // フーディーの場合はより上に、Long TeeとSweatshirtは少し上に
+    const xOffset = (isHoodie || isLongTee) ? '-0.015' : '0' // フーディーとLong Teeの場合は少し左に
 
     // デザインサイズ: Long Teeは33%、その他は29.7%
     const designSize = isLongTee ? '0.33' : '0.297'
@@ -803,7 +803,7 @@ async function compositeDesignOnTshirt(
     // デザインを相対サイズで中央より僅かに上に配置
     // 注: l_<public_id> は同一Cloudアカウントのアセットを参照
     // Cloudinaryでは、g_パラメータを先に指定し、その後にx/yオフセットを指定する
-    const overlayParams = isHoodie 
+    const overlayParams = (isHoodie || isLongTee)
       ? `fl_relative,w_${designSize},h_${designSize},g_center,x_${xOffset},y_${yOffset}`
       : `fl_relative,w_${designSize},h_${designSize},g_center,y_${yOffset}`
     
