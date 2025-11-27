@@ -435,9 +435,15 @@ export default function ProductDetail({ params }: PageProps) {
           )}
           {product.sizes && product.sizes.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Size:</p>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-sm font-medium text-gray-700">Size:</p>
+                <p className="text-xs font-medium text-red-600">MAKE SURE YOU CHECK THE SIZE GUIDE</p>
+              </div>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size, index) => (
+                {(product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')
+                  ? product.sizes.filter(size => size !== '3XL' && size !== '3xl' && size !== 'XS' && size !== 'xs')
+                  : product.sizes
+                ).map((size, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedSize(size)}
