@@ -8,6 +8,13 @@ interface SizeChartProps {
   productType?: string
 }
 
+interface SizeRow {
+  size: string
+  length: string
+  chest: string
+  sleeveLength: string
+}
+
 export default function SizeChart({ className = '', productType }: SizeChartProps) {
   const [unit, setUnit] = useState<'inches' | 'cm'>('inches')
   const [isExpanded, setIsExpanded] = useState(false)
@@ -158,7 +165,7 @@ export default function SizeChart({ className = '', productType }: SizeChartProp
                   <tr key={index} className="border-b border-gray-100">
                     <td className="py-2 text-gray-900 font-medium">{row.size}</td>
                     <td className="py-2 text-gray-700">{row.length}</td>
-                    <td className="py-2 text-gray-700">{(row as any).chest || (row as any).width}</td>
+                    <td className="py-2 text-gray-700">{row.chest}</td>
                     {!isHoodie && <td className="py-2 text-gray-700">{row.sleeveLength}</td>}
                   </tr>
                 ))}

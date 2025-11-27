@@ -4,22 +4,18 @@ import OptimizedImage from "@/app/components/OptimizedImage";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from 'react'
 import { getBrands, getVisibleProducts, getProductsByCategory, searchProducts, searchBrands, getMainCategories, getGendersByCategory, getTypesByCategoryAndGender, getProductsByCategoryGenderAndType, getProductsByCategoryAndGender, getFeatures, Brand, Product, Feature } from '@/lib/data'
-import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
 import analytics from '@/lib/analytics'
 
-function formatUSD(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-}
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
-  const [brands, setBrands] = useState<Brand[]>([])
-  const [mainCategories, setMainCategories] = useState<string[]>([])
-  const [genders, setGenders] = useState<string[]>([])
-  const [types, setTypes] = useState<string[]>([])
+  const [_brands, setBrands] = useState<Brand[]>([])
+  const [_mainCategories, setMainCategories] = useState<string[]>([])
+  const [_genders, setGenders] = useState<string[]>([])
+  const [_types, setTypes] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedMainCategory, setSelectedMainCategory] = useState<string>('All')
+  const [selectedMainCategory, _setSelectedMainCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [selectedType, setSelectedType] = useState<string>('All')
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -33,7 +29,7 @@ export default function Home() {
   const [productImageCache, setProductImageCache] = useState<Record<string, string>>({})
   
   // Use the favorites hook
-  const { isFavorited, checkFavorites } = useFavorites()
+  const { isFavorited: _isFavorited, checkFavorites } = useFavorites()
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % features.length)
@@ -100,7 +96,7 @@ export default function Home() {
   }
 
   // Function to randomly select images based on product color (with caching)
-  const getRandomImageForProduct = useCallback((product: Product): string | null => {
+  const _getRandomImageForProduct = useCallback((product: Product): string | null => {
     // Return cached image if it exists in cache
     if (productImageCache[product.id]) {
       return productImageCache[product.id]
@@ -331,19 +327,19 @@ export default function Home() {
   }, [selectedMainCategory, selectedGender, selectedType])
   
   // Calculate pagination for main products
-  const totalPages = Math.ceil(products.length / itemsPerPage)
+  const _totalPages = Math.ceil(products.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const currentProducts = products.slice(startIndex, endIndex)
+  const _currentProducts = products.slice(startIndex, endIndex)
   
   // Calculate pagination for search results
-  const searchTotalPages = searchResults ? Math.ceil(searchResults.products.length / itemsPerPage) : 0
+  const _searchTotalPages = searchResults ? Math.ceil(searchResults.products.length / itemsPerPage) : 0
   const searchStartIndex = (searchCurrentPage - 1) * itemsPerPage
   const searchEndIndex = searchStartIndex + itemsPerPage
-  const currentSearchProducts = searchResults ? searchResults.products.slice(searchStartIndex, searchEndIndex) : []
+  const _currentSearchProducts = searchResults ? searchResults.products.slice(searchStartIndex, searchEndIndex) : []
   
   // Function to generate page numbers to display
-  const getPageNumbers = (currentPageNum: number, totalPagesNum: number) => {
+  const _getPageNumbers = (currentPageNum: number, totalPagesNum: number) => {
     const pages: (number | string)[] = []
     const maxPagesToShow = 5
     

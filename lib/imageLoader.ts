@@ -1,7 +1,7 @@
 // Custom image loader for Cloudinary images
 // This helps with timeout issues by optimizing image loading and reducing costs
 
-export default function cloudinaryLoader({ src, width: _width, quality: _quality }: {
+export default function cloudinaryLoader({ src }: {
   src: string
   width: number
   quality?: number

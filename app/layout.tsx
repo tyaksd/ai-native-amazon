@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 // import { Geist, Geist_Mono } from "next/font/google";
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
 } from "@clerk/nextjs";
 import "./globals.css";
 import ConditionalHeader from "./components/ConditionalHeader";
