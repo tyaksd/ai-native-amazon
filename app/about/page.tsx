@@ -8,7 +8,9 @@ export default function About() {
   const [isBlinking, setIsBlinking] = useState(false);
   const [, setShowSecondPage] = useState(false);
   
-  const fullText = 'with AI and quantitative methods';
+  const firstPart = 'with AI and on-demand';
+  const secondPart = 'production';
+  const fullText = firstPart + '\n' + secondPart;
   
   const handleContactClick = () => {
     window.location.href = 'mailto:jack@godship.io';
@@ -97,8 +99,8 @@ export default function About() {
             <div className="text-center space-y-8 sm:space-y-8 max-w-9xl mx-auto">
               {/* Main Text */}
               <h1 className="text-white text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight sm:px-4" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                We Decode<br />
-                E-Commerce Market<br />
+                We Make<br />
+                E-Commerce Sustainable<br />
                 <span 
                   className={isBlinking ? 'animate-pulse' : ''}
                   style={{
@@ -110,7 +112,12 @@ export default function About() {
                     animation: isBlinking ? 'pulse 0.15s ease-in-out infinite' : 'gradientShift 3s ease infinite'
                   }}
                 >
-                  {displayText}
+                  {displayText.split('\n').map((line, index, array) => (
+                    <span key={index}>
+                      {line}
+                      {index < array.length - 1 && <br />}
+                    </span>
+                  ))}
                   {isTyping && displayText.length < fullText.length && (
                     <span className="animate-pulse">|</span>
                   )}

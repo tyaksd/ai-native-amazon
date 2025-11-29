@@ -110,7 +110,8 @@ const plainHoodieUrls: { [key: string]: string } = {
   'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623805/whitehoodie_vg8e1y.png',
   'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623808/navyhoodie_z6xhbq.png',
   'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763637373/greyhoodie_bgqpqe.png',
-  'Sky Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1764070813/ChatGPT_Image_Nov_25_2025_08_30_43_PM_vmabvx.png'
+  'Sky Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1764070813/ChatGPT_Image_Nov_25_2025_08_30_43_PM_vmabvx.png',
+  'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1764305201/ChatGPT_Image_Nov_28_2025_01_46_28_PM_enza3x.png'
 }
 
 // 事前にCloudinaryにアップロードされたプレーンなSweatshirt画像のURL

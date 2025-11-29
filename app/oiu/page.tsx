@@ -78,15 +78,47 @@ export default function AdminPage() {
     description: '',
     category: 'Streetwear'
   })
+  // Get default colors based on product type
+  const getDefaultColorsForType = (type: string): string[] => {
+    switch (type) {
+      case 'T-Shirt':
+        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand']
+      case 'Long Tee':
+        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Maroon']
+      case 'Sweatshirt':
+        return ['Black', 'White', 'Navy', 'Grey']
+      case 'Hoodie':
+        return ['Black', 'White', 'Navy', 'Grey', 'Sky Blue', 'Military Green']
+      default:
+        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand']
+    }
+  }
+
+  // Get default price based on product type
+  const getDefaultPriceForType = (type: string): string => {
+    switch (type) {
+      case 'T-Shirt':
+        return '29.90'
+      case 'Long Tee':
+        return '39.90'
+      case 'Sweatshirt':
+        return '39.90'
+      case 'Hoodie':
+        return '49.90'
+      default:
+        return '29.90'
+    }
+  }
+
   const [newProduct, setNewProduct] = useState({
     name: '',
     images: [] as string[],
-    price: '29.90',
+    price: getDefaultPriceForType('T-Shirt'),
     brand_id: '',
     description: '',
     category: 'Clothing',
     type: 'T-Shirt',
-    colors: ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand'] as string[],
+    colors: getDefaultColorsForType('T-Shirt'),
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
     gender: 'Unisex'
   })
@@ -107,6 +139,23 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadData()
+    
+    // Load last used values from localStorage
+    const lastBrandId = localStorage.getItem('lastProductBrandId')
+    const lastType = localStorage.getItem('lastProductType')
+    
+    if (lastBrandId || lastType) {
+      const typeToUse = lastType || 'T-Shirt'
+      setNewProduct(prev => ({
+        ...prev,
+        ...(lastBrandId && { brand_id: lastBrandId }),
+        ...(lastType && { 
+          type: lastType,
+          colors: getDefaultColorsForType(lastType),
+          price: getDefaultPriceForType(lastType)
+        })
+      }))
+    }
   }, [])
 
   // Close brand dropdown when clicking outside
@@ -318,15 +367,21 @@ export default function AdminPage() {
       })
       if (product) {
         setProducts(prev => [...prev, product])
+        
+        // Save Brand and Type to localStorage for next time
+        localStorage.setItem('lastProductBrandId', newProduct.brand_id)
+        localStorage.setItem('lastProductType', newProduct.type)
+        
+        // Reset form but keep Brand and Type, set Price and Colors based on Type
         setNewProduct({
           name: '',
           images: [],
-          price: '29.90',
-          brand_id: '',
+          price: getDefaultPriceForType(newProduct.type), // Set price based on type
+          brand_id: newProduct.brand_id, // Keep the same brand
           description: '',
           category: 'Clothing',
-          type: 'T-Shirt',
-          colors: ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand'],
+          type: newProduct.type, // Keep the same type
+          colors: getDefaultColorsForType(newProduct.type), // Set colors based on type
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
           gender: 'Unisex'
         })
@@ -754,10 +809,14 @@ export default function AdminPage() {
                       <select
                         value={newProduct.category}
                         onChange={(e) => {
+                          const newCategory = e.target.value
+                          const newType = getDefaultTypeForCategory(newCategory)
                           setNewProduct(prev => ({ 
                             ...prev, 
-                            category: e.target.value,
-                            type: getDefaultTypeForCategory(e.target.value)
+                            category: newCategory,
+                            type: newType,
+                            colors: getDefaultColorsForType(newType),
+                            price: getDefaultPriceForType(newType)
                           }))
                         }}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -773,7 +832,15 @@ export default function AdminPage() {
                       <label className="block text-sm font-medium text-gray-700">Type</label>
                       <select
                         value={newProduct.type}
-                        onChange={(e) => setNewProduct(prev => ({ ...prev, type: e.target.value }))}
+                        onChange={(e) => {
+                          const newType = e.target.value
+                          setNewProduct(prev => ({ 
+                            ...prev, 
+                            type: newType,
+                            colors: getDefaultColorsForType(newType),
+                            price: getDefaultPriceForType(newType)
+                          }))
+                        }}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       >
                         {getTypeOptionsForCategory(newProduct.category).map(option => (
