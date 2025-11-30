@@ -24,8 +24,8 @@ import ConditionalFooterNoClerk from "./components/ConditionalFooterNoClerk";
 // });
 
 export const metadata: Metadata = {
-  title: "Godship - The AI E-Commerce Platform",
-  description: "Created by AI. Loved by You. Discover favorite products!",
+  title: "Godship - The New-Gen Streetwear Platform",
+  description: "Discover brands you love and their unique products.",
   icons: {
     icon: "/gblack.png",
     shortcut: "/gblack.png",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Godship",
-    description: "Created by AI. Loved by You. Discover favorite products!",
+    description: "Discover brands you love and their unique products.",
     images: [
       {
         url: "/gblack.png",
         width: 1200,
         height: 630,
-        alt: "Godship - The AI E-Commerce Platform",
+        alt: "Godship - The New-Gen Streetwear Platform",
       },
     ],
     type: "website",
