@@ -206,7 +206,7 @@ export default function FeatureManagementPage() {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
     )
   }
@@ -410,7 +410,7 @@ export default function FeatureManagementPage() {
         {/* Features List */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
           </div>
         ) : (
           <div className="space-y-4">

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useMemo, use } from 'react'
-import { getBrandById, getProductsByBrand, Brand, Product } from "@/lib/data";
+import { getBrandById, getProductsByBrand, getBrands, Brand, Product } from "@/lib/data";
 import FavoriteButton from '@/app/components/FavoriteButton';
 import { useFavorites } from '@/lib/useFavorites';
 
@@ -19,6 +19,9 @@ export default function BrandPage({ params }: PageProps) {
   const resolvedParams = use(params)
   const [brand, setBrand] = useState<Brand | null>(null)
   const [items, setItems] = useState<Product[]>([])
+  const [allBrands, setAllBrands] = useState<Brand[]>([])
+  const [nextBrand, setNextBrand] = useState<Brand | null>(null)
+  const [prevBrand, setPrevBrand] = useState<Brand | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState<'all' | 'new'>('all')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
@@ -64,12 +67,34 @@ export default function BrandPage({ params }: PageProps) {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [brandData, productsData] = await Promise.all([
+        const [brandData, productsData, brandsData] = await Promise.all([
           getBrandById(resolvedParams.brandId),
-          getProductsByBrand(resolvedParams.brandId)
+          getProductsByBrand(resolvedParams.brandId),
+          getBrands()
         ])
         setBrand(brandData)
         setItems(productsData)
+        
+        // Sort brands by created_at (newest first) for navigation
+        const sortedBrands = [...brandsData].sort((a, b) => {
+          const dateA = new Date(a.created_at).getTime()
+          const dateB = new Date(b.created_at).getTime()
+          return dateB - dateA // Descending order (newest first)
+        })
+        setAllBrands(sortedBrands)
+        
+        // Find next and previous brand based on database order (created_at, newest first)
+        if (brandData && sortedBrands.length > 0) {
+          const currentIndex = sortedBrands.findIndex(b => b.id === brandData.id)
+          if (currentIndex !== -1) {
+            // Get next brand (older brand, loop to first if at end)
+            const nextIndex = (currentIndex + 1) % sortedBrands.length
+            setNextBrand(sortedBrands[nextIndex])
+            // Get previous brand (newer brand, loop to last if at beginning)
+            const prevIndex = currentIndex === 0 ? sortedBrands.length - 1 : currentIndex - 1
+            setPrevBrand(sortedBrands[prevIndex])
+          }
+        }
         
         // Check favorites for all products at once
         if (productsData.length > 0) {
@@ -87,8 +112,8 @@ export default function BrandPage({ params }: PageProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-96 bg-black">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
     )
   }
@@ -118,7 +143,7 @@ export default function BrandPage({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-10 h-20 flex items-end justify-start px-3">
+      <div className="relative z-10 h-20 flex items-end justify-between px-3">
         <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
           <Image 
             src={brand.icon} 
@@ -127,6 +152,55 @@ export default function BrandPage({ params }: PageProps) {
             height={100}
             className="object-cover rounded"
           />
+        </div>
+        
+        {/* Navigation Buttons */}
+        <div className="flex items-center gap-2 transform translate-y-2 md:translate-y-4">
+          {/* Previous Brand Navigation Button */}
+          {prevBrand && (
+            <Link 
+              href={`/${prevBrand.id}`}
+              className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+              aria-label={`Go to ${prevBrand.name}`}
+            >
+              <svg 
+                className="w-6 h-6 text-white drop-shadow-lg group-hover:-translate-x-1 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M15 19l-7-7 7-7" 
+                />
+              </svg>
+            </Link>
+          )}
+          
+          {/* Next Brand Navigation Button */}
+          {nextBrand && (
+            <Link 
+              href={`/${nextBrand.id}`}
+              className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+              aria-label={`Go to ${nextBrand.name}`}
+            >
+              <svg 
+                className="w-6 h-6 text-white drop-shadow-lg group-hover:translate-x-1 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M9 5l7 7-7 7" 
+                />
+              </svg>
+            </Link>
+          )}
         </div>
       </div>
 

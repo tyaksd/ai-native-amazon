@@ -137,3 +137,61 @@ body {
     background-position: 0% 100%;
   }
 }
+
+/* Loading G Stroke Animation */
+@keyframes draw-path {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-trail {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.2;
+  }
+}
+
+.loading-g-svg {
+  width: 128px;
+  height: 128px;
+}
+
+.loading-g-trail {
+  fill: none;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  opacity: 0.3;
+  animation: fade-trail 1s ease-in-out infinite;
+}
+
+.loading-g-path {
+  fill: none;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-path 1s ease-in-out infinite;
+}
+
+.loading-g-glow {
+  fill: white;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  opacity: 1;
+}

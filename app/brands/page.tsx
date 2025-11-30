@@ -16,8 +16,14 @@ export default function BrandsPage() {
     const loadBrands = async () => {
       try {
         const brandsData = await getBrands()
-        setBrands(brandsData)
-        setFilteredBrands(brandsData)
+        // Sort by created_at (newest first)
+        const sortedBrands = [...brandsData].sort((a, b) => {
+          const dateA = new Date(a.created_at).getTime()
+          const dateB = new Date(b.created_at).getTime()
+          return dateB - dateA // Descending order (newest first)
+        })
+        setBrands(sortedBrands)
+        setFilteredBrands(sortedBrands)
         
         // Get unique categories from brands that have categories
         const categories = [...new Set(brandsData
@@ -45,8 +51,8 @@ export default function BrandsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-96 bg-black">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
       </div>
     )
   }
@@ -98,15 +104,6 @@ export default function BrandsPage() {
                     fill
                     className="object-cover"
                   />
-                </div>
-              </div>
-              
-              {/* Arrow icon */}
-              <div className="absolute top-4 right-4">
-                <div className="w-8 h-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
                 </div>
               </div>
               
