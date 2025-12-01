@@ -27,6 +27,7 @@ export type Product = {
   sizes: string[];
   gender: string;
   is_visible: boolean;
+  design_png?: string[] | null;
   created_at: string;
   updated_at: string;
 };

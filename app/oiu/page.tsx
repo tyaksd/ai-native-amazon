@@ -358,12 +358,16 @@ export default function AdminPage() {
         }
       }
       
-      console.log('Creating product with:', { ...newProduct, images: finalImages })
+      // アップロードした最初の画像をdesign_pngとして保存
+      const designPng = newProduct.images.length > 0 ? [newProduct.images[0]] : null
+      
+      console.log('Creating product with:', { ...newProduct, images: finalImages, design_png: designPng })
       const product = await createProduct({
         ...newProduct,
         images: finalImages,
         price: Number(newProduct.price),
-        is_visible: true
+        is_visible: true,
+        design_png: designPng
       })
       if (product) {
         setProducts(prev => [...prev, product])

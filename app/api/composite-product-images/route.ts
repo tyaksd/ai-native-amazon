@@ -82,44 +82,44 @@ function compositeDesignOnTshirt(
 
 // 事前にCloudinaryにアップロードされたプレーンなTシャツ画像のURL
 const plainTshirtUrls: { [key: string]: string } = {
-  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186899/black-plain_eycevr.png',
-  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186982/white-plain_ohzbni.png',
-  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187015/navy-plain_l6l4ky.png',
-  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187078/grey-plain_l4a4pj.png',
+  'Black': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764584963/black-plain_dqytru.png',
+  'White': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585025/white-plain_sfeizr.png',
+  'Navy': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585029/navy-plain_ljph7i.png',
+  'Grey': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585109/grey-plain_b01ae3.png',
   'Dark Heather': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187206/dark-heather_iyj1xr.png',
-  'Red': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187046/red-plain_i0lkag.png',
-  'Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186952/blue-plain_no6w1x.png',
-  'Sand': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187100/sand-plain_jr6tsc.png',
+  'Red': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764584972/red-plain_bfyq9s.png',
+  'Blue': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764584956/blue-plain_mbh1px.png',
+  'Sand': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585012/sand-plain_d2pptv.png',
   'Natural': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187126/natural-plain_yaml1f.png',
-  'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187145/military-green-plain_lwf2t9.png'
+  'Military Green': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585094/military-green-plain_scplld.png'
 }
 
 // 事前にCloudinaryにアップロードされたプレーンなLong Tee画像のURL
 const plainLongTeeUrls: { [key: string]: string } = {
-  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886468/ChatGPT_Image_Nov_23_2025_05_27_41_PM_yasqda.png',
-  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886432/ChatGPT_Image_Nov_23_2025_05_27_05_PM_drasrd.png',
-  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886399/ChatGPT_Image_Nov_23_2025_05_26_32_PM_magpwm.png',
-  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763886347/ChatGPT_Image_Nov_23_2025_05_25_35_PM_dembcw.png',
-  'Maroon': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763887850/ChatGPT_Image_Nov_23_2025_05_50_43_PM_lwotjm.png',
-  'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763888027/ChatGPT_Image_Nov_23_2025_05_53_40_PM_ezekfp.png'
+  'Black': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586554/ChatGPT_Image_Nov_23_2025_05_27_41_PM_snpgus.png',
+  'White': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586614/ChatGPT_Image_Nov_23_2025_05_27_05_PM_aiwf5l.png',
+  'Navy': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586642/ChatGPT_Image_Nov_23_2025_05_26_32_PM_vhkimv.png',
+  'Grey': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586656/ChatGPT_Image_Nov_23_2025_05_25_35_PM_jzqcuz.png',
+  'Maroon': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586679/ChatGPT_Image_Nov_23_2025_05_50_43_PM_qdfnfw.png',
+  'Military Green': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586686/ChatGPT_Image_Nov_23_2025_05_53_40_PM_mr0f0t.png'
 }
 
 // 事前にCloudinaryにアップロードされたプレーンなHoodie画像のURL
 const plainHoodieUrls: { [key: string]: string } = {
-  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623805/blackhoodie_tegpra.png',
-  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623805/whitehoodie_vg8e1y.png',
-  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763623808/navyhoodie_z6xhbq.png',
-  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763637373/greyhoodie_bgqpqe.png',
-  'Sky Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1764070813/ChatGPT_Image_Nov_25_2025_08_30_43_PM_vmabvx.png',
-  'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1764305201/ChatGPT_Image_Nov_28_2025_01_46_28_PM_enza3x.png'
+  'Black': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585429/blackhoodie_qyrlcf.png',
+  'White': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585441/whitehoodie_zcegbr.png',
+  'Navy': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585459/navyhoodie_kdhzrq.png',
+  'Grey': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585433/greyhoodie_p1ffeq.png',
+  'Sky Blue': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764585443/ChatGPT_Image_Nov_25_2025_08_30_43_PM_n6dqcq.png',
+  'Military Green': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586109/ChatGPT_Image_Nov_28_2025_01_46_28_PM_zvq4a1.png'
 }
 
 // 事前にCloudinaryにアップロードされたプレーンなSweatshirt画像のURL
 const plainSweatshirtUrls: { [key: string]: string } = {
-  'Black': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610446/blacklong_nhzicq.png',
-  'White': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610433/whitelong_vdydvl.png',
-  'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763610441/navylong_tisu5v.png',
-  'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763611931/ChatGPT_Image_Nov_20_2025_01_12_00_PM_eyl3kk.png'
+  'Black': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586785/blacklong_ylhrme.png',
+  'White': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764586803/whitelong_smrprv.png',
+  'Navy': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764587232/navylong_offe72.png',
+  'Grey': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764587338/ChatGPT_Image_Nov_20_2025_01_12_00_PM_bjz3tg.png'
 }
 
 
