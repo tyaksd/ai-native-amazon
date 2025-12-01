@@ -24,7 +24,7 @@ import ConditionalFooterNoClerk from "./components/ConditionalFooterNoClerk";
 // });
 
 export const metadata: Metadata = {
-  title: "Godship - The New-Gen Streetwear Platform",
+  title: "Godship - The Next-Gen Streetwear Platform",
   description: "Discover brands you love and their unique products.",
   icons: {
     icon: "/gblack.png",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
         url: "/gblack.png",
         width: 1200,
         height: 630,
-        alt: "Godship - The New-Gen Streetwear Platform",
+        alt: "Godship - The Next-Gen Streetwear Platform",
       },
     ],
     type: "website",
