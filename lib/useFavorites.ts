@@ -46,14 +46,29 @@ export function useFavorites(userId?: string): UseFavoritesReturn {
         .in('product_id', productIds)
 
       if (error) {
-        console.error('Error checking favorites:', error)
+        // Better error logging with detailed information
+        console.error('Error checking favorites:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          error: error
+        })
         return
       }
 
       const favoriteIds = new Set(data?.map(fav => fav.product_id) || [])
       setFavoriteProductIds(favoriteIds)
     } catch (error) {
-      console.error('Error checking favorites:', error)
+      // Better error logging for caught errors
+      const errorDetails = error instanceof Error 
+        ? {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+          }
+        : { error }
+      console.error('Error checking favorites (caught):', errorDetails)
     } finally {
       setIsLoading(false)
     }
