@@ -325,10 +325,10 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const filteredProducts = data.filter(product => {
     const productName = product.name.toLowerCase()
     // Split product name into words (by spaces)
-    const words = productName.split(/\s+/).filter(word => word.length > 0)
+    const words = productName.split(/\s+/).filter((word: string) => word.length > 0)
     
     // Get the first letter of each word
-    const firstLetters = words.map(word => word.charAt(0))
+    const firstLetters = words.map((word: string) => word.charAt(0))
     
     // Check if each character in the search query matches the first letter of any word
     // For example, "m" should match if any word starts with "m"
@@ -375,10 +375,10 @@ export async function searchBrands(query: string): Promise<Brand[]> {
   const filteredBrands = data.filter(brand => {
     const brandName = brand.name.toLowerCase()
     // Split brand name into words (by spaces)
-    const words = brandName.split(/\s+/).filter(word => word.length > 0)
+    const words = brandName.split(/\s+/).filter((word: string) => word.length > 0)
     
     // Get the first letter of each word
-    const firstLetters = words.map(word => word.charAt(0))
+    const firstLetters = words.map((word: string) => word.charAt(0))
     
     // Check if each character in the search query matches the first letter of any word
     // For example, "m" should match if any word starts with "m"
