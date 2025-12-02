@@ -153,7 +153,7 @@ export default function FavoritesPage() {
         <div className="text-gray-500 text-lg mb-4">No favorite products yet</div>
         <p className="text-gray-400 mb-6">Start exploring and add products to your favorites!</p>
         <Link 
-          href="/" 
+          href="/brands" 
           className="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
         >
           Start Shopping

@@ -83,6 +83,101 @@ function getColorFromName(colorName: string): string {
   return colorMap[colorName.toLowerCase()] || '#CCCCCC';
 }
 
+// 色の並び順を定義（Tシャツ用）
+function sortColorsForTShirt(colors: string[]): string[] {
+  const colorOrder = [
+    'BLACK', 'black',
+    'WHITE', 'white',
+    'NAVY', 'navy',
+    'DARK HEATHER', 'dark heather', 'darkheather',
+    'GREY', 'grey', 'GRAY', 'gray',
+    'SAND', 'sand',
+    'MILITARY GREEN', 'military green', 'militarygreen',
+    'SKY BLUE', 'sky blue', 'skyblue',
+    'BLUE', 'blue',
+    'RED', 'red'
+  ];
+  
+  const sorted: string[] = [];
+  const remaining: string[] = [...colors];
+  
+  // 指定された順序で色を並べる
+  for (const orderedColor of colorOrder) {
+    const foundIndex = remaining.findIndex(
+      c => c.toLowerCase() === orderedColor.toLowerCase()
+    );
+    if (foundIndex !== -1) {
+      sorted.push(remaining[foundIndex]);
+      remaining.splice(foundIndex, 1);
+    }
+  }
+  
+  // 残りの色を最後に追加
+  return [...sorted, ...remaining];
+}
+
+// 色の並び順を定義（Hoodie用）
+function sortColorsForHoodie(colors: string[]): string[] {
+  const colorOrder = [
+    'BLACK', 'black',
+    'WHITE', 'white',
+    'NAVY', 'navy',
+    'GREY', 'grey', 'GRAY', 'gray',
+    'CREAM', 'cream',
+    'MILITARY GREEN', 'military green', 'militarygreen',
+    'SKY BLUE', 'sky blue', 'skyblue',
+    'MAROON', 'maroon'
+  ];
+  
+  const sorted: string[] = [];
+  const remaining: string[] = [...colors];
+  
+  // 指定された順序で色を並べる
+  for (const orderedColor of colorOrder) {
+    const foundIndex = remaining.findIndex(
+      c => c.toLowerCase() === orderedColor.toLowerCase()
+    );
+    if (foundIndex !== -1) {
+      sorted.push(remaining[foundIndex]);
+      remaining.splice(foundIndex, 1);
+    }
+  }
+  
+  // 残りの色を最後に追加
+  return [...sorted, ...remaining];
+}
+
+// 色の並び順を定義（Long Tee用）
+function sortColorsForLongTee(colors: string[]): string[] {
+  const colorOrder = [
+    'BLACK', 'black',
+    'WHITE', 'white',
+    'NAVY', 'navy',
+    'GREY', 'grey', 'GRAY', 'gray',
+    'SAND', 'sand',
+    'MILITARY GREEN', 'military green', 'militarygreen',
+    'SKY BLUE', 'sky blue', 'skyblue',
+    'MAROON', 'maroon'
+  ];
+  
+  const sorted: string[] = [];
+  const remaining: string[] = [...colors];
+  
+  // 指定された順序で色を並べる
+  for (const orderedColor of colorOrder) {
+    const foundIndex = remaining.findIndex(
+      c => c.toLowerCase() === orderedColor.toLowerCase()
+    );
+    if (foundIndex !== -1) {
+      sorted.push(remaining[foundIndex]);
+      remaining.splice(foundIndex, 1);
+    }
+  }
+  
+  // 残りの色を最後に追加
+  return [...sorted, ...remaining];
+}
+
 type PageProps = {
   params: Promise<{ id: string }>;
 };
@@ -264,30 +359,62 @@ export default function ProductDetail({ params }: PageProps) {
             )}
           </div>
           
-          {/* Thumbnail images */}
-          {product.images && product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-1 max-w-md mx-auto md:mx-0">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => switchImageWithAnimation(index)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImageIndex === index 
-                      ? 'border-black ring-2 ring-black/20' 
-                      : 'border-gray-200 hover:border-gray-400'
-                  }`}
-                >
-                  <Image 
-                    src={image} 
-                    alt={`${product.name} ${index + 1}`} 
-                    width={30} 
-                    height={30} 
-                    className="w-full h-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
+        {/* Thumbnail images */}
+        {product.images && product.images.length > 1 && (
+          <div className="grid grid-cols-4 gap-1 max-w-md mx-auto md:mx-0">
+            {(() => {
+              const isTShirt = product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')
+              const isLongTee = product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')
+              const isHoodie = product.type?.toLowerCase().includes('hoodie')
+
+              // For apparel types, align thumbnail order with color order
+              if ((isTShirt || isLongTee || isHoodie) && product.colors && product.colors.length > 0) {
+                const sortFn = isTShirt
+                  ? sortColorsForTShirt
+                  : isLongTee
+                    ? sortColorsForLongTee
+                    : sortColorsForHoodie
+
+                const orderedColors = sortFn(product.colors)
+
+                return orderedColors
+                  .map(color => {
+                    const imageIndex = colorImageMap[color]
+                    const image = product.images?.[imageIndex]
+                    if (imageIndex === undefined || image === undefined) return null
+                    return { color, imageIndex, image }
+                  })
+                  .filter((item): item is { color: string; imageIndex: number; image: string } => item !== null)
+              }
+
+              // Fallback: just use images as-is
+              return product.images.map((image, index) => ({
+                color: null as string | null,
+                imageIndex: index,
+                image
+              }))
+            })().map((item, idx) => (
+              <button
+                key={idx}
+                onClick={() => switchImageWithAnimation(item.imageIndex)}
+                className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                  selectedImageIndex === item.imageIndex
+                    ? 'border-black ring-2 ring-black/20' 
+                    : 'border-gray-200 hover:border-gray-400'
+                }`}
+                title={item.color ?? `${product.name} ${idx + 1}`}
+              >
+                <Image 
+                  src={item.image} 
+                  alt={item.color ?? `${product.name} ${idx + 1}`} 
+                  width={30} 
+                  height={30} 
+                  className="w-full h-full object-contain"
+                />
+              </button>
+            ))}
+          </div>
+        )}
           
           {/* T-shirt specific information for desktop - Display below product photos (desktop only) */}
           {(product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')) && (
@@ -303,6 +430,8 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• Dark Heather is 65% polyester, 35% cotton</li>
                       <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
+                  <p><strong>Comfort &amp; Durability:</strong> This tee delivers everyday comfort with long-lasting quality. Made from lightweight ringspun cotton and reinforced with double-stitched hems, it stays soft, keeps its shape, and stands up to repeated washing and everyday wear.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                 </div>
               </div>
             </div>
@@ -317,14 +446,12 @@ export default function ProductDetail({ params }: PageProps) {
                   <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
                   <p><strong>Fabric composition:</strong></p>
                   <ul className="ml-4 space-y-1">
-                    <li>・50% cotton, 50% polyester</li>
-                    <li>・Fabric weight: 8.0 oz/yd² (271 g/m²)</li>
-                    <li>・Pre-shrunk for lasting fit</li>
-                    <li>・Soft air-jet spun yarn</li>
+                    <li>・100% cotton</li>
+                    <li>・Grey is 90% cotton, 10% polyester</li>
+                    <li>・Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
-                  <p className="mt-2">Double-needle stitching for durability</p>
-                  <p className="mt-2">• Disclaimer: DWhite may appear slightly off-white depending on lighting.</p>
-                  <p>Orange may show slight hue variation.</p>
+                  <p><strong>Style:</strong> With its classic regular fit, this long sleeve shirt is a true wardrobe essential. It looks great on its own or layered under a jacket, making it perfect for relaxed, casual everyday wear.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                 </div>
               </div>
             </div>
@@ -350,13 +477,15 @@ export default function ProductDetail({ params }: PageProps) {
               <div className="p-4 bg-gray-50 rounded-lg">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
                 <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Modern fit:</strong> It prodies a more tailored look than a regular fit.</p>
                   <p><strong>Fabric composition:</strong></p>
                   <ul className="ml-4 space-y-1">
                     <li>• 65% ring-spun cotton, 35% polyester</li>
                     <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
                     <li>• 100% cotton face</li>
-                    <li>• Front pouch pocket</li>
                   </ul>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                 </div>
               </div>
             </div>
@@ -406,11 +535,25 @@ export default function ProductDetail({ params }: PageProps) {
           
           
           
-          {product.colors && product.colors.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Available Colors:</p>
-              <div className="flex flex-wrap gap-2">
-                {product.colors.map((color, index) => (
+        {product.colors && product.colors.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-gray-700 mb-2">Available Colors:</p>
+            <div className="flex flex-wrap gap-2">
+              {(() => {
+                const isTShirt = product.type?.toLowerCase().includes('t-shirt') || product.type?.toLowerCase().includes('tshirt') || product.type?.toLowerCase().includes('shirt')
+                const isLongTee = product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')
+                const isHoodie = product.type?.toLowerCase().includes('hoodie')
+                
+                if (isTShirt) {
+                  return sortColorsForTShirt(product.colors)
+                } else if (isLongTee) {
+                  return sortColorsForLongTee(product.colors)
+                } else if (isHoodie) {
+                  return sortColorsForHoodie(product.colors)
+                } else {
+                  return product.colors
+                }
+              })().map((color, index) => (
                   <button
                     key={index}
                     onClick={() => {
@@ -709,6 +852,8 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• Dark Heather is 65% polyester, 35% cotton</li>
                       <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                     </ul>
+                    <p><strong>Comfort &amp; Durability:</strong> This tee delivers everyday comfort with long-lasting quality. Made from lightweight ringspun cotton and reinforced with double-stitched hems, it stays soft, keeps its shape, and stands up to repeated washing and everyday wear.</p>
+                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                   </div>
                 </div>
               </div>
@@ -723,14 +868,12 @@ export default function ProductDetail({ params }: PageProps) {
                     <p><strong>Regular fit:</strong> Standard length, the fabric easily gives into movement.</p>
                     <p><strong>Fabric composition:</strong></p>
                     <ul className="ml-4 space-y-1">
-                      <li>・50% cotton, 50% polyester</li>
-                      <li>・Fabric weight: 8.0 oz/yd² (271 g/m²)</li>
-                      <li>・Pre-shrunk for lasting fit</li>
-                      <li>・Soft air-jet spun yarn</li>
+                      <li>・100% cotton</li>
+                      <li>・Grey is 90% cotton, 10% polyester</li>
+                      <li>・Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                     </ul>
-                    <p className="mt-2">Double-needle stitching for durability</p>
-                    <p className="mt-2">• Disclaimer: DWhite may appear slightly off-white depending on lighting.</p>
-                    <p>Orange may show slight hue variation.</p>
+                  <p><strong>Style:</strong> With its classic regular fit, this long sleeve shirt is a true wardrobe essential. It looks great on its own or layered under a jacket, making it perfect for relaxed, casual everyday wear.</p>
+                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                   </div>
                 </div>
               </div>
@@ -756,13 +899,16 @@ export default function ProductDetail({ params }: PageProps) {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h3 className="text-sm font-semibold text-gray-900 mb-3">Product Details</h3>
                   <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Modern fit:</strong> It prodies a more tailored look than a regular fit.</p>
                     <p><strong>Fabric composition:</strong></p>
                     <ul className="ml-4 space-y-1">
                       <li>• 65% ring-spun cotton, 35% polyester</li>
                       <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
                       <li>• 100% cotton face</li>
                       <li>• Front pouch pocket</li>
-                    </ul>
+                  </ul>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
                   </div>
                 </div>
               </div>

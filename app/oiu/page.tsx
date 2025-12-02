@@ -58,16 +58,18 @@ export default function AdminPage() {
 
   // Predefined color options
   const colorOptions = [
-    { name: 'Black', value: '#0e0e0e' },
-    { name: 'White', value: '#ffffff' },
-    { name: 'Navy', value: '#0f1830' },
-    { name: 'Grey', value: '#d1d2d6' },
-    { name: 'Dark Heather', value: '#424848' },
-    { name: 'Red', value: '#FF1B2B' },
-    { name: 'Blue', value: '#2665CC' },
-    { name: 'Sand', value: '#d8c5a9' },
-    { name: 'Natural', value: '#fff6ea' },
-    { name: 'Military Green', value: '#686f54' }
+    { name: 'BLACK', value: '#0e0e0e' },
+    { name: 'WHITE', value: '#ffffff' },
+    { name: 'NAVY', value: '#0f1830' },
+    { name: 'GREY', value: '#d1d2d6' },
+    { name: 'DARK HEATHER', value: '#424848' },
+    { name: 'RED', value: '#FF1B2B' },
+    { name: 'BLUE', value: '#2665CC' },
+    { name: 'SAND', value: '#d8c5a9' },
+    { name: 'NATURAL', value: '#fff6ea' },
+    { name: 'MILITARY GREEN', value: '#686f54' },
+    { name: 'MAROON', value: '#800000' },
+    { name: 'CREAM', value: '#FFFDD0' }
   ]
 
   // Form states
@@ -82,15 +84,15 @@ export default function AdminPage() {
   const getDefaultColorsForType = (type: string): string[] => {
     switch (type) {
       case 'T-Shirt':
-        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'RED', 'BLUE', 'SAND', 'SKY BLUE', 'DARK HEATHER']
       case 'Long Tee':
-        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Maroon']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'MAROON', 'SAND', 'SKY BLUE']
       case 'Sweatshirt':
-        return ['Black', 'White', 'Navy', 'Grey']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY']
       case 'Hoodie':
-        return ['Black', 'White', 'Navy', 'Grey', 'Sky Blue', 'Military Green']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'SKY BLUE', 'MILITARY GREEN', 'MAROON', 'CREAM']
       default:
-        return ['Black', 'White', 'Navy', 'Grey', 'Military Green', 'Red', 'Blue', 'Sand']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'RED', 'BLUE', 'SAND', 'SKY BLUE', 'DARK HEATHER']
     }
   }
 

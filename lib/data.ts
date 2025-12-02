@@ -305,7 +305,6 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .ilike('name', `%${query}%`)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -313,14 +312,49 @@ export async function searchProducts(query: string): Promise<Product[]> {
     return []
   }
 
-  return data || []
+  if (!data || data.length === 0) {
+    return []
+  }
+
+  // Filter products where search query characters match the first letter of words in the name
+  const queryLower = query.toLowerCase().trim()
+  if (!queryLower) {
+    return data
+  }
+
+  const filteredProducts = data.filter(product => {
+    const productName = product.name.toLowerCase()
+    // Split product name into words (by spaces)
+    const words = productName.split(/\s+/).filter(word => word.length > 0)
+    
+    // Get the first letter of each word
+    const firstLetters = words.map(word => word.charAt(0))
+    
+    // Check if each character in the search query matches the first letter of any word
+    // For example, "m" should match if any word starts with "m"
+    // "ma" should match if there are words starting with "m" and "a" (in order, allowing words in between)
+    const queryChars = queryLower.split('')
+    
+    // Check if we can match the query characters sequentially to word first letters
+    let queryIndex = 0
+    for (let i = 0; i < firstLetters.length && queryIndex < queryChars.length; i++) {
+      if (firstLetters[i] === queryChars[queryIndex]) {
+        queryIndex++
+      }
+    }
+    
+    // All query characters must be matched
+    return queryIndex === queryChars.length
+  })
+
+  return filteredProducts
 }
 
 export async function searchBrands(query: string): Promise<Brand[]> {
+  // Get all brands first
   const { data, error } = await supabase
     .from('brands')
     .select('*')
-    .ilike('name', `%${query}%`)
     .order('name')
 
   if (error) {
@@ -328,7 +362,42 @@ export async function searchBrands(query: string): Promise<Brand[]> {
     return []
   }
 
-  return data || []
+  if (!data || data.length === 0) {
+    return []
+  }
+
+  // Filter brands where search query characters match the first letter of words in the name
+  const queryLower = query.toLowerCase().trim()
+  if (!queryLower) {
+    return data
+  }
+
+  const filteredBrands = data.filter(brand => {
+    const brandName = brand.name.toLowerCase()
+    // Split brand name into words (by spaces)
+    const words = brandName.split(/\s+/).filter(word => word.length > 0)
+    
+    // Get the first letter of each word
+    const firstLetters = words.map(word => word.charAt(0))
+    
+    // Check if each character in the search query matches the first letter of any word
+    // For example, "m" should match if any word starts with "m"
+    // "ma" should match if there are words starting with "m" and "a" (in order, allowing words in between)
+    const queryChars = queryLower.split('')
+    
+    // Check if we can match the query characters sequentially to word first letters
+    let queryIndex = 0
+    for (let i = 0; i < firstLetters.length && queryIndex < queryChars.length; i++) {
+      if (firstLetters[i] === queryChars[queryIndex]) {
+        queryIndex++
+      }
+    }
+    
+    // All query characters must be matched
+    return queryIndex === queryChars.length
+  })
+
+  return filteredBrands
 }
 
 export async function getRandomProducts(excludeId: string, limit: number = 4): Promise<Product[]> {

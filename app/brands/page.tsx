@@ -60,7 +60,7 @@ export default function BrandsPage() {
   return (
     <div className="max-w-7xl mx-auto py-8 px-3 bg-black">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">New Brands</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Brands</h1>
         <p className="text-gray-300 mb-4">Discover brands you love and their unique products</p>
         
         {/* Category Filter */}
