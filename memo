@@ -24,8 +24,6 @@ Dashboard的なやつで、売り上げ、wow/momグローすぐらふ
 
 カスタマーサポート　エージェント
 
-womenのとき。選べるカラーが異なる
-
 クーポン機能
 
 分析ツール(Shopify マルパクリ、それをダッシュボードで見れる)
@@ -42,9 +40,6 @@ dynamic pricing
 
 こういうブランドと商品を生成して..>>プロンプトだけで、生成からリストまでできる俺向けui
 
-
-<＜ルール＞＞
-カラーは全部大文字で
 
 <<<<<<githubの変更がvercelでディプロイしているコードに自動で反映されない時>>>>>>>>
 1. Git に正しい author を設定
@@ -81,8 +76,5 @@ stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
 
-tshirt画像の変更
 データベースブランドのカテゴリをstreetwearではなく、〇〇系へ
 データベースの、productsの、brand_idの横に、そのbrand_idのnameを表示
-
-位置調整やり直し

@@ -431,7 +431,7 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
                   <p><strong>Comfort &amp; Durability:</strong> This tee delivers everyday comfort with long-lasting quality. Made from lightweight ringspun cotton and reinforced with double-stitched hems, it stays soft, keeps its shape, and stands up to repeated washing and everyday wear.</p>
-                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                 </div>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default function ProductDetail({ params }: PageProps) {
                     <li>・Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                   </ul>
                   <p><strong>Style:</strong> With its classic regular fit, this long sleeve shirt is a true wardrobe essential. It looks great on its own or layered under a jacket, making it perfect for relaxed, casual everyday wear.</p>
-                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                 </div>
               </div>
             </div>
@@ -485,7 +485,7 @@ export default function ProductDetail({ params }: PageProps) {
                     <li>• 100% cotton face</li>
                   </ul>
                   <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
-                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                 </div>
               </div>
             </div>
@@ -853,7 +853,7 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                     </ul>
                     <p><strong>Comfort &amp; Durability:</strong> This tee delivers everyday comfort with long-lasting quality. Made from lightweight ringspun cotton and reinforced with double-stitched hems, it stays soft, keeps its shape, and stands up to repeated washing and everyday wear.</p>
-                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                   </div>
                 </div>
               </div>
@@ -873,7 +873,7 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>・Disclaimer: Due to the fabric properties, the White color variant may appear off-white rather than bright white.</li>
                     </ul>
                   <p><strong>Style:</strong> With its classic regular fit, this long sleeve shirt is a true wardrobe essential. It looks great on its own or layered under a jacket, making it perfect for relaxed, casual everyday wear.</p>
-                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                    <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                   </div>
                 </div>
               </div>
@@ -908,7 +908,7 @@ export default function ProductDetail({ params }: PageProps) {
                       <li>• Front pouch pocket</li>
                   </ul>
                   <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
-                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men's sizing. We recommend that men choose their usual size, and women choose one size down from their regular women's size.</p>
+                  <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                   </div>
                 </div>
               </div>
