@@ -282,12 +282,12 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
         </div>
         
         {/* Brand name and style button with glass design - positioned at bottom right */}
-        <div className="absolute bottom-1 right-1 z-10 flex flex-col items-end gap-0.3">
-          <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[220px]">
+        <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
+          <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
             {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
           </div>
           {brand.style && (
-            <span className="px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
+            <span className="mr-1 px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
               {brand.style}
             </span>
           )}
