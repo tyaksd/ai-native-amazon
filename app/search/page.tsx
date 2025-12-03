@@ -210,7 +210,7 @@ function SearchContent() {
                 <h3 className="text-lg font-medium mb-4 text-white">Brands</h3>
                 
                 {/* Mobile: 2 columns with compact cards */}
-                <div className="grid grid-cols-2 sm:hidden gap-1">
+                <div className="grid grid-cols-2 sm:hidden gap-2">
                   {foundBrands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -233,23 +233,21 @@ function SearchContent() {
                           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
                         )}
                         <div className="absolute top-3 left-2">
-                          <div className="w-12 h-12 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+                          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
                             <OptimizedImage 
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
                               className="object-cover"
-                              width={48}
-                              height={48}
                             />
                           </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 pt-1 px-2 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10">
+                        <div className="absolute bottom-0 left-0 right-0 px-2 bg-black/20 backdrop-blur-md border-t border-white/10">
                           <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
                             {brand.name}
                           </h3>
                           {brand.style && (
-                            <span className="inline-block mt-1 px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+                            <span className="inline-block  px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
                               {brand.style}
                             </span>
                           )}
@@ -260,7 +258,7 @@ function SearchContent() {
                 </div>
                 
                 {/* Desktop: regular cards */}
-                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
+                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {foundBrands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -290,41 +288,30 @@ function SearchContent() {
                         )}
                         
                         {/* Brand icon */}
-                        <div className="absolute top-4 left-4">
-                          <div className="w-20 h-20 bg-white/60 backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
+                        <div className="absolute top-9 left-4">
+                          <div className="w-22 h-22 bg-white backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
                             <OptimizedImage 
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
                               className="object-cover"
-                              width={80}
-                              height={80}
                             />
                           </div>
                         </div>
                         
-                        {/* Arrow icon */}
-                        <div className="absolute top-4 right-4">
-                          <div className="w-8 h-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                        
                         {/* Glass overlay for bottom half */}
-                        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10 min-h-[80px]">
-                          <div className="flex items-center justify-between mb-1">
+                        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 bg-black/20 backdrop-blur-md border-t border-white/10 min-h-[60px]">
+                          <div className="flex items-center justify-between">
                             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
                               {brand.name}
                             </h3>
                             {brand.style && (
-                              <span className="px-2  bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
+                              <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
                                 {brand.style}
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-300 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                          <p className="text-sm text-gray-300 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
                             {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
                           </p>
                         </div>

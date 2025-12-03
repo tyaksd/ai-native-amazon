@@ -35,7 +35,7 @@ function BrandCard({ brand }: { brand: Brand }) {
         </div>
         
         {/* Glass overlay for bottom half */}
-        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 bg-white/10 backdrop-blur-md border-t border-white/10 min-h-[60px]">
+        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 bg-black/20 backdrop-blur-md border-t border-white/10 min-h-[60px]">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
               {brand.name}
@@ -247,12 +247,12 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
         </div>
         
         {/* Glass overlay for bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-2 bg-white/10 backdrop-blur-md border-t border-white/10">
+        <div className="absolute bottom-0 left-0 right-0 px-2 bg-black/20 backdrop-blur-md border-t border-white/10">
           <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
             {brand.name}
           </h3>
           {brand.style && (
-            <span className="inline-block mt-0.5 px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+            <span className="inline-block  px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
               {brand.style}
             </span>
           )}
@@ -491,11 +491,11 @@ export default function BrandsPage() {
             <select
               value={selectedStyle}
               onChange={(e) => setSelectedStyle(e.target.value)}
-              className="border-gray-600 bg-gray-800 text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
+              className="border border-white/20 bg-black/20 backdrop-blur-md text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
             >
-              <option value="All">All Styles</option>
+              <option value="All" className="bg-black">All Styles</option>
               {availableStyles.map(style => (
-                <option key={style} value={style}>{style}</option>
+                <option key={style} value={style} className="bg-black">{style}</option>
               ))}
             </select>
             <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
