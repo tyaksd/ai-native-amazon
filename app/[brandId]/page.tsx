@@ -38,6 +38,45 @@ export default function BrandPage({ params }: PageProps) {
     return now - created <= THIRTY_DAYS_MS
   }
 
+  // Get available types from products
+  const availableTypes = useMemo(() => {
+    const types = new Set<string>()
+    items.forEach(product => {
+      if (product.type) {
+        types.add(product.type)
+      }
+    })
+    return Array.from(types).sort()
+  }, [items])
+
+  // Get available types after category and gender filters are applied
+  const availableTypesAfterFilters = useMemo(() => {
+    let filtered = items
+    
+    // Filter by tab (all vs new)
+    if (selectedTab === 'new') {
+      filtered = filtered.filter(p => isNewProduct(p.created_at))
+    }
+    
+    // Filter by category (using type field)
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(p => p.type === selectedCategory)
+    }
+    
+    // Filter by gender
+    if (selectedGender !== 'All') {
+      filtered = filtered.filter(p => p.gender === selectedGender)
+    }
+    
+    const types = new Set<string>()
+    filtered.forEach(product => {
+      if (product.type) {
+        types.add(product.type)
+      }
+    })
+    return Array.from(types).sort()
+  }, [items, selectedTab, selectedCategory, selectedGender])
+
   const displayedItems = useMemo(() => {
     let filtered = items
     
@@ -109,6 +148,13 @@ export default function BrandPage({ params }: PageProps) {
     }
     loadData()
   }, [resolvedParams.brandId, checkFavorites])
+
+  // Reset selectedType if it's not available after filters change
+  useEffect(() => {
+    if (selectedType !== 'All' && !availableTypesAfterFilters.includes(selectedType)) {
+      setSelectedType('All')
+    }
+  }, [selectedType, availableTypesAfterFilters])
 
   if (loading) {
     return (
@@ -247,14 +293,9 @@ export default function BrandPage({ params }: PageProps) {
                   className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
                 >
                   <option value="All">All Types</option>
-                    <option value="T-Shirt">T-Shirt</option>
-                    <option value="Hoodie">Hoodie</option>
-                    <option value="Sweatshirt">Sweatshirt</option>
-                    <option value="Long Tee">Long Tee</option>
-                    <option value="Jacket">Jacket</option>
-                    <option value="Hat">Hat</option>
-                    <option value="Accessories">Accessories</option>
-                  <option value="Other">Other</option>
+                  {availableTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
                 </select>
               </div>
 
@@ -285,14 +326,9 @@ export default function BrandPage({ params }: PageProps) {
                     className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
                   >
                     <option value="All">All Types</option>
-                    <option value="T-Shirt">T-Shirt</option>
-                    <option value="Hoodie">Hoodie</option>
-                    <option value="Sweatshirt">Sweatshirt</option>
-                    <option value="Long Tee">Long Tee</option>
-                    <option value="Jacket">Jacket</option>
-                    <option value="Hat">Hat</option>
-                    <option value="Accessories">Accessories</option>
-                    <option value="Other">Other</option>
+                    {availableTypesAfterFilters.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
                   </select>
                 </div>
               )}

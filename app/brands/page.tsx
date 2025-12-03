@@ -3,13 +3,153 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from 'react'
-import { getBrands, Brand, getFeatures, Feature } from '@/lib/data'
+import { getBrands, Brand, getFeatures, Feature, getProductsByBrand, Product } from '@/lib/data'
 
 // Brand card component to avoid repetition
 function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
+  const [randomProducts, setRandomProducts] = useState<Product[]>([])
+  const [productImages, setProductImages] = useState<Record<string, string>>({})
+
+  // Function to get random image for a product based on random color
+  const getRandomImageForProduct = (product: Product): string | null => {
+    if (!product.images || product.images.length === 0) {
+      return null
+    }
+    
+    if (!product.colors || product.colors.length === 0) {
+      // Return first image if no color information
+      return product.images[0]
+    }
+    
+    // Randomly select one color
+    const randomColor = product.colors[Math.floor(Math.random() * product.colors.length)]
+    
+    // Get image index corresponding to selected color
+    const colorIndex = product.colors.indexOf(randomColor)
+    
+    // Return image corresponding to color index (cycles if not enough images)
+    const imageIndex = colorIndex % product.images.length
+    
+    return product.images[imageIndex]
+  }
+
+  // Fetch products for compact layout
+  useEffect(() => {
+    if (compact) {
+      const fetchProducts = async () => {
+        try {
+          const products = await getProductsByBrand(brand.id)
+          // Randomly select 4 products
+          const shuffled = [...products].sort(() => 0.5 - Math.random())
+          const selectedProducts = shuffled.slice(0, 4)
+          setRandomProducts(selectedProducts)
+          
+          // Get random image for each product
+          const images: Record<string, string> = {}
+          selectedProducts.forEach(product => {
+            const image = getRandomImageForProduct(product)
+            if (image) {
+              images[product.id] = image
+            }
+          })
+          setProductImages(images)
+        } catch (error) {
+          console.error('Error fetching products:', error)
+        }
+      }
+      fetchProducts()
+    }
+  }, [brand.id, compact])
+
+  // Compact layout: left half with CompactBrandCard layout, right half with 4 product images
+  if (compact) {
+    return (
+      <Link href={`/${brand.id}`} className="group block">
+        <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-[2/1] flex">
+          {/* Left half - CompactBrandCard layout */}
+          <div className="relative w-1/2 h-full">
+            {brand.background_image ? (
+              <Image 
+                src={brand.background_image} 
+                alt={`${brand.name} background`} 
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
+            )}
+            
+            {/* Brand icon - positioned at bottom left */}
+            <div className="absolute bottom-1 left-1 z-10">
+              <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
+                <Image 
+                  src={brand.icon} 
+                  alt={brand.name} 
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+            
+            {/* Brand name and style button - positioned at bottom right */}
+            <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
+              <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
+                {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
+              </div>
+              {brand.style && (
+                <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
+                  {brand.style}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Right half - 4 product images in 2x2 grid */}
+          <div className="w-1/2 h-full grid grid-cols-2 gap-0">
+            {randomProducts.length === 0 ? (
+              // Show "Upcoming" if no products
+              <div className="col-span-2 row-span-2 flex items-center justify-center bg-gray-200">
+                <span className="text-black text-lg font-medium">Upcoming</span>
+              </div>
+            ) : (
+              <>
+                {randomProducts.map((product, index) => {
+                  const productImage = productImages[product.id]
+                  return (
+                    <div key={product.id || index} className="relative aspect-square overflow-hidden">
+                      {productImage ? (
+                        <Image 
+                          src={productImage} 
+                          alt={product.name} 
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 text-xs font-medium">Upcoming</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {/* Fill remaining slots if less than 4 products */}
+                {Array.from({ length: Math.max(0, 4 - randomProducts.length) }).map((_, index) => (
+                  <div key={`empty-${index}`} className="relative aspect-square bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500 text-xs font-medium">Upcoming</span>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      </Link>
+    )
+  }
+
+  // Regular layout for desktop
   return (
     <Link href={`/${brand.id}`} className="group block">
-      <div className={`relative rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full ${compact ? 'min-h-[180px]' : 'min-h-[210px]'}`}>
+      <div className="relative rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full min-h-[210px]">
         {/* Full background image */}
         {brand.background_image ? (
           <Image 
@@ -23,8 +163,8 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
         )}
         
         {/* Brand icon */}
-        <div className={`absolute left-4 ${compact ? 'top-5' : 'top-9'}`}>
-          <div className={`bg-white backdrop-blur-md rounded-xl shadow-lg overflow-hidden ${compact ? 'w-20 h-20' : 'w-22 h-22'}`}>
+        <div className="absolute top-9 left-4">
+          <div className="w-22 h-22 bg-white backdrop-blur-md rounded-xl shadow-lg overflow-hidden">
             <Image 
               src={brand.icon} 
               alt={brand.name} 
@@ -222,7 +362,7 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
                   brand ? (
                     <BrandCard key={brand.id} brand={brand} compact={screenSize === 'mobile'} />
                   ) : (
-                    <div key={`empty-${slideIndex}-${index}`} className={screenSize === 'mobile' ? 'min-h-[160px] lg:hidden' : 'min-h-[210px] lg:hidden'} />
+                    <div key={`empty-${slideIndex}-${index}`} className={screenSize === 'mobile' ? 'aspect-[2/1] lg:hidden' : 'min-h-[210px] lg:hidden'} />
                   )
                 ))}
               </div>
@@ -269,9 +409,9 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
         )}
         
-        {/* Brand icon - positioned at bottom left */}
+        {/* Brand icon - positioned at bottom lbraeft */}
         <div className="absolute bottom-1 left-1 z-10">
-          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
             <Image 
               src={brand.icon} 
               alt={brand.name} 
