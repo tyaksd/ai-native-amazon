@@ -293,7 +293,9 @@ export default function AdminPage() {
         ...newBrand,
         design_concept: null,
         target_audience: null,
-        logo_design: null
+        logo_design: null,
+        is_hot: false,
+        is_new: true
       })
       if (brand) {
         setBrands(prev => [...prev, brand])

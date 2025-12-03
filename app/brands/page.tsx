@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getBrands, Brand, getFeatures, Feature } from '@/lib/data'
 
 // Brand card component to avoid repetition
@@ -59,6 +59,13 @@ function BrandCard({ brand }: { brand: Brand }) {
 function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [touchStartX, setTouchStartX] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50
 
   // Check screen size on mount and resize
   useEffect(() => {
@@ -82,16 +89,14 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
   const totalSlides = Math.ceil(brands.length / itemsPerSlide)
   const needsCarousel = brands.length > itemsPerSlide
 
-  // Get brands for current slide with empty slots for consistent grid
-  const getCurrentBrandsWithSlots = () => {
-    const startIndex = currentSlide * itemsPerSlide
-    const currentBrands = brands.slice(startIndex, startIndex + itemsPerSlide)
-    // Create array with brand or null for empty slots
-    const slots: (Brand | null)[] = []
-    for (let i = 0; i < itemsPerSlide; i++) {
-      slots.push(currentBrands[i] || null)
+  // Group brands into slides
+  const slides = []
+  for (let i = 0; i < brands.length; i += itemsPerSlide) {
+    const slideItems: (Brand | null)[] = []
+    for (let j = 0; j < itemsPerSlide; j++) {
+      slideItems.push(brands[i + j] || null)
     }
-    return slots
+    slides.push(slideItems)
   }
 
   // Reset to first slide when screen size changes
@@ -99,20 +104,74 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
     setCurrentSlide(0)
   }, [screenSize])
 
+  // Touch handlers for smooth swipe
+  const onTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    setTouchStartX(e.targetTouches[0].clientX)
+    setDragOffset(0)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const currentX = e.targetTouches[0].clientX
+    const diff = currentX - touchStartX
+    setDragOffset(diff)
+  }
+
+  const onTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+    
+    // Determine if we should change slides
+    if (dragOffset < -minSwipeDistance && currentSlide < totalSlides - 1) {
+      setCurrentSlide(prev => prev + 1)
+    } else if (dragOffset > minSwipeDistance && currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1)
+    }
+    
+    setDragOffset(0)
+  }
+
+  // Calculate transform offset
+  const getTransformOffset = () => {
+    const containerWidth = containerRef.current?.offsetWidth || 0
+    const baseOffset = -currentSlide * 100
+    const dragPercent = containerWidth > 0 ? (dragOffset / containerWidth) * 100 : 0
+    return baseOffset + dragPercent
+  }
+
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
       
-      {/* Carousel container */}
-      <div className="relative">
-        {/* Brands grid - 1 col mobile, 2 col tablet, 3 col desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-          {getCurrentBrandsWithSlots().map((brand, index) => (
-            brand ? (
-              <BrandCard key={brand.id} brand={brand} />
-            ) : (
-              <div key={`empty-${index}`} className="min-h-[210px] lg:hidden" />
-            )
+      {/* Carousel container with touch support */}
+      <div 
+        ref={containerRef}
+        className="relative overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Sliding container */}
+        <div 
+          className={`flex ${isDragging ? '' : 'transition-transform duration-100 ease-out'}`}
+          style={{ transform: `translateX(${getTransformOffset()}%)` }}
+        >
+          {slides.map((slideItems, slideIndex) => (
+            <div 
+              key={slideIndex} 
+              className="w-full flex-shrink-0"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {slideItems.map((brand, index) => (
+                  brand ? (
+                    <BrandCard key={brand.id} brand={brand} />
+                  ) : (
+                    <div key={`empty-${slideIndex}-${index}`} className="min-h-[210px] lg:hidden" />
+                  )
+                ))}
+              </div>
+            </div>
           ))}
         </div>
         
@@ -173,7 +232,7 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
             {brand.name}
           </h3>
           {brand.style && (
-            <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+            <span className="inline-block mt-0.5 px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
               {brand.style}
             </span>
           )}
@@ -193,6 +252,13 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedStyle, setSelectedStyle] = useState<string>('All')
   const [availableStyles, setAvailableStyles] = useState<string[]>([])
+  
+  // Hero swipe state
+  const [heroIsDragging, setHeroIsDragging] = useState(false)
+  const [heroDragOffset, setHeroDragOffset] = useState(0)
+  const [heroTouchStartX, setHeroTouchStartX] = useState(0)
+  const heroContainerRef = useRef<HTMLDivElement>(null)
+  const heroMinSwipeDistance = 50
 
   useEffect(() => {
     const loadData = async () => {
@@ -233,14 +299,48 @@ export default function BrandsPage() {
     loadData()
   }, [])
 
-  // Auto-rotate features
+  // Auto-rotate features (pause when dragging)
   useEffect(() => {
-    if (features.length <= 1) return
+    if (features.length <= 1 || heroIsDragging) return
     const interval = setInterval(() => {
       setCurrentFeatureIndex((prev) => (prev + 1) % features.length)
     }, 5000) // Change every 5 seconds
     return () => clearInterval(interval)
-  }, [features.length])
+  }, [features.length, heroIsDragging])
+
+  // Hero touch handlers
+  const onHeroTouchStart = (e: React.TouchEvent) => {
+    setHeroIsDragging(true)
+    setHeroTouchStartX(e.targetTouches[0].clientX)
+    setHeroDragOffset(0)
+  }
+
+  const onHeroTouchMove = (e: React.TouchEvent) => {
+    if (!heroIsDragging) return
+    const currentX = e.targetTouches[0].clientX
+    const diff = currentX - heroTouchStartX
+    setHeroDragOffset(diff)
+  }
+
+  const onHeroTouchEnd = () => {
+    if (!heroIsDragging) return
+    setHeroIsDragging(false)
+    
+    if (heroDragOffset < -heroMinSwipeDistance && currentFeatureIndex < features.length - 1) {
+      setCurrentFeatureIndex(prev => prev + 1)
+    } else if (heroDragOffset > heroMinSwipeDistance && currentFeatureIndex > 0) {
+      setCurrentFeatureIndex(prev => prev - 1)
+    }
+    
+    setHeroDragOffset(0)
+  }
+
+  const getHeroTransformOffset = () => {
+    const containerWidth = heroContainerRef.current?.offsetWidth || 0
+    const baseOffset = -currentFeatureIndex * 100
+    const dragPercent = containerWidth > 0 ? (heroDragOffset / containerWidth) * 100 : 0
+    return baseOffset + dragPercent
+  }
 
   // Filter all brands by style
   useEffect(() => {
@@ -264,39 +364,48 @@ export default function BrandsPage() {
       {/* Hero Section with Features Carousel */}
       {features.length > 0 && (
         <section className="relative overflow-hidden">
-          {/* Feature Images */}
-          <div className="relative h-[200px] sm:h-[280px] md:h-[380px]">
-            {features.map((feature, index) => (
-              <Link
-                key={feature.id}
-                href={feature.link_url}
-                className={`absolute inset-0 transition-opacity duration-700 ${
-                  index === currentFeatureIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
-              >
-                <Image
-                  src={feature.image_url}
-                  alt={feature.title}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                
-                {/* Feature text */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
-                  <div className="max-w-7xl mx-auto">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
-                      {feature.title}
-                    </h2>
-                    <p className="text-base sm:text-lg text-gray-200 max-w-2xl">
-                      {feature.subtitle}
-                    </p>
+          {/* Feature Images with swipe support */}
+          <div 
+            ref={heroContainerRef}
+            className="relative h-[200px] sm:h-[280px] md:h-[380px] overflow-hidden"
+            onTouchStart={onHeroTouchStart}
+            onTouchMove={onHeroTouchMove}
+            onTouchEnd={onHeroTouchEnd}
+          >
+            <div 
+              className={`flex h-full ${heroIsDragging ? '' : 'transition-transform duration-100 ease-out'}`}
+              style={{ transform: `translateX(${getHeroTransformOffset()}%)` }}
+            >
+              {features.map((feature, index) => (
+                <Link
+                  key={feature.id}
+                  href={feature.link_url}
+                  className="relative w-full h-full flex-shrink-0"
+                >
+                  <Image
+                    src={feature.image_url}
+                    alt={feature.title}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  
+                  {/* Feature text */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+                    <div className="max-w-7xl mx-auto">
+                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
+                        {feature.title}
+                      </h2>
+                      <p className="text-base sm:text-lg text-gray-200 max-w-2xl">
+                        {feature.subtitle}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
           
           {/* Carousel indicators */}
@@ -367,3 +476,4 @@ export default function BrandsPage() {
     </div>
   )
 }
+
