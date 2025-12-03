@@ -24,7 +24,7 @@ export default function ConditionalHeader() {
 
   return (
     <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)'}}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-10 py-3 flex items-center gap-4 justify-center md:justify-between relative">
+      <div className="mx-auto max-w-7xl px-4 sm:px-10 py-[10px] flex items-center gap-4 justify-center md:justify-between relative">
         <MobileMenu />
         <LogoLink />
         <div className="hidden md:flex flex-1">
@@ -80,13 +80,13 @@ export default function ConditionalHeader() {
         </div>
         <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-700">
           <MobileSearch />
-          <Link href="/favorites" aria-label="Favorites" className="=p-1">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
+          <Link href="/favorites" aria-label="Favorites" className="=p-1 -ml-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-7 h-7">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </Link>
           <Link href="/cart" aria-label="Cart" className="p-1">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
               <path d="M2.25 3.75a.75.75 0 000 1.5h1.862c.27 0 .505.181.574.442l2.14 8.023A2.25 2.25 0 008.996 15h7.258a2.25 2.25 0 002.17-1.607l1.6-5.6a.75.75 0 00-.72-.968H6.615l-.36-1.35A2.25 2.25 0 004.112 3.75H2.25z" />
               <path d="M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9.75 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
             </svg>

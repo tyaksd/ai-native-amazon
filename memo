@@ -77,4 +77,3 @@ stripe trigger payment_intent.succeeded
 
 
 データベースブランドのカテゴリをstreetwearではなく、〇〇系へ
-データベースの、productsの、brand_idの横に、そのbrand_idのnameを表示
