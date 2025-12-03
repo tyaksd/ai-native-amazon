@@ -75,3 +75,5 @@ stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
+
+左hqんぶんをcompactと同じ右半分に商品イメージ4つランダム

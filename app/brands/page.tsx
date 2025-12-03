@@ -269,8 +269,8 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
         )}
         
-        {/* Brand icon */}
-        <div className="absolute top-3 left-2">
+        {/* Brand icon - positioned at bottom left */}
+        <div className="absolute bottom-1 left-1 z-10">
           <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
             <Image 
               src={brand.icon} 
@@ -281,13 +281,13 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
           </div>
         </div>
         
-        {/* Glass overlay for bottom */}
-        <div className="absolute bottom-0 left-0 right-0 px-2 bg-black/20 backdrop-blur-md border-t border-white/10">
-          <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
-            {brand.name}
-          </h3>
+        {/* Brand name and style button with glass design - positioned at bottom right */}
+        <div className="absolute bottom-1 right-1 z-10 flex flex-col items-end gap-0.3">
+          <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[220px]">
+            {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
+          </div>
           {brand.style && (
-            <span className="inline-block  px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+            <span className="px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
               {brand.style}
             </span>
           )}
