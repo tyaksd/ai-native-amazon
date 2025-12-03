@@ -122,10 +122,21 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
     const diffX = currentX - touchStartX
     const diffY = currentY - touchStartY
 
-    // Determine swipe direction on first significant movement
-    // If diagonal, treat as horizontal swipe
+    // Determine swipe direction on first significant movement using angle
     if (isHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-      setIsHorizontalSwipe(Math.abs(diffX) >= Math.abs(diffY))
+      // Calculate angle in degrees (0-360, where 0 is right, 90 is down, 180 is left, 270 is up)
+      const angleRad = Math.atan2(diffY, diffX)
+      let angleDeg = (angleRad * 180) / Math.PI
+      // Normalize to 0-360
+      if (angleDeg < 0) angleDeg += 360
+      
+      // Check if angle is in horizontal range: 0-50, 130-230, 310-360 degrees
+      const isHorizontal = 
+        (angleDeg >= 0 && angleDeg <= 50) ||      // Right and down-right
+        (angleDeg >= 130 && angleDeg <= 230) ||   // Left and up-left
+        (angleDeg >= 310 && angleDeg <= 360)      // Right and up-right
+      
+      setIsHorizontalSwipe(isHorizontal)
     }
 
     // Only handle horizontal swipes
@@ -347,10 +358,21 @@ export default function BrandsPage() {
     const diffX = currentX - heroTouchStartX
     const diffY = currentY - heroTouchStartY
 
-    // Determine swipe direction on first significant movement
-    // If diagonal, treat as horizontal swipe
+    // Determine swipe direction on first significant movement using angle
     if (heroIsHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-      setHeroIsHorizontalSwipe(Math.abs(diffX) >= Math.abs(diffY))
+      // Calculate angle in degrees (0-360, where 0 is right, 90 is down, 180 is left, 270 is up)
+      const angleRad = Math.atan2(diffY, diffX)
+      let angleDeg = (angleRad * 180) / Math.PI
+      // Normalize to 0-360
+      if (angleDeg < 0) angleDeg += 360
+      
+      // Check if angle is in horizontal range: 0-50, 130-230, 310-360 degrees
+      const isHorizontal = 
+        (angleDeg >= 0 && angleDeg <= 50) ||      // Right and down-right
+        (angleDeg >= 130 && angleDeg <= 230) ||   // Left and up-left
+        (angleDeg >= 310 && angleDeg <= 360)      // Right and up-right
+      
+      setHeroIsHorizontalSwipe(isHorizontal)
     }
 
     // Only handle horizontal swipes

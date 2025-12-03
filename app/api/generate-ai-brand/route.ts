@@ -435,7 +435,7 @@ Please provide the response in the following JSON format:
         logo_design: brandContent.logo_design,
         style: brandStyle === 'street' ? 'Street' : 'Casual',
         is_hot: false,
-        is_new: true,
+        is_new: false,
       })
 
       if (!newBrand) {
