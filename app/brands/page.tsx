@@ -23,8 +23,8 @@ function BrandCard({ brand }: { brand: Brand }) {
         )}
         
         {/* Brand icon */}
-        <div className="absolute top-6 left-4">
-          <div className="w-20 h-20 bg-white backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute top-9 left-4">
+          <div className="w-22 h-22 bg-white backdrop-blur-md  rounded-xl shadow-lg overflow-hidden">
             <Image 
               src={brand.icon} 
               alt={brand.name} 
@@ -35,18 +35,18 @@ function BrandCard({ brand }: { brand: Brand }) {
         </div>
         
         {/* Glass overlay for bottom half */}
-        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10 min-h-[80px]">
-          <div className="flex items-center justify-between mb-1">
+        <div className="absolute bottom-0 left-0 right-0 pt-1 px-3 bg-white/10 backdrop-blur-md border-t border-white/10 min-h-[60px]">
+          <div className="flex items-center justify-between">
             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
               {brand.name}
             </h3>
             {brand.style && (
-              <span className="px-2  bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
+              <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
                 {brand.style}
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-300 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          <p className="text-sm text-gray-300 leading-snug overflow-hidden" style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
             {brand.description || `${brand.name}: Extraordinary Design Since 2020`}
           </p>
         </div>
@@ -55,11 +55,94 @@ function BrandCard({ brand }: { brand: Brand }) {
   )
 }
 
+// Brand carousel component for Hot Drop and New Drop sections
+function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
+
+  // Check screen size on mount and resize
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth
+      if (width < 640) {
+        setScreenSize('mobile') // < sm
+      } else if (width < 1024) {
+        setScreenSize('tablet') // sm to lg
+      } else {
+        setScreenSize('desktop') // >= lg
+      }
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  // Items per slide: 2 for mobile/tablet, 3 for desktop
+  const itemsPerSlide = screenSize === 'desktop' ? 3 : 2
+  const totalSlides = Math.ceil(brands.length / itemsPerSlide)
+  const needsCarousel = brands.length > itemsPerSlide
+
+  // Get brands for current slide with empty slots for consistent grid
+  const getCurrentBrandsWithSlots = () => {
+    const startIndex = currentSlide * itemsPerSlide
+    const currentBrands = brands.slice(startIndex, startIndex + itemsPerSlide)
+    // Create array with brand or null for empty slots
+    const slots: (Brand | null)[] = []
+    for (let i = 0; i < itemsPerSlide; i++) {
+      slots.push(currentBrands[i] || null)
+    }
+    return slots
+  }
+
+  // Reset to first slide when screen size changes
+  useEffect(() => {
+    setCurrentSlide(0)
+  }, [screenSize])
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
+      
+      {/* Carousel container */}
+      <div className="relative">
+        {/* Brands grid - 1 col mobile, 2 col tablet, 3 col desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          {getCurrentBrandsWithSlots().map((brand, index) => (
+            brand ? (
+              <BrandCard key={brand.id} brand={brand} />
+            ) : (
+              <div key={`empty-${index}`} className="min-h-[210px] lg:hidden" />
+            )
+          ))}
+        </div>
+        
+        {/* Carousel indicators */}
+        {needsCarousel && totalSlides > 1 && (
+          <div className="flex justify-center gap-2 mt-4">
+            {Array.from({ length: totalSlides }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? 'bg-white w-6'
+                    : 'bg-white/50 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Compact brand card for mobile All section and search results
 function CompactBrandCard({ brand }: { brand: Brand }) {
   return (
     <Link href={`/${brand.id}`} className="group block">
-      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 h-full min-h-[140px]">
+      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
         {/* Full background image */}
         {brand.background_image ? (
           <Image 
@@ -74,7 +157,7 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
         
         {/* Brand icon */}
         <div className="absolute top-3 left-2">
-          <div className="w-12 h-12 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
             <Image 
               src={brand.icon} 
               alt={brand.name} 
@@ -85,12 +168,12 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
         </div>
         
         {/* Glass overlay for bottom */}
-        <div className="absolute bottom-0 left-0 right-0 pt-1 px-2 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10">
+        <div className="absolute bottom-0 left-0 right-0 px-2 bg-white/10 backdrop-blur-md border-t border-white/10">
           <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
             {brand.name}
           </h3>
           {brand.style && (
-            <span className="inline-block mt-1 px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+            <span className="inline-block mt-0.5 px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
               {brand.style}
             </span>
           )}
@@ -241,26 +324,12 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         {hotBrands.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Hot Drop 🔥</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
-              {hotBrands.map((brand) => (
-                <BrandCard key={brand.id} brand={brand} />
-              ))}
-            </div>
-          </div>
+          <BrandCarousel brands={hotBrands} title="Hot Drop 🔥" />
         )}
         
         {/* New Drop Section */}
         {newBrands.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">New Drop ✨</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
-              {newBrands.map((brand) => (
-                <BrandCard key={brand.id} brand={brand} />
-              ))}
-            </div>
-          </div>
+          <BrandCarousel brands={newBrands} title="New Drop ✨" />
         )}
         
         {/* All Brands Section */}
@@ -283,12 +352,12 @@ export default function BrandsPage() {
           </div>
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
-          <div className="grid grid-cols-2 sm:hidden gap-1">
+          <div className="grid grid-cols-2 sm:hidden gap-2">
             {allBrands.map((brand) => (
               <CompactBrandCard key={brand.id} brand={brand} />
             ))}
           </div>
-          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {allBrands.map((brand) => (
               <BrandCard key={brand.id} brand={brand} />
             ))}

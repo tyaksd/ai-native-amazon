@@ -78,6 +78,7 @@ export default function AdminPage() {
     icon: '', 
     background_image: '', 
     description: '',
+    style: 'Core Street',
     category: 'Streetwear'
   })
   // Get default colors based on product type
@@ -118,7 +119,7 @@ export default function AdminPage() {
     price: getDefaultPriceForType('T-Shirt'),
     brand_id: '',
     description: '',
-    category: 'Clothing',
+    category: 'Streetwear',
     type: 'T-Shirt',
     colors: getDefaultColorsForType('T-Shirt'),
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
@@ -296,7 +297,7 @@ export default function AdminPage() {
       })
       if (brand) {
         setBrands(prev => [...prev, brand])
-        setNewBrand({ name: '', icon: '', background_image: '', description: '', category: 'Streetwear' })
+        setNewBrand({ name: '', icon: '', background_image: '', description: '', style: 'Core Street', category: 'Streetwear' })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)
@@ -385,7 +386,7 @@ export default function AdminPage() {
           price: getDefaultPriceForType(newProduct.type), // Set price based on type
           brand_id: newProduct.brand_id, // Keep the same brand
           description: '',
-          category: 'Clothing',
+          category: 'Streetwear',
           type: newProduct.type, // Keep the same type
           colors: getDefaultColorsForType(newProduct.type), // Set colors based on type
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
@@ -827,10 +828,7 @@ export default function AdminPage() {
                         }}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       >
-                        <option value="Clothing">Clothing</option>
-                        <option value="Accessories">Accessories</option>
-                        <option value="Hats">Hats</option>
-                        <option value="Others">Others</option>
+                        <option value="Streetwear">Streetwear</option>
                       </select>
                     </div>
                     
@@ -1183,22 +1181,23 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Brand Category</label>
+                      <label className="block text-sm font-medium text-gray-700">Style</label>
                       <select
-                        value={newBrand.category}
-                        onChange={(e) => setNewBrand(prev => ({ ...prev, category: e.target.value }))}
+                        value={newBrand.style}
+                        onChange={(e) => setNewBrand(prev => ({ ...prev, style: e.target.value }))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         required
                       >
-                        <option value="Streetwear">Streetwear</option>
-                        <option value="Casual">Casual</option>
-                        <option value="Mode / Avant-Garde">Mode / Avant-Garde</option>
-                        <option value="Luxury / High-End">Luxury / High-End</option>
-                        <option value="Sports / Outdoor">Sports / Outdoor</option>
-                        <option value="Traditional / Preppy">Traditional / Preppy</option>
-                        <option value="Feminine / Girly">Feminine / Girly</option>
-                        <option value="Workwear / Military">Workwear / Military</option>
-                        <option value="Sustainable / Ethical">Sustainable / Ethical</option>
+                        <option value="Core Street">Core Street</option>
+                        <option value="Hip-Hop/Urban">Hip-Hop/Urban</option>
+                        <option value="Sports/Athleisure">Sports/Athleisure</option>
+                        <option value="Retro/Vintage/Y2K">Retro/Vintage/Y2K</option>
+                        <option value="Techwear/Futuristic">Techwear/Futuristic</option>
+                        <option value="Luxury/Mode Street">Luxury/Mode Street</option>
+                        <option value="Grunge/Punk/Rock">Grunge/Punk/Rock</option>
+                        <option value="Minimal/Normcore">Minimal/Normcore</option>
+                        <option value="Art/Graphic Driven">Art/Graphic Driven</option>
+                        <option value="Culture/Character/Anime">Culture/Character/Anime</option>
                       </select>
                     </div>
 
@@ -1260,8 +1259,8 @@ export default function AdminPage() {
                             <Image src={brand.background_image} alt={`${brand.name} background`} width={800} height={96} className="w-full h-24 object-cover rounded" />
                           </div>
                         )}
-                        {brand.category && (
-                          <p className="text-sm text-blue-600 font-medium mb-2">Category: {brand.category}</p>
+                        {brand.style && (
+                          <p className="text-sm text-blue-600 font-medium mb-2">Style: {brand.style}</p>
                         )}
                         {brand.description && (
                           <p className="text-sm text-gray-600 break-words">{brand.description}</p>

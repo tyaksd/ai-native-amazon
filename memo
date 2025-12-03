@@ -65,8 +65,6 @@ git push origin main -f
 支払われたら、そんtシャツのdesign-IMageを、printfulの新規オーダーとして作り、情報も送る。(終わったらI sentにチェック)
 estimated deliveryとtracking urlを/lkjで送信する
 
-
-<
 git add .
 git commit -m "changes"
 git push origin main
@@ -75,5 +73,3 @@ stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
-
-データベースブランドのカテゴリをstreetwearではなく、〇〇系へ

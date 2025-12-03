@@ -41,7 +41,7 @@ export default function NewsletterSignup() {
   };
 
   return (
-    <div className="bg-black rounded-lg p-6">
+    <div className="bg-black rounded-lg p-5">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-white mb-1">

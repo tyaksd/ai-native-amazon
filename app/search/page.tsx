@@ -220,7 +220,7 @@ function SearchContent() {
                         analytics.trackSearchResultClick(brand.id, 'brand', searchQuery)
                       }}
                     >
-                      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 h-full min-h-[140px]">
+                      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
                         {brand.background_image ? (
                           <OptimizedImage 
                             src={brand.background_image} 

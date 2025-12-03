@@ -13,7 +13,6 @@ import MobileSearch from "./MobileSearch"
 import MobileMenu from "./MobileMenu"
 import LogoLink from "./LogoLink"
 import ContactButton from "./ContactButton"
-import NewsletterSignup from "./NewsletterSignup"
 
 export default function ConditionalHeaderFooter() {
   const pathname = usePathname()
@@ -92,12 +91,12 @@ export default function ConditionalHeaderFooter() {
         </div>
       </header>
       <footer className="mt-0 bg-black text-white">
-        <div className="mx-auto max-w-7xl px-3 sm:px-3">
-          <NewsletterSignup />
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 pt-6">
+          <h3 className="text-xl font-semibold text-white mb-1">Sign up Godship</h3>
+          <p className="text-white/80 text-sm">Get exclusive deals and early access to new products.</p>
         </div>
-        <div className="mx-auto max-w-7xl px-6 sm:px-10  grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
           <div className="md:col-span-2">
-            <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight">The best selection of AI brands for you</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:col-span-3">
             <div>
