@@ -8,6 +8,11 @@ const isClerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 // If Clerk is not configured (local development), use simple middleware
 export default isClerkConfigured 
   ? clerkMiddleware((auth, request) => {
+      // Redirect root path to /brands
+      if (request.nextUrl.pathname === '/') {
+        return NextResponse.redirect(new URL('/brands', request.url));
+      }
+      
       // Check admin authentication for protected routes
       const authResult = checkAuth(request);
       
@@ -19,6 +24,11 @@ export default isClerkConfigured
       return NextResponse.next();
     })
   : function middleware(request: NextRequest) {
+      // Redirect root path to /brands
+      if (request.nextUrl.pathname === '/') {
+        return NextResponse.redirect(new URL('/brands', request.url));
+      }
+      
       // In local development without Clerk, only check admin authentication
       const authResult = checkAuth(request);
       
