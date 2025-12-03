@@ -123,8 +123,9 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
     const diffY = currentY - touchStartY
 
     // Determine swipe direction on first significant movement
+    // If diagonal, treat as horizontal swipe
     if (isHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-      setIsHorizontalSwipe(Math.abs(diffX) > Math.abs(diffY))
+      setIsHorizontalSwipe(Math.abs(diffX) >= Math.abs(diffY))
     }
 
     // Only handle horizontal swipes
@@ -347,8 +348,9 @@ export default function BrandsPage() {
     const diffY = currentY - heroTouchStartY
 
     // Determine swipe direction on first significant movement
+    // If diagonal, treat as horizontal swipe
     if (heroIsHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
-      setHeroIsHorizontalSwipe(Math.abs(diffX) > Math.abs(diffY))
+      setHeroIsHorizontalSwipe(Math.abs(diffX) >= Math.abs(diffY))
     }
 
     // Only handle horizontal swipes
