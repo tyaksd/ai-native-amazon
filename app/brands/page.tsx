@@ -62,6 +62,8 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState(0)
   const [touchStartX, setTouchStartX] = useState(0)
+  const [touchStartY, setTouchStartY] = useState(0)
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState<boolean | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Minimum swipe distance (in px)
@@ -108,28 +110,45 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
   const onTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true)
     setTouchStartX(e.targetTouches[0].clientX)
+    setTouchStartY(e.targetTouches[0].clientY)
     setDragOffset(0)
+    setIsHorizontalSwipe(null)
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return
     const currentX = e.targetTouches[0].clientX
-    const diff = currentX - touchStartX
-    setDragOffset(diff)
+    const currentY = e.targetTouches[0].clientY
+    const diffX = currentX - touchStartX
+    const diffY = currentY - touchStartY
+
+    // Determine swipe direction on first significant movement
+    if (isHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+      setIsHorizontalSwipe(Math.abs(diffX) > Math.abs(diffY))
+    }
+
+    // Only handle horizontal swipes
+    if (isHorizontalSwipe) {
+      e.preventDefault() // Prevent vertical scrolling
+      setDragOffset(diffX)
+    }
   }
 
   const onTouchEnd = () => {
     if (!isDragging) return
     setIsDragging(false)
     
-    // Determine if we should change slides
-    if (dragOffset < -minSwipeDistance && currentSlide < totalSlides - 1) {
-      setCurrentSlide(prev => prev + 1)
-    } else if (dragOffset > minSwipeDistance && currentSlide > 0) {
-      setCurrentSlide(prev => prev - 1)
+    // Only change slides if it was a horizontal swipe
+    if (isHorizontalSwipe) {
+      if (dragOffset < -minSwipeDistance && currentSlide < totalSlides - 1) {
+        setCurrentSlide(prev => prev + 1)
+      } else if (dragOffset > minSwipeDistance && currentSlide > 0) {
+        setCurrentSlide(prev => prev - 1)
+      }
     }
     
     setDragOffset(0)
+    setIsHorizontalSwipe(null)
   }
 
   // Calculate transform offset
@@ -148,6 +167,7 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
       <div 
         ref={containerRef}
         className="relative overflow-hidden"
+        style={{ touchAction: 'pan-y' }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -257,6 +277,8 @@ export default function BrandsPage() {
   const [heroIsDragging, setHeroIsDragging] = useState(false)
   const [heroDragOffset, setHeroDragOffset] = useState(0)
   const [heroTouchStartX, setHeroTouchStartX] = useState(0)
+  const [heroTouchStartY, setHeroTouchStartY] = useState(0)
+  const [heroIsHorizontalSwipe, setHeroIsHorizontalSwipe] = useState<boolean | null>(null)
   const heroContainerRef = useRef<HTMLDivElement>(null)
   const heroMinSwipeDistance = 50
 
@@ -312,27 +334,45 @@ export default function BrandsPage() {
   const onHeroTouchStart = (e: React.TouchEvent) => {
     setHeroIsDragging(true)
     setHeroTouchStartX(e.targetTouches[0].clientX)
+    setHeroTouchStartY(e.targetTouches[0].clientY)
     setHeroDragOffset(0)
+    setHeroIsHorizontalSwipe(null)
   }
 
   const onHeroTouchMove = (e: React.TouchEvent) => {
     if (!heroIsDragging) return
     const currentX = e.targetTouches[0].clientX
-    const diff = currentX - heroTouchStartX
-    setHeroDragOffset(diff)
+    const currentY = e.targetTouches[0].clientY
+    const diffX = currentX - heroTouchStartX
+    const diffY = currentY - heroTouchStartY
+
+    // Determine swipe direction on first significant movement
+    if (heroIsHorizontalSwipe === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+      setHeroIsHorizontalSwipe(Math.abs(diffX) > Math.abs(diffY))
+    }
+
+    // Only handle horizontal swipes
+    if (heroIsHorizontalSwipe) {
+      e.preventDefault() // Prevent vertical scrolling
+      setHeroDragOffset(diffX)
+    }
   }
 
   const onHeroTouchEnd = () => {
     if (!heroIsDragging) return
     setHeroIsDragging(false)
     
-    if (heroDragOffset < -heroMinSwipeDistance && currentFeatureIndex < features.length - 1) {
-      setCurrentFeatureIndex(prev => prev + 1)
-    } else if (heroDragOffset > heroMinSwipeDistance && currentFeatureIndex > 0) {
-      setCurrentFeatureIndex(prev => prev - 1)
+    // Only change slides if it was a horizontal swipe
+    if (heroIsHorizontalSwipe) {
+      if (heroDragOffset < -heroMinSwipeDistance && currentFeatureIndex < features.length - 1) {
+        setCurrentFeatureIndex(prev => prev + 1)
+      } else if (heroDragOffset > heroMinSwipeDistance && currentFeatureIndex > 0) {
+        setCurrentFeatureIndex(prev => prev - 1)
+      }
     }
     
     setHeroDragOffset(0)
+    setHeroIsHorizontalSwipe(null)
   }
 
   const getHeroTransformOffset = () => {
@@ -368,6 +408,7 @@ export default function BrandsPage() {
           <div 
             ref={heroContainerRef}
             className="relative h-[200px] sm:h-[280px] md:h-[380px] overflow-hidden"
+            style={{ touchAction: 'pan-y' }}
             onTouchStart={onHeroTouchStart}
             onTouchMove={onHeroTouchMove}
             onTouchEnd={onHeroTouchEnd}
