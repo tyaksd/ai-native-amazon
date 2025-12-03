@@ -208,7 +208,59 @@ function SearchContent() {
             {foundBrands.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4 text-white">Brands</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+                
+                {/* Mobile: 2 columns with compact cards */}
+                <div className="grid grid-cols-2 sm:hidden gap-1">
+                  {foundBrands.map((brand) => (
+                    <Link 
+                      key={brand.id} 
+                      href={`/${brand.id}`} 
+                      className="group block"
+                      onClick={() => {
+                        analytics.trackSearchResultClick(brand.id, 'brand', searchQuery)
+                      }}
+                    >
+                      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 h-full min-h-[140px]">
+                        {brand.background_image ? (
+                          <OptimizedImage 
+                            src={brand.background_image} 
+                            alt={`${brand.name} background`} 
+                            fill
+                            className="object-cover"
+                            isImportant={true}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
+                        )}
+                        <div className="absolute top-3 left-2">
+                          <div className="w-12 h-12 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
+                            <OptimizedImage 
+                              src={brand.icon} 
+                              alt={brand.name} 
+                              fill
+                              className="object-cover"
+                              width={48}
+                              height={48}
+                            />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 pt-1 px-2 pb-2 bg-white/10 backdrop-blur-md border-t border-white/10">
+                          <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
+                            {brand.name}
+                          </h3>
+                          {brand.style && (
+                            <span className="inline-block mt-1 px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+                              {brand.style}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                
+                {/* Desktop: regular cards */}
+                <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
                   {foundBrands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -266,9 +318,9 @@ function SearchContent() {
                             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
                               {brand.name}
                             </h3>
-                            {brand.category && (
+                            {brand.style && (
                               <span className="px-2  bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
-                                {brand.category}
+                                {brand.style}
                               </span>
                             )}
                           </div>
