@@ -54,7 +54,7 @@ function compositeDesignOnTshirt(
 
     // デザインサイズ: Long Teeは29%、T-Shirtは29.7%、Hoodie/Sweatshirtは26.0%
     const designSize = isLongTee
-      ? '0.29'
+      ? '0.28'
       : isHoodie || isSweatshirt
         ? '0.26'
         : '0.297'
