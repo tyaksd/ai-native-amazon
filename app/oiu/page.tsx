@@ -119,7 +119,7 @@ export default function AdminPage() {
     price: getDefaultPriceForType('T-Shirt'),
     brand_id: '',
     description: '',
-    category: 'Streetwear',
+    category: 'Clothing',
     type: 'T-Shirt',
     colors: getDefaultColorsForType('T-Shirt'),
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
@@ -388,7 +388,7 @@ export default function AdminPage() {
           price: getDefaultPriceForType(newProduct.type), // Set price based on type
           brand_id: newProduct.brand_id, // Keep the same brand
           description: '',
-          category: 'Streetwear',
+          category: 'Clothing',
           type: newProduct.type, // Keep the same type
           colors: getDefaultColorsForType(newProduct.type), // Set colors based on type
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
@@ -689,16 +689,15 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50">
       {showCreatedBanner && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50">
-          <div className="px-4 py-2 rounded-md bg-green-600 text-white shadow-md animate-pulse">
+          <div className=" rounded-md bg-green-600 text-white shadow-md animate-pulse">
             {createdMessage}
           </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8　">
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+          <div className="px-6 border-b border-gray-200">
           </div>
 
           {/* Tabs */}
@@ -767,12 +766,11 @@ export default function AdminPage() {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="">
             {activeTab === 'products' && (
               <div className="space-y-6">
                 {/* Create Product Form */}
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h2 className="text-lg font-semibold mb-4">Add New Product</h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
                   <form onSubmit={handleCreateProduct} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -814,27 +812,6 @@ export default function AdminPage() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Category</label>
-                      <select
-                        value={newProduct.category}
-                        onChange={(e) => {
-                          const newCategory = e.target.value
-                          const newType = getDefaultTypeForCategory(newCategory)
-                          setNewProduct(prev => ({ 
-                            ...prev, 
-                            category: newCategory,
-                            type: newType,
-                            colors: getDefaultColorsForType(newType),
-                            price: getDefaultPriceForType(newType)
-                          }))
-                        }}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="Streetwear">Streetwear</option>
-                      </select>
-                    </div>
-                    
-                    <div>
                       <label className="block text-sm font-medium text-gray-700">Type</label>
                       <select
                         value={newProduct.type}
@@ -852,20 +829,6 @@ export default function AdminPage() {
                         {getTypeOptionsForCategory(newProduct.category).map(option => (
                           <option key={option} value={option}>{option}</option>
                         ))}
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Gender</label>
-                      <select
-                        value={newProduct.gender}
-                        onChange={(e) => setNewProduct(prev => ({ ...prev, gender: e.target.value }))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="Men">Men</option>
-                        <option value="Women">Women</option>
-                        <option value="Unisex">Unisex</option>
-                        <option value="Null">Null</option>
                       </select>
                     </div>
                     
@@ -910,46 +873,6 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Sizes</label>
-                      <div className="mt-1 flex gap-2">
-                        <input
-                          type="text"
-                          value={sizeInput}
-                          onChange={(e) => setSizeInput(e.target.value)}
-                          placeholder="Enter size (e.g., S, M, L)"
-                          className="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          onKeyPress={(e) => e.key === 'Enter' && addSize()}
-                        />
-                        <button
-                          type="button"
-                          onClick={addSize}
-                          className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                          Add
-                        </button>
-                      </div>
-                      {newProduct.sizes.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {newProduct.sizes.map((size, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 rounded-md text-sm"
-                            >
-                              {size}
-                              <button
-                                type="button"
-                                onClick={() => removeSize(size)}
-                                className="text-gray-500 hover:text-red-500"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
                       <label className="block text-sm font-medium text-gray-700">Description</label>
                       <textarea
                         value={newProduct.description}
@@ -960,53 +883,55 @@ export default function AdminPage() {
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Product Images</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => {
-                          const files = Array.from(e.target.files || [])
-                          if (files.length > 0) {
-                            handleImageUpload(files)
-                          }
-                        }}
-                        className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">You can select multiple images at once</p>
-                      {newProduct.images.length > 0 && (
-                        <div className="mt-2">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            {newProduct.images.map((image, index) => (
-                              <div key={index} className="relative">
-                                <Image src={image} alt={`Preview ${index + 1}`} width={80} height={80} className="h-20 w-20 object-cover rounded" />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setNewProduct(prev => ({
-                                      ...prev,
-                                      images: prev.images.filter((_, i) => i !== index)
-                                    }))
-                                  }}
-                                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ))}
+                    <div className="flex gap-6 items-center">
+                      <div className="w-1/5">
+                        <label className="block text-sm font-medium text-gray-700">Product Images</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || [])
+                            if (files.length > 0) {
+                              handleImageUpload(files)
+                            }
+                          }}
+                          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">You can select multiple images at once</p>
+                        {newProduct.images.length > 0 && (
+                          <div className="mt-2">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {newProduct.images.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <Image src={image} alt={`Preview ${index + 1}`} width={80} height={80} className="h-20 w-20 object-cover rounded" />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setNewProduct(prev => ({
+                                        ...prev,
+                                        images: prev.images.filter((_, i) => i !== index)
+                                      }))
+                                    }}
+                                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                      
+                      <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
+                      >
+                        Create Product
+                      </button>
                     </div>
-
-                    <button
-                      type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      Create Product
-                    </button>
                   </form>
                 </div>
 
@@ -1147,7 +1072,7 @@ export default function AdminPage() {
               <div className="space-y-6">
                 {/* Create Brand Form */}
                 <div className="bg-gray-50 p-6 rounded-lg">
-                  <h2 className="text-lg font-semibold mb-4">Add New Brand</h2>
+                  
                   <form onSubmit={handleCreateBrand} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -1235,7 +1160,7 @@ export default function AdminPage() {
                     </div>
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="bg-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg"
                     >
                       Create Brand
                     </button>

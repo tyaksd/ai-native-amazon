@@ -416,13 +416,8 @@ Please provide the response in the following JSON format:
       // Create brand in database
       console.log(`Creating brand ${i + 1} in database...`)
       // Determine category based on custom description or brandStyle
-      let category = 'Casual'
-      if (customDescription) {
-        // For custom descriptions, default to Streetwear
-        category = 'Streetwear'
-      } else {
-        category = brandStyle === 'street' ? 'Streetwear' : 'Casual'
-      }
+      // Note: Database only allows 'Clothing', 'Accessories', 'Hats', 'Others'
+      const category = 'Clothing'
       
       const newBrand = await createBrand({
         name: brandContent.name,

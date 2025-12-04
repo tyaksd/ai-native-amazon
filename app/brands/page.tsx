@@ -684,12 +684,12 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         {hotBrands.length > 0 && (
-          <BrandCarousel brands={hotBrands} title="Hot Drop 🔥" />
+          <BrandCarousel brands={hotBrands} title="HOT DROOPS 🔥" />
         )}
         
         {/* New Drop Section */}
         {newBrands.length > 0 && (
-          <BrandCarousel brands={newBrands} title="New Drop ✨" />
+          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" />
         )}
         
         {/* All Brands Section */}

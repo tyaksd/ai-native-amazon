@@ -52,11 +52,11 @@ function compositeDesignOnTshirt(
     const yOffset = isHoodie ? '-0.12' : (isLongTee ? '-0.13' : (isSweatshirt ? '-0.12' : '-0.08')) // フーディーの場合はより上に、Long Teeは-0.13、Sweatshirtは少し上に
     const xOffset = isHoodie ? '0' : (isLongTee ? '0' : '0') // フーディーも中央寄せに調整
 
-    // デザインサイズ: Long Teeは31%、T-Shirtは29.7%、Hoodie/Sweatshirtは28.0%
+    // デザインサイズ: Long Teeは29%、T-Shirtは29.7%、Hoodie/Sweatshirtは26.0%
     const designSize = isLongTee
-      ? '0.31'
+      ? '0.29'
       : isHoodie || isSweatshirt
-        ? '0.28'
+        ? '0.26'
         : '0.297'
 
     // デザインを相対サイズで中央より僅かに上に配置
