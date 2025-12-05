@@ -684,7 +684,7 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         {hotBrands.length > 0 && (
-          <BrandCarousel brands={hotBrands} title="HOT DROOPS 🔥" />
+          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" />
         )}
         
         {/* New Drop Section */}
@@ -694,7 +694,7 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-white mb-3">All</h2>
+          <h2 className="text-2xl font-bold text-white mb-3">ALL</h2>
           
           {/* Style Filter */}
           <div className="flex items-center gap-4 mb-4">
