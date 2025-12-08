@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from 'react'
 import { getBrands, Brand, getFeatures, Feature, getProductsByBrand, Product } from '@/lib/data'
+import BrandFollowButton from '@/app/components/BrandFollowButton'
 
 // Brand card component to avoid repetition
 function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; compact?: boolean; getStyleDisplayName?: (style: string | null | undefined) => string }) {
@@ -79,6 +80,9 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
             )}
+            
+            {/* Follow button - positioned at top right */}
+            <BrandFollowButton brandId={brand.id} />
             
             {/* Brand icon - positioned at bottom left */}
             <div className="absolute bottom-1 left-1 z-10">
@@ -415,7 +419,10 @@ function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getSty
           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
         )}
         
-        {/* Brand icon - positioned at bottom lbraeft */}
+        {/* Follow button - positioned at top right */}
+        <BrandFollowButton brandId={brand.id} />
+        
+        {/* Brand icon - positioned at bottom left */}
         <div className="absolute bottom-1 left-1 z-10">
           <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
             <Image 
@@ -460,6 +467,10 @@ export default function BrandsPage() {
   const [dragStartX, setDragStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
   const [currentScrollPosition, setCurrentScrollPosition] = useState(0)
+  const [velocity, setVelocity] = useState(0)
+  const lastScrollTimeRef = useRef<number>(0)
+  const lastScrollLeftRef = useRef<number>(0)
+  const animationFrameRef = useRef<number | null>(null)
   
   // Style name mapping for display
   const styleDisplayNames: Record<string, string> = {
@@ -1054,6 +1065,8 @@ export default function BrandsPage() {
           left: Math.max(0, scrollPosition),
           behavior: 'smooth'
         })
+        // Update scroll position state
+        setCurrentScrollPosition(Math.max(0, scrollPosition))
       }
     }
   }, [selectedStyle, availableStyles, isMobile, isDraggingStyle])
@@ -1106,12 +1119,11 @@ export default function BrandsPage() {
     
     const firstItemWidth = getItemWidth(0) // 180px
     
-    const findStyleAtPosition = (position: number): string => {
+    const findStyleAtPosition = (position: number, baseIndex: number): string => {
       let cumulativeWidth = firstItemWidth
-      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
       
       for (let i = 0; i < allStyles.length; i++) {
-        const distance = Math.abs(i - currentSelectedIndex)
+        const distance = Math.abs(i - baseIndex)
         const itemWidth = getItemWidth(distance)
         
         if (position >= cumulativeWidth && position < cumulativeWidth + itemWidth) {
@@ -1120,13 +1132,13 @@ export default function BrandsPage() {
         cumulativeWidth += itemWidth
       }
       
-      // Fallback
+      // Fallback: find closest item
       let minDistance = Infinity
       let closestIndex = 0
       cumulativeWidth = firstItemWidth
       
       for (let i = 0; i < allStyles.length; i++) {
-        const distance = Math.abs(i - currentSelectedIndex)
+        const distance = Math.abs(i - baseIndex)
         const itemWidth = getItemWidth(distance)
         const itemCenter = cumulativeWidth + itemWidth / 2
         const distanceFromPosition = Math.abs(position - itemCenter)
@@ -1141,10 +1153,13 @@ export default function BrandsPage() {
       return allStyles[closestIndex]
     }
     
+    // Use center position to find base index for accurate calculation
+    const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, allStyles.indexOf(selectedStyle))
+    
     return {
-      center: findStyleAtPosition(centerPosition),
-      left: findStyleAtPosition(leftPosition),
-      right: findStyleAtPosition(rightPosition)
+      center: findStyleAtPosition(centerPosition, centerIndex),
+      left: findStyleAtPosition(leftPosition, centerIndex),
+      right: findStyleAtPosition(rightPosition, centerIndex)
     }
   }
 
@@ -1201,29 +1216,48 @@ export default function BrandsPage() {
   // Handle style picker drag
   const handleStylePickerMouseDown = (e: React.MouseEvent) => {
     if (!stylePickerRef.current) return
+    // Cancel any ongoing momentum animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
     setIsDraggingStyle(true)
     setDragStartX(e.pageX - stylePickerRef.current.offsetLeft)
     setScrollLeft(stylePickerRef.current.scrollLeft)
+    setVelocity(0)
+    lastScrollTimeRef.current = Date.now()
+    lastScrollLeftRef.current = stylePickerRef.current.scrollLeft
   }
 
   const handleStylePickerMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingStyle || !stylePickerRef.current) return
     e.preventDefault()
     const x = e.pageX - stylePickerRef.current.offsetLeft
-    const walk = (x - dragStartX) * 1.2 // Further reduced for smoother scrolling
-    stylePickerRef.current.scrollLeft = scrollLeft - walk
+    const walk = (x - dragStartX) * 1.5 // Smooth scrolling multiplier
+    const newScrollLeft = scrollLeft - walk
+    stylePickerRef.current.scrollLeft = newScrollLeft
+    
+    // Calculate velocity for momentum scrolling
+    const now = Date.now()
+    const timeDelta = now - lastScrollTimeRef.current
+    if (timeDelta > 0) {
+      const scrollDelta = newScrollLeft - lastScrollLeftRef.current
+      const newVelocity = scrollDelta / timeDelta
+      setVelocity(newVelocity)
+    }
+    lastScrollTimeRef.current = now
+    lastScrollLeftRef.current = newScrollLeft
     
     // Update scroll position for smooth text movement
-    setCurrentScrollPosition(stylePickerRef.current.scrollLeft)
+    setCurrentScrollPosition(newScrollLeft)
     
     // Update selected style based on center position while dragging (real-time)
-    const currentScrollLeft = stylePickerRef.current.scrollLeft
     const containerWidth = stylePickerRef.current.offsetWidth
     const allStyles = ['All', ...availableStyles]
     const currentSelectedIndex = allStyles.indexOf(selectedStyle)
     
     // Find which item is at the center
-    const centerIndex = findCenterItem(currentScrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    const centerIndex = findCenterItem(newScrollLeft, containerWidth, allStyles, currentSelectedIndex)
     
     if (centerIndex >= 0 && centerIndex < allStyles.length) {
       const newStyle = allStyles[centerIndex]
@@ -1235,58 +1269,107 @@ export default function BrandsPage() {
 
   const handleStylePickerMouseUp = () => {
     setIsDraggingStyle(false)
-    // Snap to center style with smooth animation (with loop support)
-    if (stylePickerRef.current) {
-      const scrollLeft = stylePickerRef.current.scrollLeft
-      const containerWidth = stylePickerRef.current.offsetWidth
-      const allStyles = ['All', ...availableStyles]
-      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Apply momentum scrolling if velocity is significant
+    if (stylePickerRef.current && Math.abs(velocity) > 0.1) {
+      let currentVelocity = velocity
+      let currentScrollLeft = stylePickerRef.current.scrollLeft
+      const friction = 0.95 // Friction coefficient
       
-      // Find which item is at the center
-      const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
-      
-      if (centerIndex >= 0 && centerIndex < allStyles.length) {
-        const newStyle = allStyles[centerIndex]
-        if (newStyle !== selectedStyle) {
-          setSelectedStyle(newStyle)
+      const animate = () => {
+        if (!stylePickerRef.current || Math.abs(currentVelocity) < 0.1) {
+          // Snap to nearest style after momentum
+          snapToNearestStyle()
+          return
         }
-        // Smooth scroll to center using cumulative width (with loop offset)
-        const firstItemWidth = getItemWidth(0) // 180px
-        const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
-        const centerItemWidth = getItemWidth(0) // 180px
-        const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
-        stylePickerRef.current.scrollTo({
-          left: Math.max(0, scrollPosition),
-          behavior: 'smooth'
-        })
+        
+        currentScrollLeft += currentVelocity
+        stylePickerRef.current.scrollLeft = currentScrollLeft
+        setCurrentScrollPosition(currentScrollLeft)
+        currentVelocity *= friction
+        
+        animationFrameRef.current = requestAnimationFrame(animate)
       }
+      
+      animationFrameRef.current = requestAnimationFrame(animate)
+    } else {
+      // Snap to nearest style immediately
+      snapToNearestStyle()
     }
   }
-
-  const handleStylePickerTouchStart = (e: React.TouchEvent) => {
+  
+  const snapToNearestStyle = () => {
     if (!stylePickerRef.current) return
-    setIsDraggingStyle(true)
-    setDragStartX(e.touches[0].pageX - stylePickerRef.current.offsetLeft)
-    setScrollLeft(stylePickerRef.current.scrollLeft)
-  }
-
-  const handleStylePickerTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingStyle || !stylePickerRef.current) return
-    const x = e.touches[0].pageX - stylePickerRef.current.offsetLeft
-    const walk = (x - dragStartX) * 1.2 // Further reduced for smoother scrolling
-    stylePickerRef.current.scrollLeft = scrollLeft - walk
     
-    // Update scroll position for smooth text movement
-    setCurrentScrollPosition(stylePickerRef.current.scrollLeft)
-    
-    // Update selected style based on center position while dragging (real-time)
-    const currentScrollLeft = stylePickerRef.current.scrollLeft
+    const scrollLeft = stylePickerRef.current.scrollLeft
     const containerWidth = stylePickerRef.current.offsetWidth
     const allStyles = ['All', ...availableStyles]
     const currentSelectedIndex = allStyles.indexOf(selectedStyle)
     
     // Find which item is at the center
-    const centerIndex = findCenterItem(currentScrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    
+    if (centerIndex >= 0 && centerIndex < allStyles.length) {
+      const newStyle = allStyles[centerIndex]
+      if (newStyle !== selectedStyle) {
+        setSelectedStyle(newStyle)
+      }
+      // Smooth scroll to center using cumulative width (with loop offset)
+      const firstItemWidth = getItemWidth(0) // 180px
+      const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
+      const centerItemWidth = getItemWidth(0) // 180px
+      const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
+      stylePickerRef.current.scrollTo({
+        left: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      })
+      setCurrentScrollPosition(Math.max(0, scrollPosition))
+    }
+  }
+
+  const handleStylePickerTouchStart = (e: React.TouchEvent) => {
+    if (!stylePickerRef.current) return
+    // Cancel any ongoing momentum animation
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    setIsDraggingStyle(true)
+    setDragStartX(e.touches[0].pageX - stylePickerRef.current.offsetLeft)
+    setScrollLeft(stylePickerRef.current.scrollLeft)
+    setVelocity(0)
+    lastScrollTimeRef.current = Date.now()
+    lastScrollLeftRef.current = stylePickerRef.current.scrollLeft
+  }
+
+  const handleStylePickerTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingStyle || !stylePickerRef.current) return
+    const x = e.touches[0].pageX - stylePickerRef.current.offsetLeft
+    const walk = (x - dragStartX) * 1.5 // Smooth scrolling multiplier
+    const newScrollLeft = scrollLeft - walk
+    stylePickerRef.current.scrollLeft = newScrollLeft
+    
+    // Calculate velocity for momentum scrolling
+    const now = Date.now()
+    const timeDelta = now - lastScrollTimeRef.current
+    if (timeDelta > 0) {
+      const scrollDelta = newScrollLeft - lastScrollLeftRef.current
+      const newVelocity = scrollDelta / timeDelta
+      setVelocity(newVelocity)
+    }
+    lastScrollTimeRef.current = now
+    lastScrollLeftRef.current = newScrollLeft
+    
+    // Update scroll position for smooth text movement
+    setCurrentScrollPosition(newScrollLeft)
+    
+    // Update selected style based on center position while dragging (real-time)
+    const containerWidth = stylePickerRef.current.offsetWidth
+    const allStyles = ['All', ...availableStyles]
+    const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Find which item is at the center
+    const centerIndex = findCenterItem(newScrollLeft, containerWidth, allStyles, currentSelectedIndex)
     
     if (centerIndex >= 0 && centerIndex < allStyles.length) {
       const newStyle = allStyles[centerIndex]
@@ -1302,34 +1385,64 @@ export default function BrandsPage() {
 
   const handleStylePickerTouchEnd = () => {
     setIsDraggingStyle(false)
-    // Snap to center style with smooth animation and vibration (with loop support)
-    if (stylePickerRef.current) {
-      const scrollLeft = stylePickerRef.current.scrollLeft
-      const containerWidth = stylePickerRef.current.offsetWidth
-      const allStyles = ['All', ...availableStyles]
-      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Apply momentum scrolling if velocity is significant
+    if (stylePickerRef.current && Math.abs(velocity) > 0.1) {
+      let currentVelocity = velocity
+      let currentScrollLeft = stylePickerRef.current.scrollLeft
+      const friction = 0.95 // Friction coefficient
       
-      // Find which item is at the center
-      const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+      const animate = () => {
+        if (!stylePickerRef.current || Math.abs(currentVelocity) < 0.1) {
+          // Snap to nearest style after momentum
+          snapToNearestStyleWithVibration()
+          return
+        }
+        
+        currentScrollLeft += currentVelocity
+        stylePickerRef.current.scrollLeft = currentScrollLeft
+        setCurrentScrollPosition(currentScrollLeft)
+        currentVelocity *= friction
+        
+        animationFrameRef.current = requestAnimationFrame(animate)
+      }
       
-      if (centerIndex >= 0 && centerIndex < allStyles.length) {
-        const newStyle = allStyles[centerIndex]
-        if (newStyle !== selectedStyle) {
-          setSelectedStyle(newStyle)
-        }
-        // Smooth scroll to center using cumulative width (with loop offset)
-        const firstItemWidth = getItemWidth(0) // 180px
-        const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
-        const centerItemWidth = getItemWidth(0) // 180px
-        const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
-        stylePickerRef.current.scrollTo({
-          left: Math.max(0, scrollPosition),
-          behavior: 'smooth'
-        })
-        // Small vibration on snap
-        if ('vibrate' in navigator) {
-          navigator.vibrate(10) // Light vibration on snap
-        }
+      animationFrameRef.current = requestAnimationFrame(animate)
+    } else {
+      // Snap to nearest style immediately
+      snapToNearestStyleWithVibration()
+    }
+  }
+  
+  const snapToNearestStyleWithVibration = () => {
+    if (!stylePickerRef.current) return
+    
+    const scrollLeft = stylePickerRef.current.scrollLeft
+    const containerWidth = stylePickerRef.current.offsetWidth
+    const allStyles = ['All', ...availableStyles]
+    const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Find which item is at the center
+    const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    
+    if (centerIndex >= 0 && centerIndex < allStyles.length) {
+      const newStyle = allStyles[centerIndex]
+      if (newStyle !== selectedStyle) {
+        setSelectedStyle(newStyle)
+      }
+      // Smooth scroll to center using cumulative width (with loop offset)
+      const firstItemWidth = getItemWidth(0) // 180px
+      const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
+      const centerItemWidth = getItemWidth(0) // 180px
+      const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
+      stylePickerRef.current.scrollTo({
+        left: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      })
+      setCurrentScrollPosition(Math.max(0, scrollPosition))
+      // Small vibration on snap
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10) // Light vibration on snap
       }
     }
   }
@@ -1468,46 +1581,92 @@ export default function BrandsPage() {
                   }
                 }}
               >
-                {/* Transparent scrollable area for touch interaction */}
-                <div className="flex items-center h-full" style={{ width: 'max-content' }}>
+                {/* Blue cards scrollable area - only 3 cards visible */}
+                <div className="flex items-center h-full gap-2 px-2" style={{ width: 'max-content' }}>
                   {/* Add duplicate of last item at the beginning for seamless loop */}
                   {(() => {
                     const allStyles = ['All', ...availableStyles]
                     const lastStyle = allStyles[allStyles.length - 1]
                     const lastIndex = allStyles.length - 1
-                    const distance = Math.abs(0 - lastIndex)
-                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    const containerWidth = stylePickerRef.current?.offsetWidth || 0
+                    
+                    // Determine position based on scroll position
+                    let isCenter = false
+                    let isLeft = false
+                    let isRight = false
+                    
+                    if (isDraggingStyle && stylePickerRef.current) {
+                      const styles = getStylesAtPositions(currentScrollPosition, containerWidth)
+                      isCenter = styles.center === lastStyle
+                      isLeft = styles.left === lastStyle
+                      isRight = styles.right === lastStyle
+                    } else {
+                      const currentIndex = allStyles.indexOf(selectedStyle)
+                      const distance = Math.abs(0 - currentIndex)
+                      isCenter = distance === 0
+                      isLeft = distance === 1 && 0 < currentIndex
+                      isRight = distance === 1 && 0 > currentIndex
+                    }
+                    
+                    const cardWidth = isCenter ? containerWidth * 0.5 : (isLeft || isRight) ? containerWidth * 0.25 : 0
+                    const isVisible = isCenter || isLeft || isRight
                     
                     return (
                       <div
                         key={`loop-start-${lastStyle}`}
                         className="flex-shrink-0 flex items-center justify-center h-full"
                         style={{
-                          width: `${itemWidth}px`,
-                          scrollSnapAlign: 'center'
+                          width: `${cardWidth}px`,
+                          scrollSnapAlign: 'center',
+                          opacity: isVisible ? 1 : 0,
+                          transition: isDraggingStyle ? 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                       >
-                        <div className="text-center px-2 opacity-0">
-                          <div className="text-xs">placeholder</div>
-                        </div>
+                        {isVisible && (
+                          <div className="w-full h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                            <div className={`${isCenter ? 'text-sm font-bold' : 'text-xs font-medium'} text-white text-center px-2 truncate`}>
+                              {lastStyle === 'All' ? 'ALL' : getStyleDisplayName(lastStyle)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })()}
                   
                   {['All', ...availableStyles].map((style, index) => {
                     const allStyles = ['All', ...availableStyles]
-                    const currentIndex = allStyles.indexOf(selectedStyle)
-                    const distance = Math.abs(index - currentIndex)
-                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    const containerWidth = stylePickerRef.current?.offsetWidth || 0
+                    
+                    // Determine position based on scroll position
+                    let isCenter = false
+                    let isLeft = false
+                    let isRight = false
+                    
+                    if (isDraggingStyle && stylePickerRef.current) {
+                      const styles = getStylesAtPositions(currentScrollPosition, containerWidth)
+                      isCenter = styles.center === style
+                      isLeft = styles.left === style
+                      isRight = styles.right === style
+                    } else {
+                      const currentIndex = allStyles.indexOf(selectedStyle)
+                      const distance = Math.abs(index - currentIndex)
+                      isCenter = distance === 0
+                      isLeft = distance === 1 && index < currentIndex
+                      isRight = distance === 1 && index > currentIndex
+                    }
+                    
+                    const cardWidth = isCenter ? containerWidth * 0.5 : (isLeft || isRight) ? containerWidth * 0.25 : 0
+                    const isVisible = isCenter || isLeft || isRight
                     
                     return (
                       <div
                         key={style}
                         className="flex-shrink-0 flex items-center justify-center h-full"
                         style={{
-                          width: `${itemWidth}px`,
+                          width: `${cardWidth}px`,
                           scrollSnapAlign: 'center',
-                          transition: isDraggingStyle ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          opacity: isVisible ? 1 : 0,
+                          transition: isDraggingStyle ? 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                         onClick={() => {
                           if (!isDraggingStyle) {
@@ -1519,9 +1678,13 @@ export default function BrandsPage() {
                           }
                         }}
                       >
-                        <div className="text-center px-2 opacity-0">
-                          <div className="text-xs">placeholder</div>
-                        </div>
+                        {isVisible && (
+                          <div className="w-full h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                            <div className={`${isCenter ? 'text-sm font-bold' : 'text-xs font-medium'} text-white text-center px-2 truncate`}>
+                              {style === 'All' ? 'ALL' : getStyleDisplayName(style)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -1530,23 +1693,48 @@ export default function BrandsPage() {
                   {(() => {
                     const allStyles = ['All', ...availableStyles]
                     const firstStyle = allStyles[0]
-                    const firstIndex = 0
-                    const lastIndex = allStyles.length - 1
-                    const distance = Math.abs(lastIndex - firstIndex)
-                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    const containerWidth = stylePickerRef.current?.offsetWidth || 0
+                    
+                    // Determine position based on scroll position
+                    let isCenter = false
+                    let isLeft = false
+                    let isRight = false
+                    
+                    if (isDraggingStyle && stylePickerRef.current) {
+                      const styles = getStylesAtPositions(currentScrollPosition, containerWidth)
+                      isCenter = styles.center === firstStyle
+                      isLeft = styles.left === firstStyle
+                      isRight = styles.right === firstStyle
+                    } else {
+                      const currentIndex = allStyles.indexOf(selectedStyle)
+                      const lastIndex = allStyles.length - 1
+                      const distance = Math.abs(lastIndex - currentIndex)
+                      isCenter = distance === 0
+                      isLeft = distance === 1 && lastIndex < currentIndex
+                      isRight = distance === 1 && lastIndex > currentIndex
+                    }
+                    
+                    const cardWidth = isCenter ? containerWidth * 0.5 : (isLeft || isRight) ? containerWidth * 0.25 : 0
+                    const isVisible = isCenter || isLeft || isRight
                     
                     return (
                       <div
                         key={`loop-end-${firstStyle}`}
                         className="flex-shrink-0 flex items-center justify-center h-full"
                         style={{
-                          width: `${itemWidth}px`,
-                          scrollSnapAlign: 'center'
+                          width: `${cardWidth}px`,
+                          scrollSnapAlign: 'center',
+                          opacity: isVisible ? 1 : 0,
+                          transition: isDraggingStyle ? 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                       >
-                        <div className="text-center px-2 opacity-0">
-                          <div className="text-xs">placeholder</div>
-                        </div>
+                        {isVisible && (
+                          <div className="w-full h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                            <div className={`${isCenter ? 'text-sm font-bold' : 'text-xs font-medium'} text-white text-center px-2 truncate`}>
+                              {firstStyle === 'All' ? 'ALL' : getStyleDisplayName(firstStyle)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })()}
