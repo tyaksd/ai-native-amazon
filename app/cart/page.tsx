@@ -57,15 +57,13 @@ export default function Cart() {
         }
       }
       
-      // Load cart from database (for logged-in users) or localStorage (for non-logged-in users)
+      // Load cart from database (for both logged-in and non-logged-in users)
       let items: CartItem[] = [];
+      const dbItems = await loadCartFromDB(clerkId);
+      items = dbItems;
       
-      if (clerkId) {
-        // Load from database
-        const dbItems = await loadCartFromDB(clerkId);
-        items = dbItems;
-      } else {
-        // Load from localStorage (fallback for non-logged-in users)
+      // If no items from database, try localStorage as fallback (for non-logged-in users)
+      if (items.length === 0 && !clerkId) {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
           const parsedItems: CartItem[] = JSON.parse(savedCart);
@@ -112,11 +110,11 @@ export default function Cart() {
     setCartItems(updatedCart);
     setProducts(products.filter(p => !(p.id === productId)));
     
-    // Update database if logged in
-    if (user?.id) {
-      await removeCartItemFromDB(user.id, productId, size, color);
-    } else {
-      // Update localStorage for non-logged-in users
+    // Update database (for both logged-in and non-logged-in users)
+    await removeCartItemFromDB(user?.id || null, productId, size, color);
+    
+    // Also update localStorage for non-logged-in users as backup
+    if (!user?.id) {
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     }
   };
@@ -136,14 +134,14 @@ export default function Cart() {
       p.id === productId ? { ...p, quantity: newQuantity } : p
     ));
     
-    // Update database if logged in
-    if (user?.id) {
-      const item = updatedCart.find(i => i.id === productId && (i.size || null) === (size || null) && (i.color || null) === (color || null));
-      if (item) {
-        await saveCartItemToDB(user.id, item);
-      }
-    } else {
-      // Update localStorage for non-logged-in users
+    // Update database (for both logged-in and non-logged-in users)
+    const item = updatedCart.find(i => i.id === productId && (i.size || null) === (size || null) && (i.color || null) === (color || null));
+    if (item) {
+      await saveCartItemToDB(user?.id || null, item);
+    }
+    
+    // Also update localStorage for non-logged-in users as backup
+    if (!user?.id) {
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     }
   };
