@@ -418,6 +418,7 @@ export default function Home() {
                           src={feature.image_url} 
                           alt={feature.title}
                           fill
+                          sizes="100vw"
                           className="object-cover"
                           isImportant={true}
                         />

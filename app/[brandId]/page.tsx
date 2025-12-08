@@ -182,6 +182,7 @@ export default function BrandPage({ params }: PageProps) {
             src={brand.background_image} 
             alt={`${brand.name} background`} 
             fill 
+            sizes="100vw"
             className="object-cover" 
           />
           <div className="absolute inset-0 bg-black/30"></div>

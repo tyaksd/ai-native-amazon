@@ -3,42 +3,63 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 import { getProductById, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
+import { saveCartItemToDB } from '@/lib/cart'
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
 export default function FavoritesPage() {
+  const { user, isLoaded } = useUser()
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showAdded, setShowAdded] = useState(false)
   const [addedMessage, setAddedMessage] = useState('')
 
-  // Get user ID (same logic as FavoriteButton)
-  const getUserId = () => {
-    let storedUserId = localStorage.getItem('user_id')
-    if (!storedUserId) {
-      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem('user_id', storedUserId)
-    }
-    return storedUserId
-  }
-
   useEffect(() => {
     const loadFavorites = async () => {
+      // Wait for Clerk to load
+      if (!isLoaded) return
+      
       try {
-        const userId = getUserId()
+        setLoading(true)
         
-        // Get favorite product IDs
-        const { data: favorites, error: favoritesError } = await supabase
-          .from('favorites')
-          .select('product_id')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
+        // Get user ID: prefer Clerk ID if logged in, otherwise use user_id (for favorites)
+        let userId: string
+        const isLoggedIn = !!user?.id
+        
+        if (isLoggedIn && user.id) {
+          // Use Clerk ID if logged in
+          userId = user.id
+        } else {
+          // Fallback to user_id from localStorage for non-logged-in users (for favorites)
+          let storedUserId = localStorage.getItem('user_id')
+          if (!storedUserId) {
+            storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            localStorage.setItem('user_id', storedUserId)
+          }
+          userId = storedUserId
+        }
+        
+        // Get favorite product IDs - use clerk_id if logged in, otherwise user_id
+        const query = isLoggedIn
+          ? supabase
+              .from('favorites')
+              .select('product_id')
+              .eq('clerk_id', userId)
+              .order('created_at', { ascending: false })
+          : supabase
+              .from('favorites')
+              .select('product_id')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false })
+        
+        const { data: favorites, error: favoritesError } = await query
 
         if (favoritesError) {
           console.error('Error loading favorites:', favoritesError)
@@ -76,13 +97,13 @@ export default function FavoritesPage() {
     }
 
     loadFavorites()
-  }, [])
+  }, [user, isLoaded])
 
   const handleFavoriteRemoved = (productId: string) => {
     setFavoriteProducts(prev => prev.filter(product => product.id !== productId))
   }
 
-  const addToCart = (product: Product) => {
+  const addToCart = async (product: Product) => {
     try {
       // Validate product ID before adding to cart
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -94,31 +115,40 @@ export default function FavoritesPage() {
         return
       }
 
-      type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
-      const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      
-      // Clean up any invalid cart items before processing
-      const validCart = cart.filter(item => uuidRegex.test(item.id))
-      if (validCart.length !== cart.length) {
-        console.log('Removed invalid cart items')
-        localStorage.setItem('cart', JSON.stringify(validCart))
-      }
-      
-      // Check if product already exists in cart
-      const existingItem = validCart.find((item) => item.id === product.id);
-      
-      if (existingItem) {
-        existingItem.quantity += 1;
+      const cartItem = {
+        id: product.id,
+        quantity: 1,
+        size: null,
+        color: null,
+      };
+
+      // Save to database if logged in
+      if (user?.id) {
+        await saveCartItemToDB(user.id, cartItem);
       } else {
-        validCart.push({ 
-          id: product.id, 
-          quantity: 1,
-          size: null,
-          color: null,
-        });
+        // Save to localStorage for non-logged-in users
+        type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
+        const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Clean up any invalid cart items before processing
+        const validCart = cart.filter(item => uuidRegex.test(item.id))
+        if (validCart.length !== cart.length) {
+          console.log('Removed invalid cart items')
+          localStorage.setItem('cart', JSON.stringify(validCart))
+        }
+        
+        // Check if product already exists in cart
+        const existingItem = validCart.find((item) => item.id === product.id);
+        
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          validCart.push(cartItem);
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(validCart));
       }
-      
-      localStorage.setItem('cart', JSON.stringify(validCart));
+
       setAddedMessage(`Added ${product.name} to cart`);
       setShowAdded(true);
       setTimeout(() => setShowAdded(false), 2000);

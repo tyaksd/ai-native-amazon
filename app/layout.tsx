@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 // import { Geist, Geist_Mono } from "next/font/google";
 import {
   ClerkProvider,
@@ -45,15 +45,16 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Godship",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    viewportFit: "cover",
-  },
   other: {
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-capable": "yes",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

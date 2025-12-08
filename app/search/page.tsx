@@ -226,6 +226,7 @@ function SearchContent() {
                             src={brand.background_image} 
                             alt={`${brand.name} background`} 
                             fill
+                            sizes="50vw"
                             className="object-cover"
                             isImportant={true}
                           />
@@ -238,6 +239,7 @@ function SearchContent() {
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
+                              sizes="56px"
                               className="object-cover"
                             />
                           </div>
@@ -280,6 +282,7 @@ function SearchContent() {
                             src={brand.background_image} 
                             alt={`${brand.name} background`} 
                             fill
+                            sizes="(max-width: 1024px) 50vw, 33vw"
                             className="object-cover"
                             isImportant={true}
                           />
@@ -294,6 +297,7 @@ function SearchContent() {
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
+                              sizes="88px"
                               className="object-cover"
                             />
                           </div>

@@ -8,6 +8,8 @@ import ProductCarousel from "@/app/components/ProductCarousel";
 import FavoriteButton from "@/app/components/FavoriteButton";
 import SizeChart from "@/app/components/SizeChart";
 import { useFavorites } from "@/lib/useFavorites";
+import { useUser } from "@clerk/nextjs";
+import { saveCartItemToDB } from "@/lib/cart";
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -208,6 +210,7 @@ export default function ProductDetail({ params }: PageProps) {
   
   // Use the favorites hook
   const { isFavorited, checkFavorites } = useFavorites()
+  const { user } = useUser()
 
   useEffect(() => {
     const loadData = async () => {
@@ -626,7 +629,7 @@ export default function ProductDetail({ params }: PageProps) {
                 </button>
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
                   const needsColor = product.colors && product.colors.length > 0 && !selectedColor
                   const needsSize = product.sizes && product.sizes.length > 0 && !selectedSize
                   if (needsColor || needsSize) {
@@ -651,32 +654,48 @@ export default function ProductDetail({ params }: PageProps) {
                     return
                   }
 
-                  type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
-                  const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
-                  
-                  // Clean up any invalid cart items before processing
-                  const validCart = cart.filter(item => uuidRegex.test(item.id))
-                  if (validCart.length !== cart.length) {
-                    console.log('Removed invalid cart items')
-                    localStorage.setItem('cart', JSON.stringify(validCart))
+                  const cartItem = {
+                    id: product.id,
+                    quantity: quantity,
+                    size: product.sizes && product.sizes.length > 0 ? (selectedSize || null) : null,
+                    color: product.colors && product.colors.length > 0 ? (selectedColor || null) : null,
+                  };
+
+                  // Save to database (both logged in and non-logged-in users)
+                  // For logged-in users, use clerk_id; for non-logged-in, use session_id
+                  const saved = await saveCartItemToDB(user?.id || null, cartItem);
+                  if (!saved) {
+                    console.error('Failed to save cart item to database')
+                    // Still save to localStorage as fallback
+                    console.log('Falling back to localStorage')
                   }
                   
-                  const existingItem = validCart.find((item) => 
-                    item.id === product.id && 
-                    (product.sizes?.length ? (item.size || null) === (selectedSize || null) : true) &&
-                    (product.colors?.length ? (item.color || null) === (selectedColor || null) : true)
-                  );
-                  if (existingItem) {
-                    existingItem.quantity += quantity;
-                  } else {
-                    validCart.push({ 
-                      id: product.id, 
-                      quantity: quantity,
-                      size: product.sizes && product.sizes.length > 0 ? (selectedSize || null) : null,
-                      color: product.colors && product.colors.length > 0 ? (selectedColor || null) : null,
-                    });
+                  // Always also save to localStorage as backup
+                  {
+                    // Save to localStorage as backup
+                    type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
+                    const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
+                    
+                    // Clean up any invalid cart items before processing
+                    const validCart = cart.filter(item => uuidRegex.test(item.id))
+                    if (validCart.length !== cart.length) {
+                      console.log('Removed invalid cart items')
+                      localStorage.setItem('cart', JSON.stringify(validCart))
+                    }
+                    
+                    const existingItem = validCart.find((item) => 
+                      item.id === product.id && 
+                      (product.sizes?.length ? (item.size || null) === (selectedSize || null) : true) &&
+                      (product.colors?.length ? (item.color || null) === (selectedColor || null) : true)
+                    );
+                    if (existingItem) {
+                      existingItem.quantity += quantity;
+                    } else {
+                      validCart.push(cartItem);
+                    }
+                    localStorage.setItem('cart', JSON.stringify(validCart));
                   }
-                  localStorage.setItem('cart', JSON.stringify(validCart));
+
                   setAddedMessage(`Added ${quantity} item(s) to cart`);
                   setShowAdded(true);
                   setTimeout(() => setShowAdded(false), 1000);
@@ -825,15 +844,16 @@ export default function ProductDetail({ params }: PageProps) {
             </div>
             
             {/* Made-to-Order, Less Waste Text */}
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+            <div className="mt-4 p-3 bg-gray-100 rounded-lg">
               {/* <h3 className="text-sm font-semibold text-gray-900 mb-2">Made-to-Order, Less Waste</h3> */}
-              <p className="text-xs text-gray-700 leading-relaxed">
-                Our products are made just for you. Please allow several days for production and several days for shipping (US: 7-9 days, UK: 4-7 days, International: 1–3 weeks).
+              <p className="text-xs text-black leading-relaxed">
+                Our products are made just for you. Please allow several days for production and several days for shipping (US: about a week, UK: about a week, International: 1–3 weeks).
               </p>
-              <p className="text-xs text-gray-700 leading-relaxed mt-2">
-                You will receive an email confirmation once your order is confirmed, and we&apos;ll keep you updated throughout the production and shipping process.
+            
+              <p className="text-xs text-black  leading-relaxed mt-2">
+                We do not accept returns, exchanges, or order cancellations for any reason other than defective items.
               </p>
-              <p className="text-xs text-gray-700 leading-relaxed mt-2">
+              <p className="text-xs text-black  leading-relaxed mt-2">
                 Thank you for choosing a sustainable option that avoids mass production and waste.
               </p>
             </div>

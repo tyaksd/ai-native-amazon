@@ -5,6 +5,14 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getProductById, Product } from "@/lib/data";
 import { loadStripe } from '@stripe/stripe-js';
+import { useUser } from "@clerk/nextjs";
+import { 
+  loadCartFromDB, 
+  saveCartItemToDB, 
+  removeCartItemFromDB,
+  migrateCartToLoggedInUser,
+  type CartItem as CartItemType
+} from "@/lib/cart";
 
 // Type definition for Apple Pay
 declare global {
@@ -27,38 +35,59 @@ function formatUSD(value: number) {
 }
 
 export default function Cart() {
+  const { user, isLoaded } = useUser();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<(Product & { quantity: number })[]>([]);
   const [stripe, setStripe] = useState<unknown>(null);
   const [isApplePayAvailable, setIsApplePayAvailable] = useState(false);
+  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        const items: CartItem[] = JSON.parse(savedCart);
-        
-        // Clean up invalid cart items
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-        const validItems = items.filter(item => uuidRegex.test(item.id))
-        
-        if (validItems.length !== items.length) {
-          console.log('Removed invalid cart items')
-          localStorage.setItem('cart', JSON.stringify(validItems))
+      if (!isLoaded) return;
+      
+      setIsLoadingCart(true);
+      const clerkId = user?.id || null;
+      
+      // If user just logged in, migrate cart from session to clerk_id
+      if (clerkId && typeof window !== 'undefined') {
+        const sessionId = localStorage.getItem('session_id');
+        if (sessionId) {
+          await migrateCartToLoggedInUser(sessionId, clerkId);
         }
-        
-        setCartItems(validItems);
-        const productDetails = await Promise.all(
-          validItems.map(async (item) => {
-            const product = await getProductById(item.id);
-            return product ? { ...product, quantity: item.quantity, sizes: product.sizes, colors: product.colors } : null;
-          })
-        );
-        setProducts(productDetails.filter(Boolean) as (Product & { quantity: number })[]);
       }
+      
+      // Load cart from database (for logged-in users) or localStorage (for non-logged-in users)
+      let items: CartItem[] = [];
+      
+      if (clerkId) {
+        // Load from database
+        const dbItems = await loadCartFromDB(clerkId);
+        items = dbItems;
+      } else {
+        // Load from localStorage (fallback for non-logged-in users)
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          const parsedItems: CartItem[] = JSON.parse(savedCart);
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          items = parsedItems.filter(item => uuidRegex.test(item.id))
+        }
+      }
+      
+      setCartItems(items);
+      
+      // Load product details
+      const productDetails = await Promise.all(
+        items.map(async (item) => {
+          const product = await getProductById(item.id);
+          return product ? { ...product, quantity: item.quantity, sizes: product.sizes, colors: product.colors } : null;
+        })
+      );
+      setProducts(productDetails.filter(Boolean) as (Product & { quantity: number })[]);
+      setIsLoadingCart(false);
     }
     load();
-  }, []);
+  }, [user, isLoaded]);
 
   useEffect(() => {
     const initializeStripe = async () => {
@@ -78,16 +107,23 @@ export default function Cart() {
     initializeStripe();
   }, []);
 
-  const removeFromCart = (productId: string, size?: string | null, color?: string | null) => {
+  const removeFromCart = async (productId: string, size?: string | null, color?: string | null) => {
     const updatedCart = cartItems.filter(item => !(item.id === productId && (item.size || null) === (size || null) && (item.color || null) === (color || null)));
     setCartItems(updatedCart);
     setProducts(products.filter(p => !(p.id === productId)));
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    
+    // Update database if logged in
+    if (user?.id) {
+      await removeCartItemFromDB(user.id, productId, size, color);
+    } else {
+      // Update localStorage for non-logged-in users
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    }
   };
 
-  const updateQuantity = (productId: string, newQuantity: number, size?: string | null, color?: string | null) => {
+  const updateQuantity = async (productId: string, newQuantity: number, size?: string | null, color?: string | null) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId, size, color);
+      await removeFromCart(productId, size, color);
       return;
     }
 
@@ -100,7 +136,16 @@ export default function Cart() {
       p.id === productId ? { ...p, quantity: newQuantity } : p
     ));
     
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    // Update database if logged in
+    if (user?.id) {
+      const item = updatedCart.find(i => i.id === productId && (i.size || null) === (size || null) && (i.color || null) === (color || null));
+      if (item) {
+        await saveCartItemToDB(user.id, item);
+      }
+    } else {
+      // Update localStorage for non-logged-in users
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    }
   };
 
   const getTotalPrice = () => {
@@ -153,6 +198,17 @@ export default function Cart() {
       console.error('Apple Pay error:', e);
     }
   };
+
+  if (isLoadingCart) {
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Your Cart</h1>
+          <p className="text-gray-600 mb-8">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (products.length === 0) {
     return (

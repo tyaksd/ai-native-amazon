@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getBrands, Brand, getFeatures, Feature, getProductsByBrand, Product } from '@/lib/data'
 
 // Brand card component to avoid repetition
-function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
+function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; compact?: boolean; getStyleDisplayName?: (style: string | null | undefined) => string }) {
   const [randomProducts, setRandomProducts] = useState<Product[]>([])
   const [productImages, setProductImages] = useState<Record<string, string>>({})
 
@@ -73,6 +73,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
                 src={brand.background_image} 
                 alt={`${brand.name} background`} 
                 fill
+                sizes="50vw"
                 className="object-cover"
               />
             ) : (
@@ -86,6 +87,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
                   src={brand.icon} 
                   alt={brand.name} 
                   fill
+                  sizes="56px"
                   className="object-cover"
                 />
               </div>
@@ -98,7 +100,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
               </div>
               {brand.style && (
                 <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-                  {brand.style}
+                  {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
                 </span>
               )}
             </div>
@@ -122,6 +124,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
                           src={productImage} 
                           alt={product.name} 
                           fill
+                          sizes="25vw"
                           className="object-cover"
                         />
                       ) : (
@@ -156,6 +159,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
             src={brand.background_image} 
             alt={`${brand.name} background`} 
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
           />
         ) : (
@@ -169,6 +173,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
               src={brand.icon} 
               alt={brand.name} 
               fill
+              sizes="88px"
               className="object-cover"
             />
           </div>
@@ -182,7 +187,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
             </h3>
             {brand.style && (
               <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
-                {brand.style}
+                {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
               </span>
             )}
           </div>
@@ -196,7 +201,7 @@ function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
 }
 
 // Brand carousel component for Hot Drop and New Drop sections
-function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
+function BrandCarousel({ brands, title, getStyleDisplayName }: { brands: Brand[], title: string; getStyleDisplayName?: (style: string | null | undefined) => string }) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
   const [isDragging, setIsDragging] = useState(false)
@@ -360,7 +365,7 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {slideItems.map((brand, index) => (
                   brand ? (
-                    <BrandCard key={brand.id} brand={brand} compact={screenSize === 'mobile'} />
+                    <BrandCard key={brand.id} brand={brand} compact={screenSize === 'mobile'} getStyleDisplayName={getStyleDisplayName} />
                   ) : (
                     <div key={`empty-${slideIndex}-${index}`} className={screenSize === 'mobile' ? 'aspect-[2/1] lg:hidden' : 'min-h-[210px] lg:hidden'} />
                   )
@@ -393,7 +398,7 @@ function BrandCarousel({ brands, title }: { brands: Brand[], title: string }) {
 }
 
 // Compact brand card for mobile All section and search results
-function CompactBrandCard({ brand }: { brand: Brand }) {
+function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getStyleDisplayName?: (style: string | null | undefined) => string }) {
   return (
     <Link href={`/${brand.id}`} className="group block">
       <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
@@ -403,6 +408,7 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
             src={brand.background_image} 
             alt={`${brand.name} background`} 
             fill
+            sizes="(max-width: 640px) 50vw, 33vw"
             className="object-cover"
           />
         ) : (
@@ -416,6 +422,7 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
               src={brand.icon} 
               alt={brand.name} 
               fill
+              sizes="56px"
               className="object-cover"
             />
           </div>
@@ -428,7 +435,7 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
           </div>
           {brand.style && (
             <span className="mr-1 px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-              {brand.style}
+              {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
             </span>
           )}
         </div>
@@ -447,6 +454,378 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedStyle, setSelectedStyle] = useState<string>('All')
   const [availableStyles, setAvailableStyles] = useState<string[]>([])
+  
+  // Style name mapping for display
+  const styleDisplayNames: Record<string, string> = {
+    'Core Street': 'STREET CLASSIC',
+    'Hip-Hop/Urban': 'BLOCK HIP-HOP',
+    'Sports/Athleisure': 'COURT ENERGY',
+    'Retro/Vintage/Y2K': 'REWIND / Y2K',
+    'Techwear/Futuristic': 'NEO TECH',
+    'Luxury/Mode Street': 'MODE LUXE',
+    'Grunge/Punk/Rock': 'NOISE PUNK',
+    'Minimal/Normcore': 'LOW-KEY MINIMAL',
+    'Art/Graphic Driven': 'CANVAS GRAPHIC',
+    'Culture/Character/Anime': 'CULTURE / ANIME'
+  }
+  
+  const getStyleDisplayName = (style: string | null | undefined): string => {
+    if (!style) return ''
+    return styleDisplayNames[style] || style
+  }
+  const [selectedDot, setSelectedDot] = useState<number | null>(null)
+  const topRowRef = useRef<HTMLDivElement>(null)
+  const bottomRowRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [linePath, setLinePath] = useState<string>('')
+  const [glowDotPosition, setGlowDotPosition] = useState<{ x: number; y: number } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dotPositions, setDotPositions] = useState<Array<{ x: number; y: number; index: number }>>([])
+  const pathRef = useRef<SVGPathElement | null>(null)
+  const [currentDotIndex, setCurrentDotIndex] = useState<number>(0)
+  
+  // Calculate line path from dot positions
+  useEffect(() => {
+    const calculatePath = () => {
+      if (!topRowRef.current || !bottomRowRef.current || !containerRef.current) return
+      
+      // Get all child divs (the dots)
+      const topDots = Array.from(topRowRef.current.children) as HTMLElement[]
+      const bottomDots = Array.from(bottomRowRef.current.children) as HTMLElement[]
+      
+      if (topDots.length !== 5 || bottomDots.length !== 5) {
+        console.log('Dots not found:', { top: topDots.length, bottom: bottomDots.length })
+        return
+      }
+      
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const path: string[] = []
+      
+      // Get positions of all dots
+      const topPositions = Array.from(topDots).map(dot => {
+        const rect = dot.getBoundingClientRect()
+        return {
+          x: rect.left + rect.width / 2 - containerRect.left,
+          y: rect.top + rect.height / 2 - containerRect.top
+        }
+      })
+      
+      const bottomPositions = Array.from(bottomDots).map(dot => {
+        const rect = dot.getBoundingClientRect()
+        return {
+          x: rect.left + rect.width / 2 - containerRect.left,
+          y: rect.top + rect.height / 2 - containerRect.top
+        }
+      })
+      
+      // Start from top left (0)
+      path.push(`M ${topPositions[0].x} ${topPositions[0].y}`)
+      
+      // Top row: left to right (0-4) - straight lines
+      for (let i = 1; i < topPositions.length; i++) {
+        path.push(`L ${topPositions[i].x} ${topPositions[i].y}`)
+      }
+      
+      // Top right (4) to bottom left (5) - curved diagonal line (more rounded)
+      const topRightX = topPositions[4].x
+      const topRightY = topPositions[4].y
+      const bottomLeftX = bottomPositions[4].x // bottomDots[4] is index 5 (leftmost)
+      const bottomLeftY = bottomPositions[4].y
+      const midX = (topRightX + bottomLeftX) / 2 + 35 // Much more curve to the right
+      const midY = (topRightY + bottomLeftY) / 2
+      path.push(`Q ${midX} ${midY} ${bottomLeftX} ${bottomLeftY}`)
+      
+      // Bottom row: left to right (5-9) - straight lines
+      for (let i = 3; i >= 0; i--) {
+        path.push(`L ${bottomPositions[i].x} ${bottomPositions[i].y}`)
+      }
+      
+      // Bottom right (9) to top left (0) - curved diagonal line (more rounded)
+      const bottomRightX = bottomPositions[0].x // bottomDots[0] is index 9 (rightmost)
+      const bottomRightY = bottomPositions[0].y
+      const topLeftX = topPositions[0].x
+      const topLeftY = topPositions[0].y
+      const midX2 = (bottomRightX + topLeftX) / 2 - 35 // Much more curve to the left
+      const midY2 = (bottomRightY + topLeftY) / 2
+      path.push(`Q ${midX2} ${midY2} ${topLeftX} ${topLeftY}`)
+      
+      // Close the path
+      path.push('Z')
+      
+      const finalPath = path.join(' ')
+      setLinePath(finalPath)
+      console.log('Line path set:', finalPath) // Debug log
+      
+      // Store all dot positions for snapping
+      const allDotPositions: Array<{ x: number; y: number; index: number }> = []
+      topPositions.forEach((pos, i) => {
+        allDotPositions.push({ ...pos, index: i })
+      })
+      bottomPositions.forEach((pos, i) => {
+        allDotPositions.push({ ...pos, index: 9 - i }) // bottomDots[0] is index 9, bottomDots[4] is index 5
+      })
+      setDotPositions(allDotPositions)
+      
+      // Initialize glow dot position to first dot
+      if (allDotPositions.length > 0 && !glowDotPosition) {
+        setGlowDotPosition({ x: allDotPositions[0].x, y: allDotPositions[0].y })
+        setCurrentDotIndex(0)
+        setSelectedDot(0)
+      }
+      
+      // Force re-render to ensure line is visible
+      if (linePath) {
+        // Path is set, ensure it's visible
+      }
+    }
+    
+    // Calculate after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(calculatePath, 100)
+    
+    // Recalculate on resize
+    window.addEventListener('resize', calculatePath)
+    
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', calculatePath)
+    }
+  }, [selectedDot, loading]) // Recalculate when selection changes or after loading
+  
+  // Get path-ordered dot indices (0,1,2,3,4,5,6,7,8,9,0)
+  const getPathAdjacentIndices = (currentIndex: number): { prevIndex: number; nextIndex: number } => {
+    // Path order: 0→1→2→3→4→5→6→7→8→9→0
+    const pathOrder = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    const currentPathIndex = pathOrder.indexOf(currentIndex)
+    
+    if (currentPathIndex === -1) {
+      // Fallback to array order
+      const arrayIndex = dotPositions.findIndex(dot => dot.index === currentIndex)
+      const prevIndex = arrayIndex === 0 ? dotPositions.length - 1 : arrayIndex - 1
+      const nextIndex = arrayIndex === dotPositions.length - 1 ? 0 : arrayIndex + 1
+      return {
+        prevIndex: dotPositions[prevIndex].index,
+        nextIndex: dotPositions[nextIndex].index
+      }
+    }
+    
+    const prevPathIndex = currentPathIndex === 0 ? pathOrder.length - 1 : currentPathIndex - 1
+    const nextPathIndex = currentPathIndex === pathOrder.length - 1 ? 0 : currentPathIndex + 1
+    
+    return {
+      prevIndex: pathOrder[prevPathIndex],
+      nextIndex: pathOrder[nextPathIndex]
+    }
+  }
+  
+  // Find nearest point on SVG path between current and adjacent dots
+  const findNearestPointOnPath = (x: number, y: number, currentIndex: number): { x: number; y: number; distance: number; pathIndex: number } | null => {
+    if (!pathRef.current || dotPositions.length === 0) return null
+    
+    const path = pathRef.current
+    const pathLength = path.getTotalLength()
+    
+    // Get adjacent dot indices based on path order
+    const { prevIndex, nextIndex } = getPathAdjacentIndices(currentIndex)
+    
+    // Find array indices for prev and next
+    const prevArrayIndex = dotPositions.findIndex(dot => dot.index === prevIndex)
+    const nextArrayIndex = dotPositions.findIndex(dot => dot.index === nextIndex)
+    const currentArrayIndex = dotPositions.findIndex(dot => dot.index === currentIndex)
+    
+    if (prevArrayIndex === -1 || nextArrayIndex === -1 || currentArrayIndex === -1) return null
+    
+    // Check if we're moving on a curve (4→5 or 9→0)
+    const isCurveSegment = (currentIndex === 4 && nextIndex === 5) || (currentIndex === 9 && nextIndex === 0) ||
+                          (currentIndex === 5 && prevIndex === 4) || (currentIndex === 0 && prevIndex === 9)
+    
+    // Find path length positions for each dot
+    let currentPathLength = 0
+    let prevPathLength = 0
+    let nextPathLength = 0
+    
+    const findSamples = 500 // More samples to find exact dot positions
+    for (let i = 0; i <= findSamples; i++) {
+      const length = (i / findSamples) * pathLength
+      const point = path.getPointAtLength(length)
+      
+      const distToCurrent = Math.hypot(point.x - dotPositions[currentArrayIndex].x, point.y - dotPositions[currentArrayIndex].y)
+      const distToPrev = Math.hypot(point.x - dotPositions[prevArrayIndex].x, point.y - dotPositions[prevArrayIndex].y)
+      const distToNext = Math.hypot(point.x - dotPositions[nextArrayIndex].x, point.y - dotPositions[nextArrayIndex].y)
+      
+      if (distToCurrent < 5 && currentPathLength === 0) {
+        currentPathLength = length
+      }
+      if (distToPrev < 5 && prevPathLength === 0) {
+        prevPathLength = length
+      }
+      if (distToNext < 5 && nextPathLength === 0) {
+        nextPathLength = length
+      }
+    }
+    
+    // Determine which segment we're on
+    const distToPrev = Math.hypot(x - dotPositions[prevArrayIndex].x, y - dotPositions[prevArrayIndex].y)
+    const distToNext = Math.hypot(x - dotPositions[nextArrayIndex].x, y - dotPositions[nextArrayIndex].y)
+    
+    let segmentStart = 0
+    let segmentEnd = pathLength
+    
+    if (distToNext < distToPrev) {
+      // Moving forward: current to next
+      segmentStart = currentPathLength
+      segmentEnd = nextPathLength
+      // Handle wrap-around (9 to 0)
+      if (segmentEnd < segmentStart) {
+        segmentEnd = pathLength
+      }
+    } else {
+      // Moving backward: prev to current
+      segmentStart = prevPathLength
+      segmentEnd = currentPathLength
+      // Handle wrap-around (0 to 9)
+      if (segmentStart > segmentEnd) {
+        segmentStart = 0
+      }
+    }
+    
+    // For curve segments, use more samples to ensure smooth movement along the arc
+    const segmentSamples = isCurveSegment ? 300 : 200
+    
+    let bestPoint = path.getPointAtLength(segmentStart)
+    let bestDistance = Infinity
+    let bestPathIndex = 0
+    
+    for (let i = 0; i <= segmentSamples; i++) {
+      let length = segmentStart + (i / segmentSamples) * (segmentEnd - segmentStart)
+      if (length > pathLength) length = pathLength
+      const point = path.getPointAtLength(length)
+      const distance = Math.hypot(point.x - x, point.y - y)
+      
+      if (distance < bestDistance) {
+        bestDistance = distance
+        bestPoint = point
+        bestPathIndex = i
+      }
+    }
+    
+    return { x: bestPoint.x, y: bestPoint.y, distance: bestDistance, pathIndex: bestPathIndex }
+  }
+  
+  // Handle touch/drag to move glow dot
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    handleTouchMove(e)
+  }
+  
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!containerRef.current || (!isDragging && e.type !== 'touchmove')) return
+    
+    const containerRect = containerRef.current.getBoundingClientRect()
+    let clientX: number, clientY: number
+    
+    if ('touches' in e) {
+      if (e.touches.length === 0) return
+      clientX = e.touches[0].clientX
+      clientY = e.touches[0].clientY
+    } else {
+      clientX = e.clientX
+      clientY = e.clientY
+    }
+    
+    const x = clientX - containerRect.left
+    const y = clientY - containerRect.top
+    
+    // Find nearest point on the path (only between adjacent dots)
+    const pathPoint = findNearestPointOnPath(x, y, currentDotIndex)
+    if (pathPoint && dotPositions.length > 0) {
+      // Get adjacent dot indices based on path order
+      const { prevIndex, nextIndex } = getPathAdjacentIndices(currentDotIndex)
+      
+      // Find array indices
+      const currentArrayIndex = dotPositions.findIndex(dot => dot.index === currentDotIndex)
+      const prevArrayIndex = dotPositions.findIndex(dot => dot.index === prevIndex)
+      const nextArrayIndex = dotPositions.findIndex(dot => dot.index === nextIndex)
+      
+      if (currentArrayIndex === -1 || prevArrayIndex === -1 || nextArrayIndex === -1) return
+      
+      const distToCurrent = Math.hypot(pathPoint.x - dotPositions[currentArrayIndex].x, pathPoint.y - dotPositions[currentArrayIndex].y)
+      const distToPrev = Math.hypot(pathPoint.x - dotPositions[prevArrayIndex].x, pathPoint.y - dotPositions[prevArrayIndex].y)
+      const distToNext = Math.hypot(pathPoint.x - dotPositions[nextArrayIndex].x, pathPoint.y - dotPositions[nextArrayIndex].y)
+      
+      // Snap to adjacent dot if very close (30px)
+      if (distToPrev < 30) {
+        setGlowDotPosition({ x: dotPositions[prevArrayIndex].x, y: dotPositions[prevArrayIndex].y })
+        setCurrentDotIndex(prevIndex)
+        setSelectedDot(prevIndex)
+      } else if (distToNext < 30) {
+        setGlowDotPosition({ x: dotPositions[nextArrayIndex].x, y: dotPositions[nextArrayIndex].y })
+        setCurrentDotIndex(nextIndex)
+        setSelectedDot(nextIndex)
+      } else if (distToCurrent < 30) {
+        setGlowDotPosition({ x: dotPositions[currentArrayIndex].x, y: dotPositions[currentArrayIndex].y })
+        setSelectedDot(currentDotIndex)
+      } else {
+        // Move along the path
+        setGlowDotPosition({ x: pathPoint.x, y: pathPoint.y })
+        // Check if we're on a dot
+        dotPositions.forEach((dot) => {
+          const distance = Math.hypot(pathPoint.x - dot.x, pathPoint.y - dot.y)
+          if (distance < 30) {
+            setSelectedDot(dot.index)
+          }
+        })
+      }
+    }
+  }
+  
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+    // Snap to nearest adjacent dot on release
+    if (glowDotPosition && dotPositions.length > 0) {
+      // Get adjacent dot indices based on path order
+      const { prevIndex, nextIndex } = getPathAdjacentIndices(currentDotIndex)
+      
+      // Find array indices
+      const currentArrayIndex = dotPositions.findIndex(dot => dot.index === currentDotIndex)
+      const prevArrayIndex = dotPositions.findIndex(dot => dot.index === prevIndex)
+      const nextArrayIndex = dotPositions.findIndex(dot => dot.index === nextIndex)
+      
+      if (currentArrayIndex === -1 || prevArrayIndex === -1 || nextArrayIndex === -1) return
+      
+      const distToCurrent = Math.hypot(glowDotPosition.x - dotPositions[currentArrayIndex].x, glowDotPosition.y - dotPositions[currentArrayIndex].y)
+      const distToPrev = Math.hypot(glowDotPosition.x - dotPositions[prevArrayIndex].x, glowDotPosition.y - dotPositions[prevArrayIndex].y)
+      const distToNext = Math.hypot(glowDotPosition.x - dotPositions[nextArrayIndex].x, glowDotPosition.y - dotPositions[nextArrayIndex].y)
+      
+      // Snap to the closest adjacent dot
+      if (distToPrev < distToNext && distToPrev < distToCurrent) {
+        setGlowDotPosition({ x: dotPositions[prevArrayIndex].x, y: dotPositions[prevArrayIndex].y })
+        setCurrentDotIndex(prevIndex)
+        setSelectedDot(prevIndex)
+      } else if (distToNext < distToCurrent) {
+        setGlowDotPosition({ x: dotPositions[nextArrayIndex].x, y: dotPositions[nextArrayIndex].y })
+        setCurrentDotIndex(nextIndex)
+        setSelectedDot(nextIndex)
+      } else {
+        setGlowDotPosition({ x: dotPositions[currentArrayIndex].x, y: dotPositions[currentArrayIndex].y })
+        setSelectedDot(currentDotIndex)
+      }
+    }
+  }
+  
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    handleTouchMove(e)
+  }
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      handleTouchMove(e)
+    }
+  }
+  
+  const handleMouseUp = () => {
+    handleTouchEnd()
+  }
   
   // Hero swipe state
   const [heroIsDragging, setHeroIsDragging] = useState(false)
@@ -637,6 +1016,7 @@ export default function BrandsPage() {
                     src={feature.image_url}
                     alt={feature.title}
                     fill
+                    sizes="100vw"
                     className="object-cover"
                     priority={index === 0}
                   />
@@ -684,17 +1064,17 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         {hotBrands.length > 0 && (
-          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" />
+          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" getStyleDisplayName={getStyleDisplayName} />
         )}
         
         {/* New Drop Section */}
         {newBrands.length > 0 && (
-          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" />
+          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" getStyleDisplayName={getStyleDisplayName} />
         )}
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-white mb-3">ALL</h2>
+          <h2 className="text-2xl font-bold text-white mb-3">PICK YOUR STREET VIBE</h2>
           
           {/* Style Filter */}
           <div className="flex items-center gap-4 mb-4">
@@ -703,9 +1083,9 @@ export default function BrandsPage() {
               onChange={(e) => setSelectedStyle(e.target.value)}
               className="border border-white/20 bg-black/20 backdrop-blur-md text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
             >
-              <option value="All" className="bg-black">All Styles</option>
+              <option value="All" className="bg-black">ALL</option>
               {availableStyles.map(style => (
-                <option key={style} value={style} className="bg-black">{style}</option>
+                <option key={style} value={style} className="bg-black">{getStyleDisplayName(style)}</option>
               ))}
             </select>
             <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
@@ -714,12 +1094,12 @@ export default function BrandsPage() {
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
           <div className="grid grid-cols-2 sm:hidden gap-2">
             {allBrands.map((brand) => (
-              <CompactBrandCard key={brand.id} brand={brand} />
+              <CompactBrandCard key={brand.id} brand={brand} getStyleDisplayName={getStyleDisplayName} />
             ))}
           </div>
           <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {allBrands.map((brand) => (
-              <BrandCard key={brand.id} brand={brand} />
+              <BrandCard key={brand.id} brand={brand} getStyleDisplayName={getStyleDisplayName} />
             ))}
           </div>
         </div>
