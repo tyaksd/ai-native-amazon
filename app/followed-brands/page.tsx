@@ -194,7 +194,7 @@ export default function FollowedBrandsPage() {
     <div className="px-3 sm:px-10 py-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Followed Brands</h1>
-        <p className="text-gray-600">{followedBrands.length} brand(s) you're following</p>
+        <p className="text-gray-600">{followedBrands.length} brand(s) you&apos;re following</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
