@@ -8,6 +8,8 @@ import { getBrands, searchProducts, searchBrands, Brand, Product } from '@/lib/d
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { useFavorites } from '@/lib/useFavorites'
 import analytics from '@/lib/analytics'
+import BrandFollowButton from '@/app/components/BrandFollowButton'
+import Image from 'next/image'
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -195,22 +197,22 @@ function SearchContent() {
 
   return (
     <div className="bg-black min-h-screen">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 py-6">
+      <div className="mx-auto max-w-7xl  py-6">
         {searchQuery ? (
           <>
-            <div className="mb-6 mt-4">
-              <h2 className="text-xl font-semibold tracking-tight text-white">
+            <div className="mb-2 mt-2">
+              <h2 className="text-xl font-semibold tracking-tight text-white px-3 sm:px-6">
                 Search Results for &quot;{searchQuery}&quot;
               </h2>
             </div>
             
             {/* Brand Results */}
             {foundBrands.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-lg font-medium mb-4 text-white">Brands</h3>
+              <div className="mb-4 px-3 sm:px-6">
+                <h3 className="text-lg font-bold mb-4 text-white">Brands</h3>
                 
                 {/* Mobile: 2 columns with compact cards */}
-                <div className="grid grid-cols-2 sm:hidden gap-2">
+                <div className="grid grid-cols-2 sm:hidden gap-3">
                   {foundBrands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -221,21 +223,26 @@ function SearchContent() {
                       }}
                     >
                       <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
+                        {/* Full background image */}
                         {brand.background_image ? (
-                          <OptimizedImage 
+                          <Image 
                             src={brand.background_image} 
                             alt={`${brand.name} background`} 
                             fill
-                            sizes="50vw"
+                            sizes="(max-width: 640px) 50vw, 33vw"
                             className="object-cover"
-                            isImportant={true}
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
                         )}
-                        <div className="absolute top-3 left-2">
-                          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-                            <OptimizedImage 
+                        
+                        {/* Follow button - positioned at top right */}
+                        <BrandFollowButton brandId={brand.id} />
+                        
+                        {/* Brand icon - positioned at bottom left */}
+                        <div className="absolute bottom-1 left-1 z-10">
+                          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
+                            <Image 
                               src={brand.icon} 
                               alt={brand.name} 
                               fill
@@ -244,12 +251,14 @@ function SearchContent() {
                             />
                           </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 px-2 bg-black/20 backdrop-blur-md border-t border-white/10">
-                          <h3 className="font-bold text-white text-sm group-hover:text-white transition-colors truncate">
-                            {brand.name}
-                          </h3>
+                        
+                        {/* Brand name and style button with glass design - positioned at bottom right */}
+                        <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
+                          <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
+                            {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
+                          </div>
                           {brand.style && (
-                            <span className="inline-block  px-1.5  bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full truncate max-w-full">
+                            <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
                               {brand.style}
                             </span>
                           )}
@@ -329,7 +338,7 @@ function SearchContent() {
             {/* Product Results */}
             {products.length > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-4 text-white">Products</h3>
+                <h3 className="text-lg font-bold mb-4 text-white px-3 sm:px-6">Products</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
                   {currentProducts.map((p, index) => (
                     <div key={p.id} className="group relative">

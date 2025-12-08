@@ -1,13 +1,62 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Component, ReactNode } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { getBrandById, Brand } from '@/lib/data'
 import Image from 'next/image'
 import Link from 'next/link'
 import BrandFollowButton from '@/app/components/BrandFollowButton'
+
+// Check if Clerk is configured
+const isClerkConfigured = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+// Error boundary component to catch Clerk hook errors
+class ClerkErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    // Only log if it's a Clerk-related error
+    if (error.message?.includes('ClerkProvider') || error.message?.includes('useUser')) {
+      console.warn('FollowedBrandsPage: Clerk not available, using session_id only')
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback
+    }
+    return this.props.children
+  }
+}
+
+// Get user ID: prefer Clerk ID if logged in, otherwise use session_id
+function getUserIdentifier(user: { id?: string } | null | undefined): string | null {
+  // Use Clerk ID if logged in
+  if (user?.id) {
+    return user.id
+  }
+  // Use session_id for non-logged-in users
+  if (typeof window !== 'undefined') {
+    let sessionId = localStorage.getItem('session_id')
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      localStorage.setItem('session_id', sessionId)
+    }
+    return sessionId
+  }
+  return null
+}
 
 // Compact brand card component (same as in brands/page.tsx)
 function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getStyleDisplayName?: (style: string | null | undefined) => string }) {
@@ -80,32 +129,29 @@ function getStyleDisplayName(style: string | null | undefined): string {
   return styleMap[style.toLowerCase()] || style
 }
 
-export default function FollowedBrandsPage() {
-  const { user, isLoaded } = useUser()
-  const router = useRouter()
+// Fallback component that doesn't use Clerk hooks
+function FollowedBrandsPageFallback() {
   const [followedBrands, setFollowedBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadFollowedBrands = async () => {
-      // Wait for Clerk to load
-      if (!isLoaded) return
-      
-      // Redirect to home if not logged in
-      if (!user?.id) {
-        router.push('/')
-        return
-      }
-      
       try {
         setLoading(true)
         
-        // Get followed brand IDs for logged-in user
+        // Get session_id for non-logged-in users
+        let sessionId = localStorage.getItem('session_id')
+        if (!sessionId) {
+          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          localStorage.setItem('session_id', sessionId)
+        }
+        
+        // Get followed brand IDs using session_id
         const { data: follows, error: followsError } = await supabase
           .from('brand_follows')
           .select('brand_id')
-          .eq('clerk_id', user.id)
+          .eq('session_id', sessionId)
           .order('created_at', { ascending: false })
 
         if (followsError) {
@@ -144,9 +190,9 @@ export default function FollowedBrandsPage() {
     }
 
     loadFollowedBrands()
-  }, [user, isLoaded, router])
+  }, [])
 
-  if (!isLoaded) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-black">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
@@ -154,8 +200,126 @@ export default function FollowedBrandsPage() {
     )
   }
 
-  if (!user?.id) {
-    return null // Will redirect
+  if (error) {
+    return (
+      <div className="px-6 py-10">
+        <div className="text-red-600 mb-4">{error}</div>
+        <Link href="/" className="text-blue-600 underline">Back to Home</Link>
+      </div>
+    )
+  }
+
+  if (followedBrands.length === 0) {
+    return (
+      <div className="px-6 py-10 text-center">
+        <div className="text-gray-500 text-lg mb-4">No followed brands yet</div>
+        <p className="text-gray-400 mb-6">Start exploring and follow brands you love!</p>
+        <Link 
+          href="/brands" 
+          className="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+        >
+          Explore Brands
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-3 sm:px-10 py-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Followed Brands</h1>
+        <p className="text-gray-600">{followedBrands.length} brand(s) you&apos;re following</p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
+        {followedBrands.map((brand) => (
+          <CompactBrandCard 
+            key={brand.id} 
+            brand={brand} 
+            getStyleDisplayName={getStyleDisplayName}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Main component that uses Clerk hooks
+function FollowedBrandsPageInner() {
+  const { user, isLoaded } = useUser()
+  const [followedBrands, setFollowedBrands] = useState<Brand[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadFollowedBrands = async () => {
+      // Wait for Clerk to load if configured
+      if (isLoaded === false) {
+        return
+      }
+      
+      try {
+        setLoading(true)
+        
+        const currentUserId = getUserIdentifier(user)
+        if (!currentUserId) {
+          setFollowedBrands([])
+          return
+        }
+        
+        const isLoggedIn = !!user?.id
+        
+        // Get followed brand IDs - use clerk_id if logged in, otherwise session_id
+        const { data: follows, error: followsError } = await supabase
+          .from('brand_follows')
+          .select('brand_id')
+          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
+          .order('created_at', { ascending: false })
+
+        if (followsError) {
+          console.error('Error loading followed brands:', followsError)
+          setError('Failed to load followed brands')
+          return
+        }
+
+        if (!follows || follows.length === 0) {
+          setFollowedBrands([])
+          return
+        }
+
+        // Get brand details for each followed brand
+        const brands = await Promise.all(
+          follows.map(async (follow) => {
+            try {
+              const brand = await getBrandById(follow.brand_id)
+              return brand
+            } catch (error) {
+              console.error(`Error loading brand ${follow.brand_id}:`, error)
+              return null
+            }
+          })
+        )
+
+        // Filter out null brands (brands that might have been deleted)
+        const validBrands = brands.filter((brand): brand is Brand => brand !== null)
+        setFollowedBrands(validBrands)
+      } catch (error) {
+        console.error('Error loading followed brands:', error)
+        setError('Failed to load followed brands')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadFollowedBrands()
+  }, [user, isLoaded])
+
+  if (isLoaded === false) {
+    return (
+      <div className="flex items-center justify-center min-h-96 bg-black">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -210,3 +374,17 @@ export default function FollowedBrandsPage() {
   )
 }
 
+// Outer component that conditionally renders based on Clerk configuration
+export default function FollowedBrandsPage() {
+  // If Clerk is not configured, use fallback component
+  if (!isClerkConfigured) {
+    return <FollowedBrandsPageFallback />
+  }
+
+  // If Clerk is configured, use error boundary with fallback
+  return (
+    <ClerkErrorBoundary fallback={<FollowedBrandsPageFallback />}>
+      <FollowedBrandsPageInner />
+    </ClerkErrorBoundary>
+  )
+}

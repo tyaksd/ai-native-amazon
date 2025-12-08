@@ -11,6 +11,10 @@
     {
       "path": "/api/sync-printful-orders",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/update-badges",
+      "schedule": "0 0 * * *"
     }
   ]
 }

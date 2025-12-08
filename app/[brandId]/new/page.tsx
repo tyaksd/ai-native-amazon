@@ -20,15 +20,46 @@ export default function BrandNewProductsPage({ params }: PageProps) {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const isNewProduct = (createdAt: string) => {
-    const created = new Date(createdAt).getTime();
-    const now = Date.now();
-    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-    return now - created <= THIRTY_DAYS_MS;
-  };
-
+  // Get badge colors
+  const getBadgeColors = (badge: string | null) => {
+    switch (badge) {
+      case 'NEW':
+        return {
+          border: '#10B981',
+          background: '#022C22',
+          text: '#A7F3D0'
+        }
+      case 'HOT':
+        return {
+          border: '#F97316',
+          background: '#451A03',
+          text: '#FED7AA'
+        }
+      case 'SALE':
+        return {
+          border: '#EF4444',
+          background: '#450A0A',
+          text: '#FCA5A5'
+        }
+      case 'SECRET':
+        return {
+          border: '#8B5CF6',
+          background: '#020617',
+          text: '#E5E7EB'
+        }
+      case 'PICK':
+        return {
+          border: '#38BDF8',
+          background: '#0B1220',
+          text: '#E0F2FE'
+        }
+      default:
+        return null
+    }
+  }
+  
   const newItems = useMemo(() => {
-    return items.filter((p) => isNewProduct(p.created_at));
+    return items.filter((p) => p.badge === 'NEW');
   }, [items]);
 
   useEffect(() => {
@@ -137,11 +168,50 @@ export default function BrandNewProductsPage({ params }: PageProps) {
                         )}
                       </div>
                     </Link>
-                    {isNewProduct(p.created_at) && (
-                      <div className="absolute top-2 left-2">
-                        <span className="bg-black text-white text-xs px-2 py-1 rounded">New</span>
-                      </div>
-                    )}
+                    {p.badge && getBadgeColors(p.badge) && (() => {
+                      const colors = getBadgeColors(p.badge)!
+                      const fontSize = p.badge === 'SECRET' 
+                        ? 'clamp(0.5625rem, 2.25vw, 0.8125rem)' 
+                        : 'clamp(0.625rem, 2.5vw, 0.875rem)'
+                      return (
+                        <div className="absolute top-0 left-0 w-[25%] aspect-square">
+                          {/* Border triangle (outer) */}
+                          <div 
+                            className="absolute w-full h-full"
+                            style={{ 
+                              clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                              backgroundColor: colors.border
+                            }}
+                          />
+                          {/* Inner triangle */}
+                          <div 
+                            className="absolute"
+                            style={{ 
+                              top: '1.5px',
+                              left: '1.5px',
+                              width: 'calc(100% - 6px)',
+                              height: 'calc(100% - 6px)',
+                              clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                              backgroundColor: colors.background
+                            }}
+                          />
+                          <span 
+                            className="font-bold absolute z-10"
+                            style={{ 
+                              color: colors.text,
+                              fontSize: fontSize,
+                              transform: 'translate(-50%, -50%) rotate(-45deg)',
+                              transformOrigin: 'center',
+                              top: '35%',
+                              left: '35%',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {p.badge}
+                          </span>
+                        </div>
+                      )
+                    })()}
                     <div className="absolute top-2 right-2 z-10">
                       <FavoriteButton productId={p.id} className="bg-white/80 hover:bg-white rounded-full p-1" />
                     </div>

@@ -31,6 +31,7 @@ export type Product = {
   gender: string;
   is_visible: boolean;
   design_png?: string[] | null;
+  badge: string | null;
   created_at: string;
   updated_at: string;
 };
