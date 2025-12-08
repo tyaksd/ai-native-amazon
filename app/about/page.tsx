@@ -69,27 +69,35 @@ export default function About() {
   }, []);
 
   return (
-    <html lang="en">
-      <head>
-        <title>About - Godship</title>
-        <style jsx global>{`
-          html, body {
-            margin: 0;
-            padding: 0;
-            background: #000000;
-            color: white;
-            font-family: Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
-          }
-          * {
-            box-sizing: border-box;
-          }
-        `}</style>
-      </head>
-      <body>
-        <main className="min-h-screen flex flex-col relative" style={{
-          background: '#000000'
-        }}>
+    <>
+      <style jsx global>{`
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #000000;
+          color: white;
+          font-family: Helvetica, Arial, sans-serif;
+          overflow-x: hidden;
+        }
+        * {
+          box-sizing: border-box;
+        }
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes buttonGradientShift {
+          0% { background-position: 0% 50%; }
+          25% { background-position: 100% 50%; }
+          50% { background-position: 100% 100%; }
+          75% { background-position: 0% 100%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+      <main className="min-h-screen flex flex-col relative" style={{
+        background: '#000000'
+      }}>
           {/* First Page - Hero Section */}
           <div className="min-h-screen flex flex-col relative">
           
@@ -99,8 +107,8 @@ export default function About() {
             <div className="text-center space-y-8 sm:space-y-8 max-w-9xl mx-auto">
               {/* Main Text */}
               <h1 className="text-white text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight sm:px-4" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                We Make<br />
-                E-Commerce Sustainable<br />
+                We Build<br />
+                E-Commerce without Overproduction<br />
                 <span 
                   className={isBlinking ? 'animate-pulse' : ''}
                   style={{
@@ -142,24 +150,7 @@ export default function About() {
           </div>
 
           {/* Second Page - Portfolio Section - Commented out */}
-
-          <style jsx>{`
-            @keyframes gradientShift {
-              0% { background-position: 0% 50%; }
-              50% { background-position: 100% 50%; }
-              100% { background-position: 0% 50%; }
-            }
-            
-            @keyframes buttonGradientShift {
-              0% { background-position: 0% 50%; }
-              25% { background-position: 100% 50%; }
-              50% { background-position: 100% 100%; }
-              75% { background-position: 0% 100%; }
-              100% { background-position: 0% 50%; }
-            }
-          `}</style>
-        </main>
-      </body>
-    </html>
+      </main>
+    </>
   );
 }

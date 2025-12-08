@@ -67,15 +67,20 @@ git push origin main -f
 注文来たらやること
 支払われたら、そんtシャツのdesign-IMageを、printfulの新規オーダーとして作り、情報も送る。(終わったらI sentにチェック)
 estimated deliveryとtracking urlを/lkjで送信する
+e
+
 
 git add .
 git commit -m "changes"
 git push origin main
 
+
+
 stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
-カート消せない問題
 
-orders　order itemsにもclerk_idが保存されていない
+odderにsessionは表示される？
+
+購入されたらカートから消す

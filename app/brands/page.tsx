@@ -454,6 +454,12 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedStyle, setSelectedStyle] = useState<string>('All')
   const [availableStyles, setAvailableStyles] = useState<string[]>([])
+  const [isMobile, setIsMobile] = useState(false)
+  const stylePickerRef = useRef<HTMLDivElement>(null)
+  const [isDraggingStyle, setIsDraggingStyle] = useState(false)
+  const [dragStartX, setDragStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [currentScrollPosition, setCurrentScrollPosition] = useState(0)
   
   // Style name mapping for display
   const styleDisplayNames: Record<string, string> = {
@@ -469,9 +475,28 @@ export default function BrandsPage() {
     'Culture/Character/Anime': 'CULTURE / ANIME'
   }
   
+  // Style description mapping
+  const styleDescriptions: Record<string, string> = {
+    'Core Street': 'Clean logos, everyday fits, pure city street basics.',
+    'Hip-Hop/Urban': 'Rappers, block parties, heavy bass and late-night corners.',
+    'Sports/Athleisure': 'Hoops, tracks, fast breaks – game-day street heat.',
+    'Retro/Vintage/Y2K': 'VHS grain, chrome logos, 90s–00s nostalgia turned up.',
+    'Techwear/Futuristic': 'Neon shadows, utility straps, future-city street armor.',
+    'Luxury/Mode Street': 'Dark tailoring, quiet flex, runway attitude on the block.',
+    'Grunge/Punk/Rock': 'Distorted prints, rips, chaos from underground shows.',
+    'Minimal/Normcore': 'Soft tones, small details, don\'t-try-too-hard street fits.',
+    'Art/Graphic Driven': 'Big central artwork, gallery pieces printed on cotton.',
+    'Culture/Character/Anime': 'Characters, panels, stories ripped from anime and pop culture'
+  }
+  
   const getStyleDisplayName = (style: string | null | undefined): string => {
     if (!style) return ''
     return styleDisplayNames[style] || style
+  }
+  
+  const getStyleDescription = (style: string | null | undefined): string => {
+    if (!style || style === 'All') return ''
+    return styleDescriptions[style] || ''
   }
   const [selectedDot, setSelectedDot] = useState<number | null>(null)
   const topRowRef = useRef<HTMLDivElement>(null)
@@ -842,6 +867,16 @@ export default function BrandsPage() {
     dragOffset: 0
   })
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 640) // sm breakpoint
+    }
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -983,6 +1018,322 @@ export default function BrandsPage() {
     }
   }, [brands, selectedStyle])
 
+  // Helper function to calculate item width based on distance from center
+  const getItemWidth = (distance: number): number => {
+    if (distance === 0) return 180 // Center item - larger
+    if (distance === 1) return 80  // Adjacent items - smaller
+    return 60 // Other items - even smaller
+  }
+
+  // Helper function to calculate cumulative width up to a given index
+  // baseIndex: the index of the currently selected/centered item
+  const getCumulativeWidth = (targetIndex: number, allStyles: string[], baseIndex: number): number => {
+    let cumulativeWidth = 0
+    for (let i = 0; i < targetIndex; i++) {
+      const distance = Math.abs(i - baseIndex)
+      cumulativeWidth += getItemWidth(distance)
+    }
+    return cumulativeWidth
+  }
+
+  // Scroll to selected style in mobile picker (with loop support)
+  useEffect(() => {
+    if (isMobile && stylePickerRef.current && !isDraggingStyle) {
+      const allStyles = ['All', ...availableStyles]
+      const selectedIndex = allStyles.indexOf(selectedStyle)
+      if (selectedIndex !== -1) {
+        const containerWidth = stylePickerRef.current.offsetWidth
+        const centerItemWidth = getItemWidth(0) // 180px
+        // Add offset for the duplicate first item at the beginning
+        const firstItemWidth = getItemWidth(0) // 180px
+        // Calculate cumulative width up to selected index (using selectedIndex as base)
+        const cumulativeWidth = getCumulativeWidth(selectedIndex, allStyles, selectedIndex)
+        // Add the duplicate item width at the beginning
+        const scrollPosition = firstItemWidth + cumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
+        stylePickerRef.current.scrollTo({
+          left: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [selectedStyle, availableStyles, isMobile, isDraggingStyle])
+
+  // Update selected style based on scroll position (always center)
+  // This function finds which item is at the center based on scroll position (with loop support)
+  const findCenterItem = (scrollLeft: number, containerWidth: number, allStyles: string[], currentSelectedIndex: number): number => {
+    const centerPosition = scrollLeft + containerWidth / 2
+    // Account for the duplicate first item at the beginning
+    const firstItemWidth = getItemWidth(0) // 180px
+    let cumulativeWidth = firstItemWidth // Start after the duplicate
+    
+    for (let i = 0; i < allStyles.length; i++) {
+      const distance = Math.abs(i - currentSelectedIndex)
+      const itemWidth = getItemWidth(distance)
+      
+      if (centerPosition >= cumulativeWidth && centerPosition < cumulativeWidth + itemWidth) {
+        return i
+      }
+      cumulativeWidth += itemWidth
+    }
+    
+    // Fallback: find closest item
+    let minDistance = Infinity
+    let closestIndex = 0
+    cumulativeWidth = firstItemWidth
+    
+    for (let i = 0; i < allStyles.length; i++) {
+      const distance = Math.abs(i - currentSelectedIndex)
+      const itemWidth = getItemWidth(distance)
+      const itemCenter = cumulativeWidth + itemWidth / 2
+      const distanceFromCenter = Math.abs(centerPosition - itemCenter)
+      
+      if (distanceFromCenter < minDistance) {
+        minDistance = distanceFromCenter
+        closestIndex = i
+      }
+      cumulativeWidth += itemWidth
+    }
+    
+    return closestIndex
+  }
+
+  // Get styles at different positions based on scroll position
+  const getStylesAtPositions = (scrollLeft: number, containerWidth: number): { center: string; left: string; right: string } => {
+    const allStyles = ['All', ...availableStyles]
+    const centerPosition = scrollLeft + containerWidth / 2
+    const leftPosition = scrollLeft + containerWidth / 6
+    const rightPosition = scrollLeft + containerWidth * 5 / 6
+    
+    const firstItemWidth = getItemWidth(0) // 180px
+    
+    const findStyleAtPosition = (position: number): string => {
+      let cumulativeWidth = firstItemWidth
+      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+      
+      for (let i = 0; i < allStyles.length; i++) {
+        const distance = Math.abs(i - currentSelectedIndex)
+        const itemWidth = getItemWidth(distance)
+        
+        if (position >= cumulativeWidth && position < cumulativeWidth + itemWidth) {
+          return allStyles[i]
+        }
+        cumulativeWidth += itemWidth
+      }
+      
+      // Fallback
+      let minDistance = Infinity
+      let closestIndex = 0
+      cumulativeWidth = firstItemWidth
+      
+      for (let i = 0; i < allStyles.length; i++) {
+        const distance = Math.abs(i - currentSelectedIndex)
+        const itemWidth = getItemWidth(distance)
+        const itemCenter = cumulativeWidth + itemWidth / 2
+        const distanceFromPosition = Math.abs(position - itemCenter)
+        
+        if (distanceFromPosition < minDistance) {
+          minDistance = distanceFromPosition
+          closestIndex = i
+        }
+        cumulativeWidth += itemWidth
+      }
+      
+      return allStyles[closestIndex]
+    }
+    
+    return {
+      center: findStyleAtPosition(centerPosition),
+      left: findStyleAtPosition(leftPosition),
+      right: findStyleAtPosition(rightPosition)
+    }
+  }
+
+  // Update selected style and scroll position (always center) - real-time updates
+  useEffect(() => {
+    if (!isMobile || !stylePickerRef.current) return
+
+    let rafId: number | null = null
+    let lastSelectedIndex = -1
+
+    const handleScroll = () => {
+      if (!stylePickerRef.current) return
+      
+      // Use requestAnimationFrame for smooth real-time updates
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+      
+      rafId = requestAnimationFrame(() => {
+        if (!stylePickerRef.current) return
+        
+        const scrollLeft = stylePickerRef.current.scrollLeft
+        const containerWidth = stylePickerRef.current.offsetWidth
+        const allStyles = ['All', ...availableStyles]
+        const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+        
+        // Update scroll position for smooth text movement
+        setCurrentScrollPosition(scrollLeft)
+        
+        // Find which item is at the center
+        const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+        
+        if (centerIndex !== lastSelectedIndex && centerIndex >= 0 && centerIndex < allStyles.length) {
+          lastSelectedIndex = centerIndex
+          const newStyle = allStyles[centerIndex]
+          if (newStyle !== selectedStyle) {
+            setSelectedStyle(newStyle)
+          }
+        }
+      })
+    }
+
+    const container = stylePickerRef.current
+    container.addEventListener('scroll', handleScroll, { passive: true })
+    
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+      if (rafId) {
+        cancelAnimationFrame(rafId)
+      }
+    }
+  }, [isMobile, availableStyles, selectedStyle])
+
+  // Handle style picker drag
+  const handleStylePickerMouseDown = (e: React.MouseEvent) => {
+    if (!stylePickerRef.current) return
+    setIsDraggingStyle(true)
+    setDragStartX(e.pageX - stylePickerRef.current.offsetLeft)
+    setScrollLeft(stylePickerRef.current.scrollLeft)
+  }
+
+  const handleStylePickerMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingStyle || !stylePickerRef.current) return
+    e.preventDefault()
+    const x = e.pageX - stylePickerRef.current.offsetLeft
+    const walk = (x - dragStartX) * 1.2 // Further reduced for smoother scrolling
+    stylePickerRef.current.scrollLeft = scrollLeft - walk
+    
+    // Update scroll position for smooth text movement
+    setCurrentScrollPosition(stylePickerRef.current.scrollLeft)
+    
+    // Update selected style based on center position while dragging (real-time)
+    const currentScrollLeft = stylePickerRef.current.scrollLeft
+    const containerWidth = stylePickerRef.current.offsetWidth
+    const allStyles = ['All', ...availableStyles]
+    const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Find which item is at the center
+    const centerIndex = findCenterItem(currentScrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    
+    if (centerIndex >= 0 && centerIndex < allStyles.length) {
+      const newStyle = allStyles[centerIndex]
+      if (newStyle !== selectedStyle) {
+        setSelectedStyle(newStyle)
+      }
+    }
+  }
+
+  const handleStylePickerMouseUp = () => {
+    setIsDraggingStyle(false)
+    // Snap to center style with smooth animation (with loop support)
+    if (stylePickerRef.current) {
+      const scrollLeft = stylePickerRef.current.scrollLeft
+      const containerWidth = stylePickerRef.current.offsetWidth
+      const allStyles = ['All', ...availableStyles]
+      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+      
+      // Find which item is at the center
+      const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+      
+      if (centerIndex >= 0 && centerIndex < allStyles.length) {
+        const newStyle = allStyles[centerIndex]
+        if (newStyle !== selectedStyle) {
+          setSelectedStyle(newStyle)
+        }
+        // Smooth scroll to center using cumulative width (with loop offset)
+        const firstItemWidth = getItemWidth(0) // 180px
+        const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
+        const centerItemWidth = getItemWidth(0) // 180px
+        const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
+        stylePickerRef.current.scrollTo({
+          left: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        })
+      }
+    }
+  }
+
+  const handleStylePickerTouchStart = (e: React.TouchEvent) => {
+    if (!stylePickerRef.current) return
+    setIsDraggingStyle(true)
+    setDragStartX(e.touches[0].pageX - stylePickerRef.current.offsetLeft)
+    setScrollLeft(stylePickerRef.current.scrollLeft)
+  }
+
+  const handleStylePickerTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingStyle || !stylePickerRef.current) return
+    const x = e.touches[0].pageX - stylePickerRef.current.offsetLeft
+    const walk = (x - dragStartX) * 1.2 // Further reduced for smoother scrolling
+    stylePickerRef.current.scrollLeft = scrollLeft - walk
+    
+    // Update scroll position for smooth text movement
+    setCurrentScrollPosition(stylePickerRef.current.scrollLeft)
+    
+    // Update selected style based on center position while dragging (real-time)
+    const currentScrollLeft = stylePickerRef.current.scrollLeft
+    const containerWidth = stylePickerRef.current.offsetWidth
+    const allStyles = ['All', ...availableStyles]
+    const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+    
+    // Find which item is at the center
+    const centerIndex = findCenterItem(currentScrollLeft, containerWidth, allStyles, currentSelectedIndex)
+    
+    if (centerIndex >= 0 && centerIndex < allStyles.length) {
+      const newStyle = allStyles[centerIndex]
+      if (newStyle !== selectedStyle) {
+        setSelectedStyle(newStyle)
+        // Small vibration when style changes during scroll on mobile
+        if ('vibrate' in navigator) {
+          navigator.vibrate(5) // Very light vibration
+        }
+      }
+    }
+  }
+
+  const handleStylePickerTouchEnd = () => {
+    setIsDraggingStyle(false)
+    // Snap to center style with smooth animation and vibration (with loop support)
+    if (stylePickerRef.current) {
+      const scrollLeft = stylePickerRef.current.scrollLeft
+      const containerWidth = stylePickerRef.current.offsetWidth
+      const allStyles = ['All', ...availableStyles]
+      const currentSelectedIndex = allStyles.indexOf(selectedStyle)
+      
+      // Find which item is at the center
+      const centerIndex = findCenterItem(scrollLeft, containerWidth, allStyles, currentSelectedIndex)
+      
+      if (centerIndex >= 0 && centerIndex < allStyles.length) {
+        const newStyle = allStyles[centerIndex]
+        if (newStyle !== selectedStyle) {
+          setSelectedStyle(newStyle)
+        }
+        // Smooth scroll to center using cumulative width (with loop offset)
+        const firstItemWidth = getItemWidth(0) // 180px
+        const newCumulativeWidth = getCumulativeWidth(centerIndex, allStyles, centerIndex)
+        const centerItemWidth = getItemWidth(0) // 180px
+        const scrollPosition = firstItemWidth + newCumulativeWidth - (containerWidth / 2) + (centerItemWidth / 2)
+        stylePickerRef.current.scrollTo({
+          left: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        })
+        // Small vibration on snap
+        if ('vibrate' in navigator) {
+          navigator.vibrate(10) // Light vibration on snap
+        }
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-black">
@@ -1077,19 +1428,229 @@ export default function BrandsPage() {
           <h2 className="text-2xl font-bold text-white mb-3">PICK YOUR STREET VIBE</h2>
           
           {/* Style Filter */}
-          <div className="flex items-center gap-4 mb-4">
-            <select
-              value={selectedStyle}
-              onChange={(e) => setSelectedStyle(e.target.value)}
-              className="border border-white/20 bg-black/20 backdrop-blur-md text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
-            >
-              <option value="All" className="bg-black">ALL</option>
-              {availableStyles.map(style => (
-                <option key={style} value={style} className="bg-black">{getStyleDisplayName(style)}</option>
-              ))}
-            </select>
-            <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
-          </div>
+          {/* Mobile: Roulette style picker */}
+          {isMobile ? (
+            <div className="mb-4">
+              <div 
+                ref={stylePickerRef}
+                className="relative overflow-x-auto overflow-y-hidden hide-scrollbar h-14"
+                style={{ 
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                  cursor: isDraggingStyle ? 'grabbing' : 'grab',
+                  scrollBehavior: 'smooth'
+                }}
+                onMouseDown={handleStylePickerMouseDown}
+                onMouseMove={handleStylePickerMouseMove}
+                onMouseUp={handleStylePickerMouseUp}
+                onMouseLeave={handleStylePickerMouseUp}
+                onTouchStart={handleStylePickerTouchStart}
+                onTouchMove={handleStylePickerTouchMove}
+                onTouchEnd={handleStylePickerTouchEnd}
+                onScroll={(e) => {
+                  // Handle loop scrolling
+                  if (!stylePickerRef.current || isDraggingStyle) return
+                  const container = stylePickerRef.current
+                  const scrollLeft = container.scrollLeft
+                  const scrollWidth = container.scrollWidth
+                  const containerWidth = container.offsetWidth
+                  const allStyles = ['All', ...availableStyles]
+                  
+                  // If scrolled to the end, jump to the beginning (with offset)
+                  if (scrollLeft >= scrollWidth - containerWidth - 10) {
+                    const firstItemWidth = getItemWidth(0) // 180px
+                    container.scrollLeft = firstItemWidth
+                  }
+                  // If scrolled to the beginning (before first duplicate), jump to the end
+                  else if (scrollLeft < 10) {
+                    const lastItemWidth = getItemWidth(0) // 180px
+                    container.scrollLeft = scrollWidth - containerWidth - lastItemWidth
+                  }
+                }}
+              >
+                {/* Transparent scrollable area for touch interaction */}
+                <div className="flex items-center h-full" style={{ width: 'max-content' }}>
+                  {/* Add duplicate of last item at the beginning for seamless loop */}
+                  {(() => {
+                    const allStyles = ['All', ...availableStyles]
+                    const lastStyle = allStyles[allStyles.length - 1]
+                    const lastIndex = allStyles.length - 1
+                    const distance = Math.abs(0 - lastIndex)
+                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    
+                    return (
+                      <div
+                        key={`loop-start-${lastStyle}`}
+                        className="flex-shrink-0 flex items-center justify-center h-full"
+                        style={{
+                          width: `${itemWidth}px`,
+                          scrollSnapAlign: 'center'
+                        }}
+                      >
+                        <div className="text-center px-2 opacity-0">
+                          <div className="text-xs">placeholder</div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                  
+                  {['All', ...availableStyles].map((style, index) => {
+                    const allStyles = ['All', ...availableStyles]
+                    const currentIndex = allStyles.indexOf(selectedStyle)
+                    const distance = Math.abs(index - currentIndex)
+                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    
+                    return (
+                      <div
+                        key={style}
+                        className="flex-shrink-0 flex items-center justify-center h-full"
+                        style={{
+                          width: `${itemWidth}px`,
+                          scrollSnapAlign: 'center',
+                          transition: isDraggingStyle ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                        onClick={() => {
+                          if (!isDraggingStyle) {
+                            setSelectedStyle(style)
+                            // Small vibration on tap
+                            if ('vibrate' in navigator) {
+                              navigator.vibrate(10)
+                            }
+                          }
+                        }}
+                      >
+                        <div className="text-center px-2 opacity-0">
+                          <div className="text-xs">placeholder</div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  
+                  {/* Add duplicate of first item at the end for seamless loop */}
+                  {(() => {
+                    const allStyles = ['All', ...availableStyles]
+                    const firstStyle = allStyles[0]
+                    const firstIndex = 0
+                    const lastIndex = allStyles.length - 1
+                    const distance = Math.abs(lastIndex - firstIndex)
+                    const itemWidth = distance === 0 ? 180 : distance === 1 ? 80 : 60
+                    
+                    return (
+                      <div
+                        key={`loop-end-${firstStyle}`}
+                        className="flex-shrink-0 flex items-center justify-center h-full"
+                        style={{
+                          width: `${itemWidth}px`,
+                          scrollSnapAlign: 'center'
+                        }}
+                      >
+                        <div className="text-center px-2 opacity-0">
+                          <div className="text-xs">placeholder</div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+                
+                {/* Dynamic overlay: center 2/3 shows current style, left/right 1/6 show next style */}
+                {/* When dragging: text moves smoothly based on scroll position */}
+                {/* When not dragging: text is fixed based on selected style */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  {(() => {
+                    const allStyles = ['All', ...availableStyles]
+                    const containerWidth = stylePickerRef.current?.offsetWidth || 0
+                    
+                    let centerStyle: string
+                    let leftStyle: string
+                    let rightStyle: string
+                    
+                    if (isDraggingStyle && stylePickerRef.current) {
+                      // When dragging: calculate styles based on scroll position
+                      const styles = getStylesAtPositions(currentScrollPosition, containerWidth)
+                      centerStyle = styles.center
+                      leftStyle = styles.left
+                      rightStyle = styles.right
+                    } else {
+                      // When not dragging: use fixed styles based on selected style
+                      const currentIndex = allStyles.indexOf(selectedStyle)
+                      const prevIndex = currentIndex > 0 ? currentIndex - 1 : allStyles.length - 1
+                      const nextIndex = currentIndex < allStyles.length - 1 ? currentIndex + 1 : 0
+                      centerStyle = selectedStyle
+                      leftStyle = allStyles[prevIndex]
+                      rightStyle = allStyles[nextIndex]
+                    }
+                    
+                    return (
+                      <>
+                        {/* Left 1/6 - Previous/Left style */}
+                        <div 
+                          className="absolute left-0 w-1/6 h-full flex items-center justify-center"
+                          style={{
+                            transition: isDraggingStyle ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          <div className="text-xs text-gray-500 text-center">
+                            {leftStyle === 'All' ? 'ALL' : getStyleDisplayName(leftStyle)}
+                          </div>
+                        </div>
+                        
+                        {/* Center 2/3 - Current style */}
+                        <div 
+                          className="absolute left-1/6 w-2/3 h-full flex items-center justify-center"
+                          style={{
+                            transition: isDraggingStyle ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          <div className="text-base font-bold text-white text-center">
+                            {centerStyle === 'All' ? 'ALL' : getStyleDisplayName(centerStyle)}
+                          </div>
+                        </div>
+                        
+                        {/* Right 1/6 - Next/Right style */}
+                        <div 
+                          className="absolute right-0 w-1/6 h-full flex items-center justify-center"
+                          style={{
+                            transition: isDraggingStyle ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          <div className="text-xs text-gray-500 text-center">
+                            {rightStyle === 'All' ? 'ALL' : getStyleDisplayName(rightStyle)}
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
+              </div>
+              <div className="text-center mt-2">
+                <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
+              </div>
+            </div>
+          ) : (
+            /* Desktop: Traditional select */
+            <div className="flex items-center gap-4 mb-4">
+              <select
+                value={selectedStyle}
+                onChange={(e) => setSelectedStyle(e.target.value)}
+                className="border border-white/20 bg-black/20 backdrop-blur-md text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm px-3 py-2"
+              >
+                <option value="All" className="bg-black">ALL</option>
+                {availableStyles.map(style => (
+                  <option key={style} value={style} className="bg-black">{getStyleDisplayName(style)}</option>
+                ))}
+              </select>
+              <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
+            </div>
+          )}
+          
+          {/* Style Description */}
+          {selectedStyle !== 'All' && getStyleDescription(selectedStyle) && (
+            <div className="mb-4">
+              <p className="text-sm text-gray-300 leading-relaxed">
+                {getStyleDescription(selectedStyle)}
+              </p>
+            </div>
+          )}
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
           <div className="grid grid-cols-2 sm:hidden gap-2">

@@ -6,24 +6,20 @@ export default function AboutLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <style jsx global>{`
-          body {
-            margin: 0;
-            padding: 0;
-            background: #000000;
-            color: white;
-            font-family: Helvetica, Arial, sans-serif;
-          }
-          * {
-            box-sizing: border-box;
-          }
-        `}</style>
-      </head>
-      <body>
-        {children}
-      </body>
-    </html>
+    <>
+      <style jsx global>{`
+        body {
+          margin: 0;
+          padding: 0;
+          background: #000000;
+          color: white;
+          font-family: Helvetica, Arial, sans-serif;
+        }
+        * {
+          box-sizing: border-box;
+        }
+      `}</style>
+      {children}
+    </>
   );
 }

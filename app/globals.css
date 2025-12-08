@@ -195,3 +195,13 @@ body {
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
   opacity: 1;
 }
+
+/* Hide scrollbar for style picker */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

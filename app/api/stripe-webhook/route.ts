@@ -628,6 +628,57 @@ const billingName =
       // Printful統合が無効化されている旨をログに記録
       console.log('⚠️ Printful integration is temporarily disabled for deployment')
 
+      // ====== カートから購入商品を削除 ======
+      try {
+        if (itemsPayload.length > 0 && (clerkId || sessionId)) {
+          console.log('Removing purchased items from cart...')
+          console.log('Clerk ID:', clerkId)
+          console.log('Session ID:', sessionId)
+          console.log('Items to remove:', itemsPayload.length)
+
+          // 購入された各商品をカートから削除
+          for (const item of itemsPayload) {
+            if (!item.product_id) {
+              console.log('Skipping item without product_id:', item.product_name)
+              continue
+            }
+
+            // カートアイテムを削除（product_id, size, color が一致するもの）
+            const deleteQuery = clerkId
+              ? supabaseAdmin
+                  .from('cart_items')
+                  .delete()
+                  .eq('clerk_id', clerkId)
+                  .eq('product_id', item.product_id)
+                  .eq('size', item.size || null)
+                  .eq('color', item.color || null)
+              : supabaseAdmin
+                  .from('cart_items')
+                  .delete()
+                  .eq('session_id', sessionId)
+                  .eq('product_id', item.product_id)
+                  .eq('size', item.size || null)
+                  .eq('color', item.color || null)
+
+            const { error: deleteError, data: deleteData } = await deleteQuery
+
+            if (deleteError) {
+              console.error(`Error removing cart item for product ${item.product_id}:`, deleteError)
+            } else {
+              console.log(`Successfully removed cart item: ${item.product_name} (${item.size || 'N/A'}, ${item.color || 'N/A'})`)
+            }
+          }
+
+          console.log('✅ Cart cleanup completed')
+        } else {
+          console.log('Skipping cart cleanup: no items or no user identifier')
+        }
+      } catch (cartErr) {
+        // カート削除のエラーは注文処理を中断しない
+        console.error('Error removing items from cart:', cartErr)
+        console.log('⚠️ Continuing webhook processing despite cart cleanup error')
+      }
+
       // ====== 購入確認メール ======
       try {
         if (customerEmail) {
