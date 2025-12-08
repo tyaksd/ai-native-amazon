@@ -16,7 +16,7 @@ export default function ConditionalHeaderNoClerk() {
   }
 
   return (
-    <header id="site-header" className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)'}}>
+    <header id="site-header" className="fixed top-0 left-0 right-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)'}}>
       <div className="mx-auto max-w-7xl px-4 sm:px-10 py-[10px] flex items-center gap-4 justify-center md:justify-between relative">
         <MobileMenu />
         <LogoLink />
