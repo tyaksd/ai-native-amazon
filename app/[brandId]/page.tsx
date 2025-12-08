@@ -276,62 +276,63 @@ export default function BrandPage({ params }: PageProps) {
           />
         </div>
         
-        {/* Navigation Buttons */}
-        <div className="flex items-center gap-2 transform translate-y-2 md:translate-y-4">
-          {/* Previous Brand Navigation Button */}
-          {prevBrand && (
-            <Link 
-              href={`/${prevBrand.id}`}
-              className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
-              aria-label={`Go to ${prevBrand.name}`}
-            >
-              <svg 
-                className="w-6 h-6 text-white drop-shadow-lg group-hover:-translate-x-1 transition-transform" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
+        {/* Navigation Buttons and Follow Button */}
+        <div className="flex flex-col items-center gap-2 transform translate-y-2 md:translate-y-4">
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Previous Brand Navigation Button */}
+            {prevBrand && (
+              <Link 
+                href={`/${prevBrand.id}`}
+                className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+                aria-label={`Go to ${prevBrand.name}`}
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M15 19l-7-7 7-7" 
-                />
-              </svg>
-            </Link>
-          )}
+                <svg 
+                  className="w-6 h-6 text-white drop-shadow-lg group-hover:-translate-x-1 transition-transform" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M15 19l-7-7 7-7" 
+                  />
+                </svg>
+              </Link>
+            )}
+            
+            {/* Next Brand Navigation Button */}
+            {nextBrand && (
+              <Link 
+                href={`/${nextBrand.id}`}
+                className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+                aria-label={`Go to ${nextBrand.name}`}
+              >
+                <svg 
+                  className="w-6 h-6 text-white drop-shadow-lg group-hover:translate-x-1 transition-transform" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M9 5l7 7-7 7" 
+                  />
+                </svg>
+              </Link>
+            )}
+          </div>
           
-          {/* Next Brand Navigation Button */}
-          {nextBrand && (
-            <Link 
-              href={`/${nextBrand.id}`}
-              className="flex items-center justify-center w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
-              aria-label={`Go to ${nextBrand.name}`}
-            >
-              <svg 
-                className="w-6 h-6 text-white drop-shadow-lg group-hover:translate-x-1 transition-transform" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M9 5l7 7-7 7" 
-                />
-              </svg>
-            </Link>
-          )}
-        </div>
-        
-        {/* Follow Button */}
-        {isUserLoaded && user?.id && (
-          <div className="flex justify-center mt-4">
+          {/* Follow Button */}
+          {isUserLoaded && user?.id && (
             <button
               onClick={handleToggleFollow}
               disabled={isFollowLoading}
-              className={`px-6 py-2 rounded-lg backdrop-blur-md border transition-all duration-200 hover:scale-105 font-medium ${
+              className={`px-4 py-1.5 rounded-lg backdrop-blur-md border transition-all duration-200 hover:scale-105 text-sm font-medium ${
                 isFollowed
                   ? 'bg-white/90 border-white/20 text-black hover:bg-white'
                   : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
@@ -357,12 +358,12 @@ export default function BrandPage({ params }: PageProps) {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  {isFollowed ? 'Unfollow' : '+ Follow'}
+                  {isFollowed ? 'Unfollow' : 'Follow'}
                 </span>
               )}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
