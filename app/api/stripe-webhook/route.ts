@@ -403,9 +403,11 @@ const billingName =
         lineItems = fetched.data as unknown as Stripe.LineItem[]
       }
 
-      // Get Clerk user ID from metadata
+      // Get Clerk user ID and session ID from metadata
       const clerkId = session.metadata?.clerk_id || null
+      const sessionId = session.metadata?.session_id || null
       console.log('Clerk ID from metadata:', clerkId)
+      console.log('Session ID from metadata:', sessionId)
 
       // === Order を作成 ===
       console.log('Creating order with data:', {
@@ -419,6 +421,7 @@ const billingName =
         billing_address: billingAddress,
         billing_name: billingName,
         clerk_id: clerkId,
+        session_id: sessionId,
       })
       
       // Check if order already exists to prevent duplicates
@@ -447,7 +450,8 @@ const billingName =
           shipping_name: shippingName,
           billing_address: billingAddress,
           billing_name: billingName,
-          clerk_id: clerkId, // Include Clerk user ID
+          clerk_id: clerkId || null, // Include Clerk user ID if authenticated
+          session_id: clerkId ? null : (sessionId || null), // Include session ID if not logged in
         })
         .select()
         .single()
@@ -470,6 +474,8 @@ const billingName =
         quantity: number
         size: string | null
         color: string | null
+        clerk_id: string | null
+        session_id: string | null
       }
 
       let itemsPayload: ItemPayload[] = []
@@ -500,7 +506,8 @@ const billingName =
           quantity: Number(ci.quantity ?? 1),
           size: ci.size ? String(ci.size) : null,
           color: ci.color ? String(ci.color) : null,
-          clerk_id: clerkId, // Include Clerk user ID
+          clerk_id: clerkId || null, // Include Clerk user ID if authenticated
+          session_id: clerkId ? null : (sessionId || null), // Include session ID if not logged in
         }))
       } else {
         // StripeのLineItemから計算
@@ -520,7 +527,8 @@ const billingName =
             quantity,
             size: metadata?.size ?? null,
             color: metadata?.color ?? null,
-            clerk_id: clerkId, // Include Clerk user ID
+            clerk_id: clerkId || null, // Include Clerk user ID if authenticated
+            session_id: clerkId ? null : (sessionId || null), // Include session ID if not logged in
           }
         })
       }

@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth()
 
     const body = await req.json().catch(() => ({}))
-    const { items } = body as {
+    const { items, session_id } = body as {
       items?: {
         id?: string
         name: string
@@ -134,6 +134,7 @@ export async function POST(req: NextRequest) {
         size?: string | null
         color?: string | null
       }[]
+      session_id?: string
     }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -183,6 +184,7 @@ export async function POST(req: NextRequest) {
           }))
         ),
         clerk_id: userId || '', // Include Clerk user ID if authenticated
+        session_id: session_id || '', // Include session ID for non-logged-in users
       },
     })
 

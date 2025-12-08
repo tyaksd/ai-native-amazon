@@ -78,4 +78,4 @@ stripe trigger payment_intent.succeeded
 
 カート消せない問題
 
-ordersにもclerk_idが保存されていない
+orders　order itemsにもclerk_idが保存されていない

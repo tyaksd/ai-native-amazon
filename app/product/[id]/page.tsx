@@ -810,10 +810,16 @@ export default function ProductDetail({ params }: PageProps) {
                       return
                     }
 
+                    // Get session_id for non-logged-in users
+                    let sessionId: string | undefined = undefined
+                    if (!user?.id && typeof window !== 'undefined') {
+                      sessionId = localStorage.getItem('session_id') || undefined
+                    }
+
                     const res = await fetch('/api/checkout_sessions', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ items })
+                      body: JSON.stringify({ items, session_id: sessionId })
                     })
                     const data = await res.json()
                     if (!res.ok || !data?.url) {
