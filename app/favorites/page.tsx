@@ -7,7 +7,6 @@ import { useUser } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase'
 import { getProductById, Product } from '@/lib/data'
 import FavoriteButton from '@/app/components/FavoriteButton'
-import { saveCartItemToDB } from '@/lib/cart'
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -18,8 +17,6 @@ export default function FavoritesPage() {
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showAdded, setShowAdded] = useState(false)
-  const [addedMessage, setAddedMessage] = useState('')
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -103,63 +100,6 @@ export default function FavoritesPage() {
     setFavoriteProducts(prev => prev.filter(product => product.id !== productId))
   }
 
-  const addToCart = async (product: Product) => {
-    try {
-      // Validate product ID before adding to cart
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      if (!uuidRegex.test(product.id)) {
-        console.error('Invalid product ID format:', product.id)
-        setAddedMessage('Invalid product ID')
-        setShowAdded(true)
-        setTimeout(() => setShowAdded(false), 2000)
-        return
-      }
-
-      const cartItem = {
-        id: product.id,
-        quantity: 1,
-        size: null,
-        color: null,
-      };
-
-      // Save to database if logged in
-      if (user?.id) {
-        await saveCartItemToDB(user.id, cartItem);
-      } else {
-        // Save to localStorage for non-logged-in users
-        type CartItemLocal = { id: string; quantity: number; size?: string | null; color?: string | null };
-        const cart: CartItemLocal[] = JSON.parse(localStorage.getItem('cart') || '[]');
-        
-        // Clean up any invalid cart items before processing
-        const validCart = cart.filter(item => uuidRegex.test(item.id))
-        if (validCart.length !== cart.length) {
-          console.log('Removed invalid cart items')
-          localStorage.setItem('cart', JSON.stringify(validCart))
-        }
-        
-        // Check if product already exists in cart
-        const existingItem = validCart.find((item) => item.id === product.id);
-        
-        if (existingItem) {
-          existingItem.quantity += 1;
-        } else {
-          validCart.push(cartItem);
-        }
-        
-        localStorage.setItem('cart', JSON.stringify(validCart));
-      }
-
-      setAddedMessage(`Added ${product.name} to cart`);
-      setShowAdded(true);
-      setTimeout(() => setShowAdded(false), 2000);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      setAddedMessage('Failed to add to cart');
-      setShowAdded(true);
-      setTimeout(() => setShowAdded(false), 2000);
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-black">
@@ -194,13 +134,6 @@ export default function FavoritesPage() {
 
   return (
     <div className="px-3 sm:px-10 py-6">
-      {/* Added to Cart Banner */}
-      {showAdded && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg z-50">
-          {addedMessage}
-        </div>
-      )}
-      
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Favorites</h1>
         <p className="text-gray-600">{favoriteProducts.length} item(s) in your favorites</p>
@@ -255,18 +188,13 @@ export default function FavoritesPage() {
                 </Link>
               </div>
               
-              {/* Add to Cart Button */}
-              <button
-                onClick={() => addToCart(product)}
+              {/* Choose Color & Size Button */}
+              <Link
+                href={`/product/${product.id}`}
                 className="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-xs sm:text-sm font-medium"
               >
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 3.75a.75.75 0 000 1.5h1.862c.27 0 .505.181.574.442l2.14 8.023A2.25 2.25 0 008.996 15h7.258a2.25 2.25 0 002.17-1.607l1.6-5.6a.75.75 0 00-.72-.968H6.615l-.36-1.35A2.25 2.25 0 004.112 3.75H2.25z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9.75 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                </svg>
-                <span className="hidden sm:inline">Add to Cart</span>
-                <span className="sm:hidden">Add</span>
-              </button>
+                <span>Choose Color & Size</span>
+              </Link>
             </div>
           </div>
         ))}
