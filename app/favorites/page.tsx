@@ -29,7 +29,7 @@ export default function FavoritesPage() {
       try {
         setLoading(true)
         
-        // Get user ID: prefer Clerk ID if logged in, otherwise use user_id (for favorites)
+        // Get user ID: prefer Clerk ID if logged in, otherwise use session_id
         let userId: string
         const isLoggedIn = !!user?.id
         
@@ -37,16 +37,16 @@ export default function FavoritesPage() {
           // Use Clerk ID if logged in
           userId = user.id
         } else {
-          // Fallback to user_id from localStorage for non-logged-in users (for favorites)
-          let storedUserId = localStorage.getItem('user_id')
-          if (!storedUserId) {
-            storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-            localStorage.setItem('user_id', storedUserId)
+          // Fallback to session_id from localStorage for non-logged-in users (same as cart)
+          let sessionId = localStorage.getItem('session_id')
+          if (!sessionId) {
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            localStorage.setItem('session_id', sessionId)
           }
-          userId = storedUserId
+          userId = sessionId
         }
         
-        // Get favorite product IDs - use clerk_id if logged in, otherwise user_id
+        // Get favorite product IDs - use clerk_id if logged in, otherwise session_id
         const query = isLoggedIn
           ? supabase
               .from('favorites')
@@ -56,7 +56,7 @@ export default function FavoritesPage() {
           : supabase
               .from('favorites')
               .select('product_id')
-              .eq('user_id', userId)
+              .eq('session_id', userId)
               .order('created_at', { ascending: false })
         
         const { data: favorites, error: favoritesError } = await query

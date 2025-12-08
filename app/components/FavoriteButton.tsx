@@ -19,7 +19,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
   const [showMessage, setShowMessage] = useState(false)
   const [message, setMessage] = useState('')
 
-  // Get user ID: prefer Clerk ID if logged in, otherwise use user_id (for favorites)
+  // Get user ID: prefer Clerk ID if logged in, otherwise use session_id
   const getUserId = useCallback(() => {
     // Use Clerk ID if logged in
     if (user?.id) {
@@ -27,17 +27,17 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
     }
     // Use provided userId if available
     if (userId) return userId
-    // Use user_id for non-logged-in users (for favorites, not session_id)
+    // Use session_id for non-logged-in users (same as cart)
     if (typeof window !== 'undefined') {
-      let storedUserId = localStorage.getItem('user_id')
-      if (!storedUserId) {
-        storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        localStorage.setItem('user_id', storedUserId)
+      let sessionId = localStorage.getItem('session_id')
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        localStorage.setItem('session_id', sessionId)
       }
-      return storedUserId
+      return sessionId
     }
     // Fallback (should not happen in browser)
-    return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }, [userId, user])
 
   // Check if product is favorited - only if initialFavoriteState is not provided
@@ -52,7 +52,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
         const currentUserId = getUserId()
         const isLoggedIn = !!user?.id
         
-        // Use clerk_id if logged in, otherwise use user_id
+        // Use clerk_id if logged in, otherwise use session_id
         const query = isLoggedIn
           ? supabase
               .from('favorites')
@@ -63,7 +63,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
           : supabase
               .from('favorites')
               .select('id')
-              .eq('user_id', currentUserId)
+              .eq('session_id', currentUserId)
               .eq('product_id', productId)
               .maybeSingle()
 
@@ -102,7 +102,7 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
           : supabase
               .from('favorites')
               .delete()
-              .eq('user_id', currentUserId)
+              .eq('session_id', currentUserId)
               .eq('product_id', productId)
 
         const { error } = await deleteQuery
@@ -121,14 +121,14 @@ export default function FavoriteButton({ productId, userId, className = '', onFa
         }
       } else {
         // Add to favorites
-        // For logged-in users, use clerk_id; for non-logged-in users, use user_id
+        // For logged-in users, use clerk_id; for non-logged-in users, use session_id
         const insertData = isLoggedIn
           ? {
               clerk_id: currentUserId,
               product_id: productId
             }
           : {
-              user_id: currentUserId,
+              session_id: currentUserId,
               product_id: productId
             }
         

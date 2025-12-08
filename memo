@@ -79,6 +79,8 @@ stripe trigger payment_intent.succeeded
 
 heroにめっちゃリアルなAIモデル。
 favotitesにclerk_idが保存されていない
-
+カート消せない問題
 
 ordersにもclerk_idが保存されていない
+
+いいねからカートには追加できない choose color & size
