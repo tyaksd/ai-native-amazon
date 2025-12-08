@@ -138,7 +138,7 @@ function BrandFollowButtonInner({ brandId, className = '', initialFollowState }:
     <button
       onClick={toggleFollow}
       disabled={isLoading}
-      className={`absolute top-2 right-2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-white/50 shadow-lg transition-all duration-200 hover:bg-white hover:scale-110 ${
+      className={`absolute top-2 right-2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg transition-all duration-200 hover:bg-white hover:scale-110 ${
         isFollowed
           ? 'text-black'
           : 'text-white'

@@ -6,6 +6,8 @@ import { useState, useEffect, useMemo, use } from 'react'
 import { getBrandById, getProductsByBrand, getBrands, Brand, Product } from "@/lib/data";
 import FavoriteButton from '@/app/components/FavoriteButton';
 import { useFavorites } from '@/lib/useFavorites';
+import { useUser } from '@clerk/nextjs';
+import { supabase } from '@/lib/supabase';
 
 function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
@@ -17,6 +19,7 @@ type PageProps = {
 
 export default function BrandPage({ params }: PageProps) {
   const resolvedParams = use(params)
+  const { user, isLoaded: isUserLoaded } = useUser()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [items, setItems] = useState<Product[]>([])
   const [allBrands, setAllBrands] = useState<Brand[]>([])
@@ -27,6 +30,8 @@ export default function BrandPage({ params }: PageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [selectedType, setSelectedType] = useState<string>('All')
+  const [isFollowed, setIsFollowed] = useState(false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
   
   // Use the useFavorites hook to manage favorites efficiently
   const { isFavorited, checkFavorites } = useFavorites()
@@ -149,6 +154,76 @@ export default function BrandPage({ params }: PageProps) {
     loadData()
   }, [resolvedParams.brandId, checkFavorites])
 
+  // Check if brand is followed
+  useEffect(() => {
+    if (!isUserLoaded || !user?.id || !brand) {
+      setIsFollowed(false)
+      return
+    }
+
+    const checkFollow = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('brand_follows')
+          .select('id')
+          .eq('clerk_id', user.id)
+          .eq('brand_id', brand.id)
+          .maybeSingle()
+
+        if (error) {
+          console.error('Error checking brand follow:', error)
+          return
+        }
+        
+        setIsFollowed(!!data)
+      } catch (error) {
+        console.error('Error checking brand follow:', error)
+      }
+    }
+
+    checkFollow()
+  }, [brand?.id, user?.id, isUserLoaded])
+
+  const handleToggleFollow = async () => {
+    if (isFollowLoading || !user?.id || !brand) return
+
+    setIsFollowLoading(true)
+    try {
+      if (isFollowed) {
+        // Unfollow brand
+        const { error } = await supabase
+          .from('brand_follows')
+          .delete()
+          .eq('clerk_id', user.id)
+          .eq('brand_id', brand.id)
+
+        if (error) {
+          console.error('Error unfollowing brand:', error)
+        } else {
+          setIsFollowed(false)
+        }
+      } else {
+        // Follow brand
+        const { error } = await supabase
+          .from('brand_follows')
+          .insert({
+            clerk_id: user.id,
+            brand_id: brand.id
+          })
+
+        if (error) {
+          console.error('Error following brand:', error)
+        } else {
+          setIsFollowed(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling brand follow:', error)
+    } finally {
+      setIsFollowLoading(false)
+    }
+  }
+
   // Reset selectedType if it's not available after filters change
   useEffect(() => {
     if (selectedType !== 'All' && !availableTypesAfterFilters.includes(selectedType)) {
@@ -249,6 +324,45 @@ export default function BrandPage({ params }: PageProps) {
             </Link>
           )}
         </div>
+        
+        {/* Follow Button */}
+        {isUserLoaded && user?.id && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={handleToggleFollow}
+              disabled={isFollowLoading}
+              className={`px-6 py-2 rounded-lg backdrop-blur-md border transition-all duration-200 hover:scale-105 font-medium ${
+                isFollowed
+                  ? 'bg-white/90 border-white/20 text-black hover:bg-white'
+                  : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+              } ${isFollowLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              {isFollowLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  {isFollowed ? 'Unfollowing...' : 'Following...'}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  {isFollowed ? 'Unfollow' : '+ Follow'}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
