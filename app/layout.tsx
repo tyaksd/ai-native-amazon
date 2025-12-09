@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Godship",
-    description: "Discover brands you love and their unique products.",
+    description: "The Next-Gen Streetwear Platform",
     images: [
       {
         url: "/gblack.png",
