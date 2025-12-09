@@ -381,11 +381,12 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       
       {/* Brand Logo Space */}
       {!hideHeader && (
-      <div className="relative z-10 px-3 pb-4">
+      <div className="relative z-10  pb-4">
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
-            <div className="flex flex-col items-start gap-3 transform translate-y-8">
-              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+            <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">
+              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden ml-3">
+                
                 <Image 
                   src={brand.icon} 
                   alt={brand.name} 
@@ -393,12 +394,13 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
                   height={100}
                   className="object-cover rounded"
                 />
+ 
               </div>
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
+              <h2 className="text-2xl px-3 font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
               
               {/* Category Navigation Tabs */}
-              <div className="mt-2 w-full">
-                <div className="flex flex-wrap gap-2 border-b border-white/30">
+              <div className=" w-full">
+                <div className="flex flex-wrap gap-2 border-b border-white/30 px-3">
                   <button
                     onClick={() => setSelectedTab('all')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -420,6 +422,153 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
                     New
                   </button>
                 </div>
+              </div>
+              
+              {/* Filters */}
+              <div className="mt-1 w-full">
+                <div className="flex items-center">
+                  <label className="text-sm font-medium text-white px-3">Filter by type:</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
+                  >
+                    <option value="All">All Types</option>
+                    {availableTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+              
+              </div>
+              
+              {/* Products Grid */}
+              <div className="mt-3 w-full">
+                {displayedItems.length === 0 ? (
+                  <div className="text-white text-center py-12 drop-shadow-lg">No products available for this brand.</div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
+                    {displayedItems.map((p, index) => {
+                      // 黒と白を交互に選択する関数
+                      const getImageForProduct = (product: Product, productIndex: number): string | null => {
+                        if (!product.images || product.images.length === 0) {
+                          return null
+                        }
+                        
+                        // 黒と白が利用可能かチェック
+                        if (product.colors && product.colors.length > 0) {
+                          // インデックスに基づいて黒と白を交互に選択
+                          const targetColor = productIndex % 2 === 0 ? 'Black' : 'White'
+                          
+                          // カラー名の正規化（大文字小文字を無視）
+                          const normalizedColors = product.colors.map(c => c.trim())
+                          const blackIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'black')
+                          const whiteIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'white')
+                          
+                          // 黒または白が見つかった場合、対応する画像を使用
+                          if (targetColor === 'Black' && blackIndex >= 0) {
+                            const imageIndex = blackIndex % product.images.length
+                            return product.images[imageIndex]
+                          } else if (targetColor === 'White' && whiteIndex >= 0) {
+                            const imageIndex = whiteIndex % product.images.length
+                            return product.images[imageIndex]
+                          }
+                          
+                          // 交互に選択したいカラーが見つからない場合、もう一方を試す
+                          if (targetColor === 'Black' && whiteIndex >= 0) {
+                            const imageIndex = whiteIndex % product.images.length
+                            return product.images[imageIndex]
+                          } else if (targetColor === 'White' && blackIndex >= 0) {
+                            const imageIndex = blackIndex % product.images.length
+                            return product.images[imageIndex]
+                          }
+                        }
+                        
+                        // フォールバック: 最初の画像を使用
+                        return product.images[0]
+                      }
+                      
+                      const selectedImage = getImageForProduct(p, index)
+                      
+                      return (
+                        <div key={p.id} className="group relative">
+                          <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                            <div className="aspect-square bg-gray-50">
+                              {selectedImage ? (
+                                <Image src={selectedImage} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                  <span className="text-gray-500 text-sm">No image</span>
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                          {p.badge && getBadgeColors(p.badge) && (() => {
+                            const colors = getBadgeColors(p.badge)!
+                            const fontSize = p.badge === 'SECRET' 
+                              ? 'clamp(0.5625rem, 2.25vw, 0.8125rem)' 
+                              : 'clamp(0.625rem, 2.5vw, 0.875rem)'
+                            return (
+                              <div className="absolute top-0 left-0 w-[25%] aspect-square">
+                                {/* Border triangle (outer) */}
+                                <div 
+                                  className="absolute w-full h-full"
+                                  style={{ 
+                                    clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                    backgroundColor: colors.border
+                                  }}
+                                />
+                                {/* Inner triangle */}
+                                <div 
+                                  className="absolute"
+                                  style={{ 
+                                    top: '1.5px',
+                                    left: '1.5px',
+                                    width: 'calc(100% - 6px)',
+                                    height: 'calc(100% - 6px)',
+                                    clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                    backgroundColor: colors.background
+                                  }}
+                                />
+                                <span 
+                                  className="font-bold absolute z-10"
+                                  style={{ 
+                                    color: colors.text,
+                                    fontSize: fontSize,
+                                    transform: 'translate(-50%, -50%) rotate(-45deg)',
+                                    transformOrigin: 'center',
+                                    top: '35%',
+                                    left: '35%',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {p.badge}
+                                </span>
+                            </div>
+                            )
+                          })()}
+                          <div className="absolute top-2 right-2 z-10">
+                            <FavoriteButton 
+                              productId={p.id} 
+                              className="bg-white/80 hover:bg-white rounded-full p-1"
+                              initialFavoriteState={isFavorited(p.id)}
+                            />
+                          </div>
+                          <div className="mt-2 ml-2">
+                            <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
+                                {p.type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -540,182 +689,6 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Brand Info */}
           <div className="lg:col-span-2">
-            {/* Category Filter */}
-            <div className="mb-6 px-3">
-              <div className="mt-4 flex items-center gap-2">
-                <label className="text-sm font-medium text-white">Filter by type:</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
-                >
-                  <option value="All">All Types</option>
-                  {availableTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Gender Filter */}
-              {selectedCategory !== 'All' && (
-                <div className="mt-4 flex items-center gap-2">
-                  <label className="text-sm font-medium text-white">Filter by gender:</label>
-                  <select
-                    value={selectedGender}
-                    onChange={(e) => setSelectedGender(e.target.value)}
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
-                  >
-                    <option value="All">All Genders</option>
-                    <option value="Men">Men</option>
-                    <option value="Women">Women</option>
-                    <option value="Unisex">Unisex</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Type Filter */}
-              {selectedCategory !== 'All' && selectedGender !== 'All' && (
-                <div className="mt-4 flex items-center gap-2">
-                  <label className="text-sm font-medium text-white">Filter by type:</label>
-                  <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
-                  >
-                    <option value="All">All Types</option>
-                    {availableTypesAfterFilters.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            {/* Products Grid */}
-            {displayedItems.length === 0 ? (
-              <div className="text-white text-center py-12 drop-shadow-lg">No products available for this brand.</div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
-                {displayedItems.map((p, index) => {
-                  // 黒と白を交互に選択する関数
-                  const getImageForProduct = (product: Product, productIndex: number): string | null => {
-                    if (!product.images || product.images.length === 0) {
-                      return null
-                    }
-                    
-                    // 黒と白が利用可能かチェック
-                    if (product.colors && product.colors.length > 0) {
-                      // インデックスに基づいて黒と白を交互に選択
-                      const targetColor = productIndex % 2 === 0 ? 'Black' : 'White'
-                      
-                      // カラー名の正規化（大文字小文字を無視）
-                      const normalizedColors = product.colors.map(c => c.trim())
-                      const blackIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'black')
-                      const whiteIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'white')
-                      
-                      // 黒または白が見つかった場合、対応する画像を使用
-                      if (targetColor === 'Black' && blackIndex >= 0) {
-                        const imageIndex = blackIndex % product.images.length
-                        return product.images[imageIndex]
-                      } else if (targetColor === 'White' && whiteIndex >= 0) {
-                        const imageIndex = whiteIndex % product.images.length
-                        return product.images[imageIndex]
-                      }
-                      
-                      // 交互に選択したいカラーが見つからない場合、もう一方を試す
-                      if (targetColor === 'Black' && whiteIndex >= 0) {
-                        const imageIndex = whiteIndex % product.images.length
-                        return product.images[imageIndex]
-                      } else if (targetColor === 'White' && blackIndex >= 0) {
-                        const imageIndex = blackIndex % product.images.length
-                        return product.images[imageIndex]
-                      }
-                    }
-                    
-                    // フォールバック: 最初の画像を使用
-                    return product.images[0]
-                  }
-                  
-                  const selectedImage = getImageForProduct(p, index)
-                  
-                  return (
-                    <div key={p.id} className="group relative">
-                      <Link href={`/${p.brand_id}/${p.id}`} className="block">
-                        <div className="aspect-square bg-gray-50">
-                          {selectedImage ? (
-                            <Image src={selectedImage} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                          ) : (
-                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                              <span className="text-gray-500 text-sm">No image</span>
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                      {p.badge && getBadgeColors(p.badge) && (() => {
-                        const colors = getBadgeColors(p.badge)!
-                        const fontSize = p.badge === 'SECRET' 
-                          ? 'clamp(0.5625rem, 2.25vw, 0.8125rem)' 
-                          : 'clamp(0.625rem, 2.5vw, 0.875rem)'
-                        return (
-                          <div className="absolute top-0 left-0 w-[25%] aspect-square">
-                            {/* Border triangle (outer) */}
-                            <div 
-                              className="absolute w-full h-full"
-                              style={{ 
-                                clipPath: 'polygon(0 0, 100% 0, 0 100%)',
-                                backgroundColor: colors.border
-                              }}
-                            />
-                            {/* Inner triangle */}
-                            <div 
-                              className="absolute"
-                              style={{ 
-                                top: '1.5px',
-                                left: '1.5px',
-                                width: 'calc(100% - 6px)',
-                                height: 'calc(100% - 6px)',
-                                clipPath: 'polygon(0 0, 100% 0, 0 100%)',
-                                backgroundColor: colors.background
-                              }}
-                            />
-                            <span 
-                              className="font-bold absolute z-10"
-                              style={{ 
-                                color: colors.text,
-                                fontSize: fontSize,
-                                transform: 'translate(-50%, -50%) rotate(-45deg)',
-                                transformOrigin: 'center',
-                                top: '35%',
-                                left: '35%',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              {p.badge}
-                            </span>
-                        </div>
-                        )
-                      })()}
-                      <div className="absolute top-2 right-2 z-10">
-                        <FavoriteButton 
-                          productId={p.id} 
-                          className="bg-white/80 hover:bg-white rounded-full p-1"
-                          initialFavoriteState={isFavorited(p.id)}
-                        />
-                      </div>
-                      <div className="mt-3 ml-2">
-                        <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
-                            {p.type}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
           </div>
 
           {/* Right Column - About Brand */}
@@ -765,6 +738,44 @@ function BrandPageInner({ params }: PageProps) {
   
   // Use the useFavorites hook to manage favorites efficiently
   const { isFavorited, checkFavorites } = useFavorites()
+
+  // Get badge colors
+  const getBadgeColors = (badge: string | null) => {
+    switch (badge) {
+      case 'NEW':
+        return {
+          border: '#10B981',
+          background: '#022C22',
+          text: '#A7F3D0'
+        }
+      case 'HOT':
+        return {
+          border: '#F97316',
+          background: '#451A03',
+          text: '#FED7AA'
+        }
+      case 'SALE':
+        return {
+          border: '#EF4444',
+          background: '#450A0A',
+          text: '#FCA5A5'
+        }
+      case 'SECRET':
+        return {
+          border: '#8B5CF6',
+          background: '#020617',
+          text: '#E5E7EB'
+        }
+      case 'PICK':
+        return {
+          border: '#38BDF8',
+          background: '#0B1220',
+          text: '#E0F2FE'
+        }
+      default:
+        return null
+    }
+  }
 
   // Get available types from products
   const availableTypes = useMemo(() => {
@@ -1049,7 +1060,7 @@ function BrandPageInner({ params }: PageProps) {
       <div className="relative z-30 px-3 pb-4" style={{ pointerEvents: 'auto' }}>
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
-            <div className="flex flex-col items-start gap-3 transform translate-y-8">
+            <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">
               <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
                 <Image 
                   src={brand.icon} 
@@ -1085,6 +1096,183 @@ function BrandPageInner({ params }: PageProps) {
                     New
                   </button>
                 </div>
+              </div>
+              
+              {/* Filters */}
+              <div className="mt-4 w-full">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-white">Filter by type:</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
+                  >
+                    <option value="All">All Types</option>
+                    {availableTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedCategory !== 'All' && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <label className="text-sm font-medium text-white">Filter by gender:</label>
+                    <select
+                      value={selectedGender}
+                      onChange={(e) => setSelectedGender(e.target.value)}
+                      className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
+                    >
+                      <option value="All">All Genders</option>
+                      <option value="Men">Men</option>
+                      <option value="Women">Women</option>
+                      <option value="Unisex">Unisex</option>
+                    </select>
+                  </div>
+                )}
+
+                {selectedCategory !== 'All' && selectedGender !== 'All' && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <label className="text-sm font-medium text-white">Filter by type:</label>
+                    <select
+                      value={selectedType}
+                      onChange={(e) => setSelectedType(e.target.value)}
+                      className="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/90"
+                    >
+                      <option value="All">All Types</option>
+                      {availableTypesAfterFilters.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+              
+              {/* Products Grid */}
+              <div className="mt-6 w-full">
+                {displayedItems.length === 0 ? (
+                  <div className="text-white text-center py-12 drop-shadow-lg">No products available for this brand.</div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-y-4">
+                    {displayedItems.map((p, index) => {
+                      // 黒と白を交互に選択する関数
+                      const getImageForProduct = (product: Product, productIndex: number): string | null => {
+                        if (!product.images || product.images.length === 0) {
+                          return null
+                        }
+                        
+                        // 黒と白が利用可能かチェック
+                        if (product.colors && product.colors.length > 0) {
+                          // インデックスに基づいて黒と白を交互に選択
+                          const targetColor = productIndex % 2 === 0 ? 'Black' : 'White'
+                          
+                          // カラー名の正規化（大文字小文字を無視）
+                          const normalizedColors = product.colors.map(c => c.trim())
+                          const blackIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'black')
+                          const whiteIndex = normalizedColors.findIndex(c => c.toLowerCase() === 'white')
+                          
+                          // 黒または白が見つかった場合、対応する画像を使用
+                          if (targetColor === 'Black' && blackIndex >= 0) {
+                            const imageIndex = blackIndex % product.images.length
+                            return product.images[imageIndex]
+                          } else if (targetColor === 'White' && whiteIndex >= 0) {
+                            const imageIndex = whiteIndex % product.images.length
+                            return product.images[imageIndex]
+                          }
+                          
+                          // 交互に選択したいカラーが見つからない場合、もう一方を試す
+                          if (targetColor === 'Black' && whiteIndex >= 0) {
+                            const imageIndex = whiteIndex % product.images.length
+                            return product.images[imageIndex]
+                          } else if (targetColor === 'White' && blackIndex >= 0) {
+                            const imageIndex = blackIndex % product.images.length
+                            return product.images[imageIndex]
+                          }
+                        }
+                        
+                        // フォールバック: 最初の画像を使用
+                        return product.images[0]
+                      }
+                      
+                      const selectedImage = getImageForProduct(p, index)
+                      
+                      return (
+                        <div key={p.id} className="group relative">
+                          <Link href={`/${p.brand_id}/${p.id}`} className="block">
+                            <div className="aspect-square bg-gray-50">
+                              {selectedImage ? (
+                                <Image src={selectedImage} alt={p.name} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                  <span className="text-gray-500 text-sm">No image</span>
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                          {p.badge && getBadgeColors(p.badge) && (() => {
+                            const colors = getBadgeColors(p.badge)!
+                            const fontSize = p.badge === 'SECRET' 
+                              ? 'clamp(0.5625rem, 2.25vw, 0.8125rem)' 
+                              : 'clamp(0.625rem, 2.5vw, 0.875rem)'
+                            return (
+                              <div className="absolute top-0 left-0 w-[25%] aspect-square">
+                                {/* Border triangle (outer) */}
+                                <div 
+                                  className="absolute w-full h-full"
+                                  style={{ 
+                                    clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                    backgroundColor: colors.border
+                                  }}
+                                />
+                                {/* Inner triangle */}
+                                <div 
+                                  className="absolute"
+                                  style={{ 
+                                    top: '1.5px',
+                                    left: '1.5px',
+                                    width: 'calc(100% - 6px)',
+                                    height: 'calc(100% - 6px)',
+                                    clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                    backgroundColor: colors.background
+                                  }}
+                                />
+                                <span 
+                                  className="font-bold absolute z-10"
+                                  style={{ 
+                                    color: colors.text,
+                                    fontSize: fontSize,
+                                    transform: 'translate(-50%, -50%) rotate(-45deg)',
+                                    transformOrigin: 'center',
+                                    top: '35%',
+                                    left: '35%',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  {p.badge}
+                                </span>
+                            </div>
+                            )
+                          })()}
+                          <div className="absolute top-2 right-2 z-10">
+                            <FavoriteButton 
+                              productId={p.id} 
+                              className="bg-white/80 hover:bg-white rounded-full p-1"
+                              initialFavoriteState={isFavorited(p.id)}
+                            />
+                          </div>
+                          <div className="mt-3 ml-2">
+                            <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
+                            <div className="flex items-center justify-between mt-1">
+                              <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-800">
+                                {p.type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
