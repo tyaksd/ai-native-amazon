@@ -1016,7 +1016,7 @@ export default function BrandsPage() {
     if (selectedStyle === 'All') {
       setAllBrands(brands)
     } else {
-      setAllBrands(brands.filter(brand => brand.style === selectedStyle))
+      setAllBrands(brands.filter(brand => brand.style && brand.style.toLowerCase() === selectedStyle.toLowerCase()))
     }
   }, [brands, selectedStyle])
 
@@ -1121,15 +1121,16 @@ export default function BrandsPage() {
                 <button
                   key={style}
                   onClick={() => {
-                    setSelectedStyle(style)
+                    const styleValue = style === 'All' ? 'All' : style.toLowerCase()
+                    setSelectedStyle(styleValue)
                     // Small vibration on tap
                     if ('vibrate' in navigator) {
                       navigator.vibrate(10)
                     }
                   }}
                   className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
-                    selectedStyle === style.toLowerCase()
-                      ? 'bg-white/50 border-white/30 text-white'
+                    selectedStyle === (style === 'All' ? 'All' : style.toLowerCase())
+                      ? 'bg-white/40 border-white/50 text-white'
                       : 'bg-black/10 border-white/60 text-gray-300 hover:bg-black/30'
                   }`}
                 >
