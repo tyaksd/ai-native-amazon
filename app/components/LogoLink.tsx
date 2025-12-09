@@ -19,7 +19,7 @@ export default function LogoLink() {
       onClick={handleLogoClick}
       className="flex items-center gap-3 mx-auto md:mx-0 md:mr-auto"
     >
-      <Image src="/godship.png" alt="Godship" width={32} height={32} className="rounded" unoptimized />
+      <Image src="/gwhite.png" alt="Godship" width={32} height={32} className="rounded" unoptimized />
     </Link>
   )
 }

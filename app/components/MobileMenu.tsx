@@ -31,7 +31,7 @@ export default function MobileMenu() {
     <>
       {/* Hamburger/Close Button */}
       <button 
-        className="md:hidden absolute left-3 inline-flex items-center justify-center p-2 text-gray-700" 
+        className="md:hidden absolute left-3 inline-flex items-center justify-center p-2 text-gray-300" 
         aria-label={isOpen ? "Close menu" : "Menu"}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -49,11 +49,11 @@ export default function MobileMenu() {
       {/* Mobile Menu Overlay */}
       {isOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsOpen(false)}>
-          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white border-r border-gray-200 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 bg-white relative">
+          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-black border-r border-gray-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 bg-black relative">
               {/* Close Button */}
               <button 
-                className="absolute top-4 left-4 p-2 text-gray-700 hover:text-gray-900"
+                className="absolute top-4 left-4 p-2 text-white hover:text-gray-300"
                 onClick={() => setIsOpen(false)}
                 aria-label="Close menu"
               >
@@ -63,10 +63,10 @@ export default function MobileMenu() {
               </button>
               
               {/* Authentication Section */}
-              <div className="pt-8 bg-white">
+              <div className="pt-8 bg-black">
                 {!clerkLoaded ? (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-500 text-center py-4">
+                    <div className="text-sm text-gray-400 text-center py-4">
                       Loading authentication...
                     </div>
                   </div>
@@ -75,12 +75,12 @@ export default function MobileMenu() {
                     <SignedOut>
                       <div className="space-y-3">
                         <SignInButton mode="modal">
-                          <button className="w-full inline-flex items-center justify-center rounded-md border border-gray-500 bg-transparent px-4 py-3 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
+                          <button className="w-full inline-flex items-center justify-center rounded-md border border-gray-600 bg-transparent px-4 py-3 text-sm text-white hover:border-gray-500 hover:bg-gray-900 transition-colors">
                             Login
                           </button>
                         </SignInButton>
                         <SignUpButton mode="modal">
-                          <button className="w-full inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-3 text-sm text-white hover:bg-gray-800 transition-colors">
+                          <button className="w-full inline-flex items-center justify-center rounded-md bg-white px-4 py-3 text-sm text-black hover:bg-gray-200 transition-colors">
                             Sign Up
                           </button>
                         </SignUpButton>

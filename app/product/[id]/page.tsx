@@ -357,7 +357,7 @@ function ProductDetailFallback({ params }: PageProps) {
   }
 
   return (
-    <div className=" pt-0 pb-0 bg-white -mt-4 relative">
+    <div className=" pt-0 pb-0 bg-white  relative">
       {/* Copied Banner */}
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">

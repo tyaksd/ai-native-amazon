@@ -33,34 +33,34 @@ export default function ConditionalHeaderFooterNoClerk() {
             </form>
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/followed-brands" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900" title="Followed Brands">
+            <Link href="/followed-brands" className="inline-flex items-center justify-center p-2 text-gray-300 hover:text-white" title="Followed Brands">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
             </Link>
-            <Link href="/favorites" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900" title="Favorites">
+            <Link href="/favorites" className="inline-flex items-center justify-center p-2 text-gray-300 hover:text-white" title="Favorites">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </Link>
-            <Link href="/cart" className="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900">
-              <img src="/cart2.png" alt="Cart" className="w-5 h-5" />
+            <Link href="/cart" className="inline-flex items-center justify-center p-2 text-gray-300 hover:text-white">
+              <img src="/cart3.png" alt="Cart" className="w-7 h-7" />
             </Link>
           </div>
-          <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-700">
+          <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-300">
             <MobileSearch className="ml-1" />
-            <Link href="/followed-brands" aria-label="Followed Brands" className="p-1">
+            <Link href="/followed-brands" aria-label="Followed Brands" className="p-1 text-gray-300">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
             </Link>
-            <Link href="/favorites" aria-label="Favorites" className="p-1">
+            <Link href="/favorites" aria-label="Favorites" className="p-1 text-gray-300">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </Link>
             <Link href="/cart" aria-label="Cart" className="p-1">
-              <img src="/cart2.png" alt="Cart" className="w-5 h-5" />
+              <img src="/cart3.png" alt="Cart" className="w-7 h-7" />
             </Link>
           </div>
         </div>
