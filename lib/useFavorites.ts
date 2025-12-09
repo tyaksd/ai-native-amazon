@@ -303,20 +303,15 @@ function useFavoritesInner(userId?: string): UseFavoritesReturn {
   }
 }
 
-// Export function - conditionally use the right version based on Clerk configuration
-// Note: This conditionally calls different hooks, which technically violates React Hooks rules
-// However, since isClerkConfigured is a build-time constant (environment variable),
-// the same hooks will always be called in the same order for a given build
-// This is a necessary workaround to support environments with and without Clerk
+// Export function - always call hooks in the same order
+// This ensures React Hooks rules are followed
+// Note: This will call useUser unconditionally, which will throw if ClerkProvider is not available
+// Components using this hook should wrap it in an error boundary (like ClerkErrorBoundary)
+// For environments without Clerk, use useFavoritesFallback directly instead
 export function useFavorites(userId?: string): UseFavoritesReturn {
-  // If Clerk is not configured, use the fallback version that doesn't call useUser
-  // This avoids calling useUser when ClerkProvider is not available
-  if (!isClerkConfigured) {
-    return useFavoritesFallback(userId)
-  }
-  
-  // If Clerk is configured, use the version that calls useUser
-  // This will throw if ClerkProvider is not available, which should be caught by error boundaries
+  // Always call useUser unconditionally to follow React Hooks rules
+  // If ClerkProvider is not available, this will throw and should be caught by error boundaries
+  // Components should wrap this hook in an error boundary that falls back to useFavoritesFallback
   return useFavoritesInner(userId)
 }
 
