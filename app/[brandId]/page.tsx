@@ -1181,7 +1181,7 @@ function BrandPageInner({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-30 px-3 pb-4" style={{ pointerEvents: 'auto' }}>
+      <div className="relative z-10 pb-4" style={{ pointerEvents: 'auto' }}>
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
             <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">

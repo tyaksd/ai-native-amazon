@@ -424,7 +424,7 @@ function FollowedBrandsPageInner() {
 
   return (
     <div className="px-3 sm:px-10 py-6 bg-black min-h-screen">
-      <div className="mb-8">
+      <div className="mb-4">
         <h1 className="text-3xl font-bold text-white mb-2">FOLLOWED BRANDS</h1>
         <p className="text-gray-400">{followedBrands.length} brand(s) you&apos;re following</p>
       </div>

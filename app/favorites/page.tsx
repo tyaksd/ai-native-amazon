@@ -337,8 +337,8 @@ function FavoritesPageInner() {
 
   return (
     <div className="px-3 sm:px-10 py-6 bg-black min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">My Favorites</h1>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold text-white mb-2">MY FAVORITES</h1>
         <p className="text-gray-400">{favoriteProducts.length} item(s) in your favorites</p>
       </div>
 
