@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo, use, Component, ReactNode } from 'react'
 import { getBrandById, getProductsByBrand, getBrands, Brand, Product } from "@/lib/data";
 import FavoriteButton from '@/app/components/FavoriteButton';
-import { useFavorites } from '@/lib/useFavorites';
+import { useFavorites, useFavoritesFallback } from '@/lib/useFavorites';
 import { useUser } from '@clerk/nextjs';
 import { supabase } from '@/lib/supabase';
 
@@ -67,8 +67,8 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
   const [isFollowed, setIsFollowed] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   
-  // Use the useFavorites hook to manage favorites efficiently
-  const { isFavorited, checkFavorites } = useFavorites()
+  // Use the useFavoritesFallback hook since this component doesn't use Clerk
+  const { isFavorited, checkFavorites } = useFavoritesFallback()
 
   // Get badge colors
   const getBadgeColors = (badge: string | null) => {

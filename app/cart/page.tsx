@@ -309,18 +309,18 @@ function CartFallback() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-lg sticky top-8 border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">ORDER SUMMARY</h2>
+          <div className="bg-black p-6 rounded-lg sticky top-8 border ">
+            <h2 className="text-lg font-semibold text-white mb-4">ORDER SUMMARY</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (
-                <div key={product.id} className="flex justify-between text-sm">
+                <div key={product.id} className="flex justify-between text-sm text-white">
                   <span>{product.name} x{product.quantity}</span>
                   <span>{formatUSD(product.price * product.quantity)}</span>
                 </div>
               ))}
             </div>
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between text-lg font-semibold">
+            <div className="border-t border-gray-700 pt-4">
+              <div className="flex justify-between text-lg font-semibold text-white">
                 <span>Total</span>
                 <span>{formatUSD(getTotalPrice())}</span>
               </div>
@@ -679,18 +679,18 @@ function CartInner() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-6 rounded-lg sticky top-8 border border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">ORDER SUMMARY</h2>
+          <div className="bg-black p-6 rounded-lg sticky top-8 border border-gray-700">
+            <h2 className="text-lg font-semibold text-white mb-4">ORDER SUMMARY</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (
-                <div key={product.id} className="flex justify-between text-sm">
+                <div key={product.id} className="flex justify-between text-sm text-white">
                   <span>{product.name} x{product.quantity}</span>
                   <span>{formatUSD(product.price * product.quantity)}</span>
                 </div>
               ))}
             </div>
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between text-lg font-semibold">
+            <div className="border-t border-gray-700 pt-4">
+              <div className="flex justify-between text-lg font-semibold text-white">
                 <span>Total</span>
                 <span>{formatUSD(getTotalPrice())}</span>
               </div>

@@ -166,25 +166,24 @@ function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getSty
   )
 }
 
-// Style display name helper function
+// Style display name helper function (same as brands page)
 function getStyleDisplayName(style: string | null | undefined): string {
   if (!style) return ''
   
-  const styleMap: Record<string, string> = {
-    'streetwear': 'Streetwear',
-    'casual': 'Casual',
-    'mode': 'Mode',
-    'luxury': 'Luxury',
-    'sports': 'Sports',
-    'traditional': 'Traditional',
-    'feminine': 'Feminine',
-    'workwear': 'Workwear',
-    'sustainable': 'Sustainable',
-    'culture': 'Culture',
-    'anime': 'Anime',
+  const styleDisplayNames: Record<string, string> = {
+    'Core Street': 'STREET CLASSIC',
+    'Hip-Hop/Urban': 'BLOCK HIP-HOP',
+    'Sports/Athleisure': 'COURT ENERGY',
+    'Retro/Vintage/Y2K': 'REWIND / Y2K',
+    'Techwear/Futuristic': 'NEO TECH',
+    'Luxury/Mode Street': 'MODE LUXE',
+    'Grunge/Punk/Rock': 'NOISE PUNK',
+    'Minimal/Normcore': 'LOW-KEY MINIMAL',
+    'Art/Graphic Driven': 'CANVAS GRAPHIC',
+    'Culture/Character/Anime': 'CULTURE / ANIME'
   }
   
-  return styleMap[style.toLowerCase()] || style
+  return styleDisplayNames[style] || style
 }
 
 // Fallback component that doesn't use Clerk hooks
@@ -289,22 +288,22 @@ function FollowedBrandsPageFallback() {
         <p className="text-gray-400">{followedBrands.length} brand(s) you&apos;re following</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {followedBrands.map((brand) => (
           <div key={brand.id}>
             {/* Mobile: CompactBrandCard */}
-            <div className="block md:hidden">
-          <CompactBrandCard 
+            <div className="block sm:hidden">
+              <CompactBrandCard 
                 brand={brand} 
                 getStyleDisplayName={getStyleDisplayName}
               />
             </div>
-            {/* Desktop: BrandCard */}
-            <div className="hidden md:block">
+            {/* Tablet/Desktop: BrandCard */}
+            <div className="hidden sm:block">
               <BrandCard 
-            brand={brand} 
-            getStyleDisplayName={getStyleDisplayName}
-          />
+                brand={brand} 
+                getStyleDisplayName={getStyleDisplayName}
+              />
             </div>
           </div>
         ))}
@@ -430,22 +429,22 @@ function FollowedBrandsPageInner() {
         <p className="text-gray-400">{followedBrands.length} brand(s) you&apos;re following</p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {followedBrands.map((brand) => (
           <div key={brand.id}>
             {/* Mobile: CompactBrandCard */}
-            <div className="block md:hidden">
-          <CompactBrandCard 
+            <div className="block sm:hidden">
+              <CompactBrandCard 
                 brand={brand} 
                 getStyleDisplayName={getStyleDisplayName}
               />
             </div>
-            {/* Desktop: BrandCard */}
-            <div className="hidden md:block">
+            {/* Tablet/Desktop: BrandCard */}
+            <div className="hidden sm:block">
               <BrandCard 
-            brand={brand} 
-            getStyleDisplayName={getStyleDisplayName}
-          />
+                brand={brand} 
+                getStyleDisplayName={getStyleDisplayName}
+              />
             </div>
           </div>
         ))}
