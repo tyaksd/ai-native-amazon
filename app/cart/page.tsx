@@ -677,7 +677,7 @@ function CartInner() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-black p-6 rounded-lg sticky top-8 border border-gray-700">
+          <div className="bg-black p-6 rounded-lg sticky top-8 border ">
             <h2 className="text-lg font-semibold text-white mb-4">ORDER SUMMARY</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (

@@ -121,7 +121,13 @@ export async function getProductById(productId: string): Promise<Product | null>
       .single()
 
     if (error) {
-      console.error('Error fetching product by UUID:', error)
+      console.error('Error fetching product by UUID:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: JSON.stringify(error, null, 2)
+      })
       return null
     }
 
