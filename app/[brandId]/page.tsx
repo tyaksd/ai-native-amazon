@@ -381,22 +381,51 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       
       {/* Brand Logo Space */}
       {!hideHeader && (
-      <div className="relative z-10 flex items-end px-3 pb-4">
-        <div className="flex flex-col items-start gap-3 transform translate-y-8">
-          <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
-            <Image 
-              src={brand.icon} 
-              alt={brand.name} 
-              width={100}
-              height={100}
-              className="object-cover rounded"
-            />
+      <div className="relative z-10 px-3 pb-4">
+        <div className="flex items-end justify-between">
+          <div className="flex flex-col items-start gap-3 flex-1">
+            <div className="flex flex-col items-start gap-3 transform translate-y-8">
+              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+                <Image 
+                  src={brand.icon} 
+                  alt={brand.name} 
+                  width={100}
+                  height={100}
+                  className="object-cover rounded"
+                />
+              </div>
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
+              
+              {/* Category Navigation Tabs */}
+              <div className="mt-2 w-full">
+                <div className="flex flex-wrap gap-2 border-b border-white/30">
+                  <button
+                    onClick={() => setSelectedTab('all')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedTab === 'all'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-white/70 hover:text-white'
+                    }`}
+                  >
+                    All Products
+                  </button>
+                  <button
+                    onClick={() => setSelectedTab('new')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedTab === 'new'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-white/70 hover:text-white'
+                    }`}
+                  >
+                    New
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
-        </div>
-        
-        {/* Navigation Buttons and Follow Button */}
-        <div className="absolute top-16 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
+          
+          {/* Navigation Buttons and Follow Button */}
+          <div className="absolute top-5 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -502,6 +531,7 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
             )}
           </button>
         </div>
+        </div>
       </div>
       )}
 
@@ -510,32 +540,8 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Brand Info */}
           <div className="lg:col-span-2">
-            {/* Category Navigation */}
+            {/* Category Filter */}
             <div className="mb-6 px-3">
-              <div className="flex flex-wrap gap-2 border-b border-white/30">
-                <button
-                  onClick={() => setSelectedTab('all')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    selectedTab === 'all'
-                      ? 'border-white text-white'
-                      : 'border-transparent text-white/70 hover:text-white'
-                  }`}
-                >
-                  All Products
-                </button>
-                <button
-                  onClick={() => setSelectedTab('new')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    selectedTab === 'new'
-                      ? 'border-white text-white'
-                      : 'border-transparent text-white/70 hover:text-white'
-                  }`}
-                >
-                  New
-                </button>
-              </div>
-              
-              {/* Category Filter */}
               <div className="mt-4 flex items-center gap-2">
                 <label className="text-sm font-medium text-white">Filter by type:</label>
                 <select
@@ -1040,22 +1046,51 @@ function BrandPageInner({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-30 flex items-end px-3 pb-4" style={{ pointerEvents: 'auto' }}>
-        <div className="flex flex-col items-start gap-3 transform translate-y-8">
-          <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
-            <Image 
-              src={brand.icon} 
-              alt={brand.name} 
-              width={100}
-              height={100}
-              className="object-cover rounded"
-            />
+      <div className="relative z-30 px-3 pb-4" style={{ pointerEvents: 'auto' }}>
+        <div className="flex items-end justify-between">
+          <div className="flex flex-col items-start gap-3 flex-1">
+            <div className="flex flex-col items-start gap-3 transform translate-y-8">
+              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+                <Image 
+                  src={brand.icon} 
+                  alt={brand.name} 
+                  width={100}
+                  height={100}
+                  className="object-cover rounded"
+                />
+              </div>
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
+              
+              {/* Category Navigation Tabs */}
+              <div className="mt-2 w-full">
+                <div className="flex flex-wrap gap-2 border-b border-white/30">
+                  <button
+                    onClick={() => setSelectedTab('all')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedTab === 'all'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-white/70 hover:text-white'
+                    }`}
+                  >
+                    All Products
+                  </button>
+                  <button
+                    onClick={() => setSelectedTab('new')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedTab === 'new'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-white/70 hover:text-white'
+                    }`}
+                  >
+                    New
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
-        </div>
-        
-        {/* Navigation Buttons and Follow Button */}
-        <div className="absolute top-5 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
+          
+          {/* Navigation Buttons and Follow Button */}
+          <div className="absolute top-5 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -1160,6 +1195,7 @@ function BrandPageInner({ params }: PageProps) {
               </span>
             )}
           </button>
+        </div>
         </div>
       </div>
 

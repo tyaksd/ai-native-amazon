@@ -335,8 +335,8 @@ export default async function UserPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user.firstName || 'User'}!</h1>
+        <div className="mb-8 bg-black rounded-lg p-6">
+          <h1 className="text-3xl font-bold text-white">Welcome, {user.firstName || 'User'}!</h1>
         </div>
 
         {/* Account Information */}

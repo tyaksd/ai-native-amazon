@@ -271,7 +271,6 @@ function CartFallback() {
                 />
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-600">{product.id.toUpperCase()}</p>
                   {(cartItems[idx]?.size || cartItems[idx]?.color) && (
                     <p className="text-sm text-gray-600">{cartItems[idx]?.size ? `Size: ${cartItems[idx]?.size}` : ''} {cartItems[idx]?.color ? `Color: ${cartItems[idx]?.color}` : ''}</p>
                   )}
@@ -641,7 +640,6 @@ function CartInner() {
                 />
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-600">{product.id.toUpperCase()}</p>
                   {(cartItems[idx]?.size || cartItems[idx]?.color) && (
                     <p className="text-sm text-gray-600">{cartItems[idx]?.size ? `Size: ${cartItems[idx]?.size}` : ''} {cartItems[idx]?.color ? `Color: ${cartItems[idx]?.color}` : ''}</p>
                   )}

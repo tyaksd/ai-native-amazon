@@ -5,7 +5,11 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 
-export default function MobileMenu() {
+interface MobileMenuProps {
+  className?: string;
+}
+
+export default function MobileMenu({ className = '' }: MobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [clerkLoaded, setClerkLoaded] = useState(false);
   const pathname = usePathname();
@@ -31,7 +35,7 @@ export default function MobileMenu() {
     <>
       {/* Hamburger/Close Button */}
       <button 
-        className="md:hidden absolute left-3 inline-flex items-center justify-center p-2 text-gray-300" 
+        className={`md:hidden inline-flex items-center justify-center p-2 text-gray-300 ${className}`} 
         aria-label={isOpen ? "Close menu" : "Menu"}
         onClick={() => setIsOpen(!isOpen)}
       >
