@@ -328,6 +328,13 @@ export async function searchProducts(query: string): Promise<Product[]> {
 
   const filteredProducts = data.filter(product => {
     const productName = product.name.toLowerCase()
+    
+    // First check: simple substring match (e.g., "kaiju" matches "KAIJU Brand")
+    if (productName.includes(queryLower)) {
+      return true
+    }
+    
+    // Second check: match query characters to first letters of words
     // Split product name into words (by spaces)
     const words = productName.split(/\s+/).filter((word: string) => word.length > 0)
     
@@ -378,6 +385,13 @@ export async function searchBrands(query: string): Promise<Brand[]> {
 
   const filteredBrands = data.filter(brand => {
     const brandName = brand.name.toLowerCase()
+    
+    // First check: simple substring match (e.g., "kaiju" matches "KAIJU")
+    if (brandName.includes(queryLower)) {
+      return true
+    }
+    
+    // Second check: match query characters to first letters of words
     // Split brand name into words (by spaces)
     const words = brandName.split(/\s+/).filter((word: string) => word.length > 0)
     

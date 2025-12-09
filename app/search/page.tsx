@@ -15,6 +15,44 @@ function formatUSD(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
+// Get badge colors
+function getBadgeColors(badge: string | null) {
+  switch (badge) {
+    case 'NEW':
+      return {
+        border: '#10B981',
+        background: '#022C22',
+        text: '#A7F3D0'
+      }
+    case 'HOT':
+      return {
+        border: '#F97316',
+        background: '#451A03',
+        text: '#FED7AA'
+      }
+    case 'SALE':
+      return {
+        border: '#EF4444',
+        background: '#450A0A',
+        text: '#FCA5A5'
+      }
+    case 'SECRET':
+      return {
+        border: '#8B5CF6',
+        background: '#020617',
+        text: '#E5E7EB'
+      }
+    case 'PICK':
+      return {
+        border: '#38BDF8',
+        background: '#0B1220',
+        text: '#E0F2FE'
+      }
+    default:
+      return null
+  }
+}
+
 function SearchContent() {
   const searchParams = useSearchParams()
   const [products, setProducts] = useState<Product[]>([])
@@ -202,14 +240,14 @@ function SearchContent() {
           <>
             <div className="mb-2 mt-2">
               <h2 className="text-xl font-semibold tracking-tight text-white px-3 sm:px-6">
-                Search Results for &quot;{searchQuery}&quot;
+                SEARCH RESULTS FOR &quot;{searchQuery}&quot;
               </h2>
             </div>
             
             {/* Brand Results */}
             {foundBrands.length > 0 && (
               <div className="mb-4 px-3 sm:px-6">
-                <h3 className="text-lg font-bold mb-4 text-white">Brands</h3>
+                <h3 className="text-lg font-bold mb-4 text-white">BRANDS</h3>
                 
                 {/* Mobile: 2 columns with compact cards */}
                 <div className="grid grid-cols-2 sm:hidden gap-3">
@@ -338,7 +376,7 @@ function SearchContent() {
             {/* Product Results */}
             {products.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4 text-white px-3 sm:px-6">Products</h3>
+                <h3 className="text-lg font-bold mb-4 text-white px-3 sm:px-6">PRODUCTS</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
                   {currentProducts.map((p, index) => (
                     <div key={p.id} className="group relative">
@@ -370,8 +408,54 @@ function SearchContent() {
                         {(() => {
                           const randomImage = getRandomImageForProduct(p)
                           return randomImage ? (
-                            <div className="aspect-square overflow-hidden">
+                            <div className="aspect-square overflow-hidden relative">
                               <OptimizedImage src={randomImage} alt={p.name} width={800} height={800} className="w-full h-full object-cover" isImportant={true} />
+                              
+                              {/* Badge */}
+                              {p.badge && getBadgeColors(p.badge) && (() => {
+                                const colors = getBadgeColors(p.badge)!
+                                const fontSize = p.badge === 'SECRET' 
+                                  ? 'clamp(0.5625rem, 2.25vw, 0.8125rem)' 
+                                  : 'clamp(0.625rem, 2.5vw, 0.875rem)'
+                                return (
+                                  <div className="absolute top-0 left-0 w-[25%] aspect-square z-10">
+                                    {/* Border triangle (outer) */}
+                                    <div 
+                                      className="absolute w-full h-full"
+                                      style={{ 
+                                        clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                        backgroundColor: colors.border
+                                      }}
+                                    />
+                                    {/* Inner triangle */}
+                                    <div 
+                                      className="absolute"
+                                      style={{ 
+                                        top: '1.5px',
+                                        left: '1.5px',
+                                        width: 'calc(100% - 6px)',
+                                        height: 'calc(100% - 6px)',
+                                        clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+                                        backgroundColor: colors.background
+                                      }}
+                                    />
+                                    <span 
+                                      className="font-bold absolute z-10"
+                                      style={{ 
+                                        color: colors.text,
+                                        fontSize: fontSize,
+                                        transform: 'translate(-50%, -50%) rotate(-45deg)',
+                                        transformOrigin: 'center',
+                                        top: '35%',
+                                        left: '35%',
+                                        whiteSpace: 'nowrap'
+                                      }}
+                                    >
+                                      {p.badge}
+                                    </span>
+                                  </div>
+                                )
+                              })()}
                             </div>
                           ) : (
                             <div className="aspect-square bg-gray-200 flex items-center justify-center">

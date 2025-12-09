@@ -128,9 +128,7 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
           setTimeout(() => setShowMessage(false), 2000)
         } else {
           setIsFavorited(false)
-          setMessage('Removed from favorites')
-          setShowMessage(true)
-          setTimeout(() => setShowMessage(false), 2000)
+          // Don't show message when removing from favorites
           onFavoriteRemoved?.(productId)
         }
       } else {
@@ -197,7 +195,7 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
       
       {/* Message Banner */}
       {showMessage && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">
           {message}
         </div>
       )}
@@ -292,9 +290,7 @@ function FavoriteButtonInner({ productId, userId, className = '', onFavoriteRemo
           setTimeout(() => setShowMessage(false), 2000)
         } else {
           setIsFavorited(false)
-          setMessage('Removed from favorites')
-          setShowMessage(true)
-          setTimeout(() => setShowMessage(false), 2000)
+          // Don't show message when removing from favorites
           onFavoriteRemoved?.(productId)
         }
       } else {
@@ -371,7 +367,7 @@ function FavoriteButtonInner({ productId, userId, className = '', onFavoriteRemo
       
       {/* Message Banner */}
       {showMessage && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">
           {message}
         </div>
       )}

@@ -50,7 +50,7 @@ type PageProps = {
 };
 
 // Component that renders the page without Clerk features (fallback)
-function BrandPageWithoutClerk({ params }: PageProps) {
+function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hideHeader?: boolean }) {
   const resolvedParams = use(params)
   const user: { id?: string } | null = null
   const isUserLoaded = true
@@ -242,11 +242,6 @@ function BrandPageWithoutClerk({ params }: PageProps) {
       setIsFollowed(false)
       return
     }
-    
-    // Wait for user to load if Clerk is configured
-    if (!isUserLoaded) {
-      return
-    }
 
     const checkFollow = async () => {
       try {
@@ -277,15 +272,24 @@ function BrandPageWithoutClerk({ params }: PageProps) {
       }
     }
 
+    // Always check follow status, regardless of login state
     checkFollow()
-  }, [brand?.id, isUserLoaded])
+  }, [brand?.id])
 
-  const handleToggleFollow = async () => {
+  const handleToggleFollow = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     if (isFollowLoading || !brand) return
 
     const currentUserId = getUserId()
-    if (!currentUserId) return
+    if (!currentUserId) {
+      console.log('No user ID available')
+      return
+    }
 
+    console.log('Toggling follow:', { currentUserId, brandId: brand.id, isFollowed })
     setIsFollowLoading(true)
     try {
       const typedUser = user as { id?: string } | null
@@ -376,6 +380,7 @@ function BrandPageWithoutClerk({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
+      {!hideHeader && (
       <div className="relative z-10 h-20 flex items-end justify-between px-3">
         <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
           <Image 
@@ -388,7 +393,7 @@ function BrandPageWithoutClerk({ params }: PageProps) {
         </div>
         
         {/* Navigation Buttons and Follow Button */}
-        <div className="relative z-20 flex flex-col items-center gap-2 transform translate-y-8.5 md:translate-y-12">
+        <div className="relative z-20 flex flex-col items-center gap-2 transform translate-y-8.5 md:translate-y-12" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -439,41 +444,63 @@ function BrandPageWithoutClerk({ params }: PageProps) {
           </div>
           
           {/* Follow Button */}
-            <button
-              onClick={handleToggleFollow}
-              disabled={isFollowLoading}
-              className={`relative z-20 px-4 py-1.5 rounded-lg backdrop-blur-md border transition-all duration-200 hover:scale-105 text-sm font-medium ${
-                isFollowed
-                  ? 'bg-white/10 border-white/20 text-black hover:bg-white/20'
-                  : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-              } ${isFollowLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-            >
-              {isFollowLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  {isFollowed ? 'Unfollowing...' : 'Following...'}
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  {isFollowed ? 'Unfollow' : 'Follow'}
-                </span>
-              )}
-            </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (!isFollowLoading && brand) {
+                handleToggleFollow(e)
+              }
+            }}
+            disabled={isFollowLoading || !brand}
+            style={{ 
+              pointerEvents: 'auto', 
+              zIndex: 50, 
+              position: 'relative',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            className={`
+              px-4 py-1.5 rounded-lg backdrop-blur-md border 
+              transition-all duration-200 hover:scale-105 
+              text-sm font-medium
+              ${isFollowed
+                ? 'bg-white/10 border-white/20 text-black hover:bg-white/20'
+                : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+              }
+              ${isFollowLoading || !brand 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'cursor-pointer active:scale-95'
+              }
+            `}
+          >
+            {isFollowLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span>{isFollowed ? 'Unfollowing...' : 'Following...'}</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
+              </span>
+            )}
+          </button>
         </div>
       </div>
+      )}
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto py-8">
@@ -868,11 +895,6 @@ function BrandPageInner({ params }: PageProps) {
       setIsFollowed(false)
       return
     }
-    
-    // Wait for user to load if Clerk is configured
-    if (!isUserLoaded) {
-      return
-    }
 
     const checkFollow = async () => {
       try {
@@ -884,7 +906,7 @@ function BrandPageInner({ params }: PageProps) {
 
         const typedUser = user as { id?: string } | null
         const isLoggedIn = !!(typedUser && typedUser.id)
-
+        
         const { data, error } = await supabase
           .from('brand_follows')
           .select('id')
@@ -903,22 +925,38 @@ function BrandPageInner({ params }: PageProps) {
       }
     }
 
+    // Always check follow status, regardless of login state
     checkFollow()
-  }, [brand?.id, user?.id, isUserLoaded, user, brand])
+  }, [brand?.id, user?.id])
 
-  const handleToggleFollow = async () => {
-    if (isFollowLoading || !brand) return
+  const handleToggleFollow = async (e?: React.MouseEvent) => {
+    // Prevent default and stop propagation
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
 
+    // Guard clauses
+    if (isFollowLoading || !brand) {
+      return
+    }
+
+    // Get user ID (works for both logged in and non-logged in users)
     const currentUserId = getUserId()
-    if (!currentUserId) return
+    if (!currentUserId) {
+      return
+    }
 
+    // Set loading state
     setIsFollowLoading(true)
+
     try {
+      // Determine if user is logged in
       const typedUser = user as { id?: string } | null
       const isLoggedIn = !!(typedUser && typedUser.id)
 
       if (isFollowed) {
-        // Unfollow brand
+        // Unfollow: Delete the follow record
         const { error } = await supabase
           .from('brand_follows')
           .delete()
@@ -931,7 +969,7 @@ function BrandPageInner({ params }: PageProps) {
           setIsFollowed(false)
         }
       } else {
-        // Follow brand
+        // Follow: Insert a new follow record
         const insertData = isLoggedIn
           ? {
               clerk_id: currentUserId,
@@ -1003,7 +1041,7 @@ function BrandPageInner({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-10 h-20 flex items-end justify-between px-3">
+      <div className="relative z-30 h-20 flex items-end justify-between px-3" style={{ pointerEvents: 'auto' }}>
         <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
           <Image 
             src={brand.icon} 
@@ -1015,7 +1053,7 @@ function BrandPageInner({ params }: PageProps) {
         </div>
         
         {/* Navigation Buttons and Follow Button */}
-        <div className="flex flex-col items-center gap-2 transform translate-y-12 md:translate-y-16">
+        <div className="relative z-50 flex flex-col items-center gap-2 transform translate-y-12 md:translate-y-16" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -1066,46 +1104,71 @@ function BrandPageInner({ params }: PageProps) {
           </div>
           
           {/* Follow Button */}
-            <button
-              onClick={handleToggleFollow}
-              disabled={isFollowLoading}
-              className={`relative z-20 px-4 py-1.5 rounded-lg backdrop-blur-md border transition-all duration-200 hover:scale-105 text-sm font-medium ${
-                isFollowed
-                  ? 'bg-white/10 border-white/20 text-black hover:bg-white/20'
-                  : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-              } ${isFollowLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-            >
-              {isFollowLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  {isFollowed ? 'Unfollowing...' : 'Following...'}
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  {isFollowed ? 'Unfollow' : 'Follow'}
-                </span>
-              )}
-            </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (!isFollowLoading && brand) {
+                handleToggleFollow(e)
+              }
+            }}
+            disabled={isFollowLoading || !brand}
+            style={{ 
+              pointerEvents: 'auto', 
+              zIndex: 50, 
+              position: 'relative',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+            className={`
+              px-4 py-1.5 rounded-lg backdrop-blur-md border 
+              transition-all duration-200 hover:scale-105 
+              text-sm font-medium
+              ${isFollowed
+                ? 'bg-white/10 border-white/20 text-black hover:bg-white/20'
+                : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+              }
+              ${isFollowLoading || !brand 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'cursor-pointer active:scale-95'
+              }
+            `}
+          >
+            {isFollowLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span>{isFollowed ? 'Unfollowing...' : 'Following...'}</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span>{isFollowed ? 'Unfollow' : 'Follow'}</span>
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
       {/* Main Content - reuse the same structure as BrandPageWithoutClerk */}
       {/* For brevity, we'll reuse BrandPageWithoutClerk's JSX structure */}
       {/* In a real implementation, you'd copy the full JSX here */}
-      <BrandPageWithoutClerk params={params} />
+      <div className="relative z-10" style={{ marginTop: '-5rem', pointerEvents: 'none' }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <BrandPageWithoutClerk params={params} hideHeader={true} />
+        </div>
+      </div>
     </div>
   )
 }

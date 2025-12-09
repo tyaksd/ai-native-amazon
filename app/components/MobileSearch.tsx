@@ -4,7 +4,11 @@ import { useEffect, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 // import { useRouter } from 'next/navigation' // Removed unused import
 
-export default function MobileSearch() {
+interface MobileSearchProps {
+  className?: string
+}
+
+export default function MobileSearch({ className = '' }: MobileSearchProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(64) // Fallback
   const [mounted, setMounted] = useState(false)
@@ -62,7 +66,7 @@ export default function MobileSearch() {
       <button
         onClick={() => setIsSearchOpen(true)}
         aria-label="Search"
-        className="md:hidden p-2 text-gray-700"
+        className={`md:hidden text-gray-700 ${className}`}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
           <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 104.243 11.964l3.771 3.772a.75.75 0 101.06-1.06l-3.772-3.772A6.75 6.75 0 0010.5 3.75zm-5.25 6.75a5.25 5.25 0 1110.5 0 5.25 5.25 0 01-10.5 0z" clipRule="evenodd" />
@@ -75,7 +79,7 @@ export default function MobileSearch() {
           {/* Search bar (overlay on header) */}
           <div className="fixed  left-0 right-0 top-0 z-[100]">
             <div className="w-full">
-               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md shadow-lg p-2 border border-white/20">
+               <div className="flex items-center　 gap-2 　bg-white/10 backdrop-blur-md shadow-lg　 p-2 border border-white/20">
                 <form
                   onSubmit={handleSearch}
                   className="w-full flex items-center gap-2"
