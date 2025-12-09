@@ -2,7 +2,8 @@
 
 export default function LegalNoticePage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900">Legal Notice</h1>
       <p className="text-sm text-gray-500 mt-2">Specified Commercial Transactions Act (Japan)</p>
 
@@ -66,6 +67,7 @@ x
           <p className="mt-3 leading-7">Mon–Fri 10:00–18:00 JST (excluding holidays)</p>
         </section>
       </div>
+    </div>
     </div>
   )
 }

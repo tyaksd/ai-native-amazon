@@ -123,7 +123,8 @@ export default function AdminPage() {
     type: 'T-Shirt',
     colors: getDefaultColorsForType('T-Shirt'),
     sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'] as string[],
-    gender: 'Unisex'
+    gender: 'Unisex',
+    badge: 'NEW'
   })
   // removed unused file states
   const [colorInput, setColorInput] = useState('')
@@ -373,7 +374,7 @@ export default function AdminPage() {
         price: Number(newProduct.price),
         is_visible: true,
         design_png: designPng,
-        badge: null
+        badge: newProduct.badge || null
       })
       if (product) {
         setProducts(prev => [...prev, product])
@@ -393,7 +394,8 @@ export default function AdminPage() {
           type: newProduct.type, // Keep the same type
           colors: getDefaultColorsForType(newProduct.type), // Set colors based on type
           sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
-          gender: 'Unisex'
+          gender: 'Unisex',
+          badge: 'NEW'
         })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
@@ -787,19 +789,40 @@ export default function AdminPage() {
                       </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Brand *</label>
-                      <select
-                        value={newProduct.brand_id}
-                        onChange={(e) => setNewProduct(prev => ({ ...prev, brand_id: e.target.value }))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      >
-                        <option value="">Select a brand</option>
-                        {brands.map(brand => (
-                          <option key={brand.id} value={brand.id}>{brand.name}</option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Brand *</label>
+                        <select
+                          value={newProduct.brand_id}
+                          onChange={(e) => setNewProduct(prev => ({ ...prev, brand_id: e.target.value }))}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        >
+                          <option value="">Select a brand</option>
+                          {brands.map(brand => (
+                            <option key={brand.id} value={brand.id}>{brand.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Badge</label>
+                        <select
+                          value={newProduct.badge}
+                          onChange={(e) => setNewProduct(prev => ({ ...prev, badge: e.target.value }))}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="NEW">NEW</option>
+                          <option value="HOT">HOT</option>
+                          <option value="SALE">SALE</option>
+                          <option value="SECRET">SECRET</option>
+                          <option value="JACK">JACK</option>
+                          <option value="TODAY">TODAY</option>
+                          <option value="LAST">LAST</option>
+                          <option value="COLLAB">COLLAB</option>
+                          <option value="PICK">PICK</option>
+                          <option value="">None</option>
+                        </select>
+                      </div>
                     </div>
                     
                     <div>
@@ -1206,7 +1229,7 @@ export default function AdminPage() {
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       {/* Brand Selection */}
-                      <div className="relative brand-dropdown-container">
+                      <div className="relative brand-dropdown-container w-1/2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select Brand</label>
                         <div className="relative">
                           <input
@@ -1237,7 +1260,7 @@ export default function AdminPage() {
                         </div>
                         
                         {showBrandDropdown && (
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[120px] overflow-auto">
                             {filteredBrands.length > 0 ? (
                               filteredBrands.map(brand => (
                                 <button

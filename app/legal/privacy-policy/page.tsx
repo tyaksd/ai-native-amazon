@@ -2,7 +2,8 @@
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900">Privacy Policy</h1>
       <p className="text-sm text-gray-500 mt-2">Last updated: September 28, 2025</p>
 
@@ -127,6 +128,7 @@ export default function PrivacyPolicyPage() {
           <p className="mt-3 leading-7">jack@godship.io or see Legal Notice.</p>
         </section>
       </div>
+    </div>
     </div>
   )
 }

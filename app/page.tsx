@@ -25,7 +25,7 @@ export default function Home() {
   const [features, setFeatures] = useState<Feature[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [searchCurrentPage, setSearchCurrentPage] = useState(1)
-  const itemsPerPage = 80
+  const itemsPerPage = 40
   const [productImageCache, setProductImageCache] = useState<Record<string, string>>({})
   
   // Use the favorites hook

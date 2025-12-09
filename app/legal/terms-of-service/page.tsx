@@ -2,7 +2,8 @@
 
 export default function TermsOfServicePage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900">Terms of Service</h1>
       <p className="text-sm text-gray-500 mt-2">Last updated: November 22, 2025</p>
 
@@ -167,6 +168,7 @@ export default function TermsOfServicePage() {
           </p>
         </section>
       </div>
+    </div>
     </div>
   )
 }

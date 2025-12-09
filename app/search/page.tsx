@@ -61,7 +61,7 @@ function SearchContent() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 80
+  const itemsPerPage = 40
   const [productImageCache, setProductImageCache] = useState<Record<string, string>>({})
   
   // Use the favorites hook
