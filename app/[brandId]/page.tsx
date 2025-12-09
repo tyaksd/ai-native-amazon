@@ -977,34 +977,10 @@ function BrandPageInner({ params }: PageProps) {
   }
 
   if (!brand) {
-  return (
+    return (
       <div className="px-6 py-10">
         <div className="text-red-600 mb-4">Brand not found</div>
         <Link href="/brands" className="text-blue-600 underline">Back to Brands</Link>
-      </div>
-    )
-  }
-
-  // Reset selectedType if it's not available after filters change
-  useEffect(() => {
-    if (selectedType !== 'All' && !availableTypesAfterFilters.includes(selectedType)) {
-      setSelectedType('All')
-    }
-  }, [selectedType, availableTypesAfterFilters])
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
-      </div>
-    )
-  }
-
-  if (!brand) {
-    return (
-      <div className="px-6 py-10">
-        <div className="text-gray-700">Brand not found.</div>
-        <Link href="/" className="text-blue-600 underline">Back to Home</Link>
       </div>
     )
   }

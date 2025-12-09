@@ -134,7 +134,7 @@ function useFavoritesFallback(userId?: string): UseFavoritesReturn {
 
 // Main version that uses Clerk hooks
 function useFavoritesInner(userId?: string): UseFavoritesReturn {
-  // useUser must be called unconditionally (React Hooks rule)
+  // Always call useUser unconditionally to follow React Hooks rules
   // If ClerkProvider is not available, this will throw an error
   // Components using this hook should wrap it in an error boundary
   const { user } = useUser()
@@ -301,18 +301,18 @@ function useFavoritesInner(userId?: string): UseFavoritesReturn {
   }
 }
 
-// Export function - conditionally use the right version
-// If Clerk is not configured, use fallback version that doesn't use Clerk hooks
+// Export function - always call hooks in the same order
+// This ensures React Hooks rules are followed
 export function useFavorites(userId?: string): UseFavoritesReturn {
-  // If Clerk is not configured, use fallback version
-  // This avoids calling useUser when ClerkProvider is not available
-  if (!isClerkConfigured) {
-    return useFavoritesFallback(userId)
-  }
-
-  // If Clerk is configured, try to use the main version
-  // If ClerkProvider is not available, this will throw an error
-  // Components should wrap this in an error boundary
+  // Always call useUser hook unconditionally to follow React Hooks rules
+  // If Clerk is not configured, useUser will throw, which should be caught by error boundaries
+  // Components using this hook should wrap it in an error boundary if Clerk might not be configured
+  
+  // Always call useUser unconditionally - this follows React Hooks rules
+  // If ClerkProvider is not available, this will throw and should be handled by error boundaries
+  // For environments without Clerk, components should use useFavoritesFallback directly
+  // or wrap useFavorites in an error boundary that falls back to useFavoritesFallback
+  
   return useFavoritesInner(userId)
 }
 
