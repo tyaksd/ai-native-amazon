@@ -1054,18 +1054,3 @@ export default function ProductDetail(props: PageProps) {
     </ClerkErrorBoundary>
   )
 }
-
-// Outer component that conditionally renders based on Clerk configuration
-export default function ProductDetail(props: PageProps) {
-  // If Clerk is not configured, use fallback component
-  if (!isClerkConfigured) {
-    return <ProductDetailFallback {...props} />
-  }
-
-  // If Clerk is configured, use error boundary with fallback
-  return (
-    <ClerkErrorBoundary fallback={<ProductDetailFallback {...props} />}>
-      <ProductDetailInner {...props} />
-    </ClerkErrorBoundary>
-  )
-}
