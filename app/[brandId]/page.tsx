@@ -1185,7 +1185,7 @@ function BrandPageInner({ params }: PageProps) {
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
             <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">
-              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+              <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden ml-3">
                 <Image 
                   src={brand.icon} 
                   alt={brand.name} 
@@ -1194,11 +1194,11 @@ function BrandPageInner({ params }: PageProps) {
                   className="object-cover rounded"
                 />
               </div>
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
+              <h2 className="text-2xl px-3 font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
               
               {/* Category Navigation Tabs */}
-              <div className="mt-2 w-full">
-                <div className="flex flex-wrap gap-2 border-b border-white/30">
+              <div className=" w-full">
+                <div className="flex flex-wrap gap-2 border-b border-white/30 px-3">
                   <button
                     onClick={() => setSelectedTab('all')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
@@ -1223,9 +1223,9 @@ function BrandPageInner({ params }: PageProps) {
               </div>
               
               {/* Filters */}
-              <div className="mt-4 w-full">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-white">Filter by type:</label>
+              <div className="mt-1 w-full">
+                <div className="flex items-center">
+                  <label className="text-sm font-medium text-white px-3">Filter by type:</label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
@@ -1383,7 +1383,7 @@ function BrandPageInner({ params }: PageProps) {
                               initialFavoriteState={isFavorited(p.id)}
                             />
                           </div>
-                          <div className="mt-3 ml-2">
+                          <div className="mt-2 ml-2">
                             <h3 className="font-medium text-white truncate drop-shadow-lg">{p.name}</h3>
                             <div className="flex items-center justify-between mt-1">
                               <p className="text-sm text-white drop-shadow-lg">{formatUSD(p.price)}</p>
