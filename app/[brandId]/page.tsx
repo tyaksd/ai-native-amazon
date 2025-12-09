@@ -381,7 +381,7 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       
       {/* Brand Logo Space */}
       {!hideHeader && (
-      <div className="relative z-10 pb-4">
+      <div className="relative z-20 pb-4">
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
             <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">
@@ -574,7 +574,7 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
           </div>
           
           {/* Navigation Buttons and Follow Button */}
-          <div className="absolute top-16 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
+          <div className="absolute top-16 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0 z-20" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -685,7 +685,7 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto py-7">
+      <div className="relative z-20 max-w-7xl mx-auto py-7">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Products Grid - Desktop Only */}
           <div className="lg:col-span-2 hidden lg:block">
@@ -1181,7 +1181,7 @@ function BrandPageInner({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-10 pb-4" style={{ pointerEvents: 'auto' }}>
+      <div className="relative z-20 pb-4" style={{ pointerEvents: 'auto' }}>
         <div className="flex items-end justify-between">
           <div className="flex flex-col items-start gap-3 flex-1">
             <div className="flex flex-col items-start gap-3 transform translate-y-8 w-full">
@@ -1402,7 +1402,7 @@ function BrandPageInner({ params }: PageProps) {
           </div>
           
           {/* Navigation Buttons and Follow Button */}
-          <div className="absolute top-5 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
+          <div className="absolute top-16 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0 z-20" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -1469,7 +1469,7 @@ function BrandPageInner({ params }: PageProps) {
               WebkitTapHighlightColor: 'transparent'
             }}
             className={`
-              px-4 py-1.5 rounded-lg backdrop-blur-md border 
+              px-3 py-1 rounded-lg backdrop-blur-md border 
               transition-all duration-200 hover:scale-105 
               text-sm font-medium
               ${isFollowed
@@ -1514,7 +1514,7 @@ function BrandPageInner({ params }: PageProps) {
       {/* Main Content - reuse the same structure as BrandPageWithoutClerk */}
       {/* For brevity, we'll reuse BrandPageWithoutClerk's JSX structure */}
       {/* In a real implementation, you'd copy the full JSX here */}
-      <div className="relative z-10" style={{ marginTop: '-5rem', pointerEvents: 'none' }}>
+      <div className="relative" style={{ marginTop: '-5rem', pointerEvents: 'none' }}>
         <div style={{ pointerEvents: 'auto' }}>
           <BrandPageWithoutClerk params={params} hideHeader={true} />
         </div>
