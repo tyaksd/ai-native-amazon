@@ -217,7 +217,18 @@ type PageProps = {
 };
 
 // Fallback version that doesn't use Clerk hooks
-function ProductDetailFallback({ params }: PageProps) {
+// Component that renders the page without Clerk features (fallback)
+// Can also be used by Inner component with authentication props
+function ProductDetailFallback({ 
+  params,
+  user: providedUser,
+  isFavorited: providedIsFavorited,
+  checkFavorites: providedCheckFavorites
+}: PageProps & {
+  user?: { id?: string } | null
+  isFavorited?: (productId: string) => boolean
+  checkFavorites?: (productIds: string[]) => Promise<void>
+}) {
   const resolvedParams = use(params)
   const productId = resolvedParams.id
   const [product, setProduct] = useState<Product | null>(null)
@@ -241,10 +252,12 @@ function ProductDetailFallback({ params }: PageProps) {
   // UUID validation regex - defined once at the top
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
-  // Use the favorites hook (this already handles Clerk fallback)
-  const { isFavorited, checkFavorites } = useFavorites()
-  // No user in fallback - use null with explicit type
-  const user: { id?: string } | null = null as { id?: string } | null
+  // Use provided favorites hooks or fallback to useFavorites
+  const fallbackFavorites = useFavorites()
+  const isFavorited = providedIsFavorited ?? fallbackFavorites.isFavorited
+  const checkFavorites = providedCheckFavorites ?? fallbackFavorites.checkFavorites
+  // Use provided user or fallback to null (for fallback mode)
+  const user: { id?: string } | null = providedUser ?? null
 
   useEffect(() => {
     const loadData = async () => {
@@ -1004,129 +1017,11 @@ function ProductDetailFallback({ params }: PageProps) {
 
 // Main version that uses Clerk hooks
 function ProductDetailInner({ params }: PageProps) {
-  const resolvedParams = use(params)
-  const productId = resolvedParams.id
-  const [product, setProduct] = useState<Product | null>(null)
-  const [brand, setBrand] = useState<Brand | null>(null)
-  const [brandProducts, setBrandProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [quantity, setQuantity] = useState(1)
-  const [showCopied, setShowCopied] = useState(false)
-  const [selectedColor, setSelectedColor] = useState<string>('')
-  const [selectedSize, setSelectedSize] = useState<string>('')
-  const [showNotice, setShowNotice] = useState(false)
-  const [noticeMessage, setNoticeMessage] = useState('')
-  const [showAdded, setShowAdded] = useState(false)
-  const [addedMessage, setAddedMessage] = useState('')
-  const [colorImageMap, setColorImageMap] = useState<{[key: string]: number}>({})
-  const [isImageTransitioning, setIsImageTransitioning] = useState(false)
-  const prevSelectedColorRef = useRef<string>('')
-  const selectedImageIndexRef = useRef<number>(0)
-  
-  // UUID validation regex - defined once at the top
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  
-  // Use the favorites hook
+  const { user, isLoaded } = useUser()
   const { isFavorited, checkFavorites } = useFavorites()
-  // If ClerkProvider is not available, this will throw an error
-  // Components using this hook should wrap it in an error boundary
-  const { user } = useUser()
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const productData = await getProductById(productId)
-        if (productData) {
-          setProduct(productData)
-          const brandData = await getBrandById(productData.brand_id)
-          setBrand(brandData)
-          
-          // Get other products from the same brand (excluding current product)
-          const allBrandProducts = await getProductsByBrand(productData.brand_id)
-          const otherBrandProducts = allBrandProducts.filter(p => p.id !== productData.id).slice(0, 4)
-          setBrandProducts(otherBrandProducts)
-          
-          // Create color to image mapping
-          if (productData.colors && productData.images) {
-            const mapping: {[key: string]: number} = {}
-            productData.colors.forEach((color, index) => {
-              // Map each color to its corresponding image index
-              // If there are more colors than images, cycle through images
-              mapping[color] = index % productData.images.length
-            })
-            setColorImageMap(mapping)
-          }
-          
-          // Check favorites for current product and related products
-          const allProductIds = [productData.id, ...otherBrandProducts.map(p => p.id)]
-          await checkFavorites(allProductIds)
-        } else {
-          // Product not found - this could be due to invalid ID format or deleted product
-          console.error('Product not found for ID:', productId)
-          setProduct(null)
-        }
-      } catch (error) {
-        console.error('Error loading product:', error)
-        setProduct(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadData()
-  }, [productId, checkFavorites])
-
-  // If there is exactly one available color, auto-select it
-  useEffect(() => {
-    if (product?.colors && product.colors.length === 1 && !selectedColor) {
-      setSelectedColor(product.colors[0])
-    }
-  }, [product, selectedColor])
-
-  // Function to handle image switching with fade animation
-  const switchImageWithAnimation = (newImageIndex: number) => {
-    // Only trigger animation if the image index is actually changing
-    if (newImageIndex !== selectedImageIndexRef.current) {
-      // Start fade out
-      setIsImageTransitioning(true)
-      // After fade out completes, change image and fade in
-      setTimeout(() => {
-        setSelectedImageIndex(newImageIndex)
-        selectedImageIndexRef.current = newImageIndex
-        // Small delay before fade in to ensure smooth transition
-        setTimeout(() => {
-          setIsImageTransitioning(false)
-        }, 20)
-      }, 100) // Match the transition duration
-    }
-  }
-
-  // Handle color selection and image switching with fade animation
-  useEffect(() => {
-    if (selectedColor && colorImageMap[selectedColor] !== undefined) {
-      const newImageIndex = colorImageMap[selectedColor]
-      // Only trigger animation if the color is actually changing
-      if (selectedColor !== prevSelectedColorRef.current) {
-        // Check if image index is actually changing
-        if (newImageIndex !== selectedImageIndexRef.current) {
-          switchImageWithAnimation(newImageIndex)
-        } else {
-          // Color changed but image index is the same, just update without animation
-          setSelectedImageIndex(newImageIndex)
-          selectedImageIndexRef.current = newImageIndex
-        }
-        // Update the ref to track the previous color
-        prevSelectedColorRef.current = selectedColor
-      }
-    }
-  }, [selectedColor, colorImageMap])
-  
-  // Update ref when selectedImageIndex changes (e.g., from thumbnail clicks)
-  useEffect(() => {
-    selectedImageIndexRef.current = selectedImageIndex
-  }, [selectedImageIndex])
-
-  if (loading) {
+  // Wait for Clerk to load
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-black">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
@@ -1134,17 +1029,16 @@ function ProductDetailInner({ params }: PageProps) {
     )
   }
 
-  if (!product) {
-    return (
-      <div className="px-6 py-10">
-        <div className="text-gray-700">Product not found.</div>
-        <Link href="/" className="text-blue-600 underline">Back to Home</Link>
-      </div>
-    );
-  }
-
+  // Reuse ProductDetailFallback for layout - only authentication logic differs
   return (
-    <div className=" pt-0 pb-0 bg-white  relative">
+    <ProductDetailFallback 
+      params={params}
+      user={user}
+      isFavorited={isFavorited}
+      checkFavorites={checkFavorites}
+    />
+  )
+}
       {/* Copied Banner */}
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">

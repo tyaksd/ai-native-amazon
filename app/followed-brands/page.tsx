@@ -187,28 +187,38 @@ function getStyleDisplayName(style: string | null | undefined): string {
 }
 
 // Fallback component that doesn't use Clerk hooks
-function FollowedBrandsPageFallback() {
+// Can also be used by Inner component with authentication props
+function FollowedBrandsPageFallback({ 
+  user: providedUser,
+  clerkId: providedClerkId
+}: {
+  user?: { id?: string } | null
+  clerkId?: string | null
+} = {}) {
   const [followedBrands, setFollowedBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const user = providedUser ?? null
+  const clerkId = providedClerkId ?? null
 
   useEffect(() => {
     const loadFollowedBrands = async () => {
       try {
         setLoading(true)
         
-        // Get session_id for non-logged-in users
-        let sessionId = localStorage.getItem('session_id')
-        if (!sessionId) {
-          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-          localStorage.setItem('session_id', sessionId)
+        const currentUserId = getUserIdentifier(user)
+        if (!currentUserId) {
+          setFollowedBrands([])
+          return
         }
         
-        // Get followed brand IDs using session_id
+        const isLoggedIn = !!(clerkId && user?.id)
+        
+        // Get followed brand IDs - use clerk_id if logged in, otherwise session_id
         const { data: follows, error: followsError } = await supabase
           .from('brand_follows')
           .select('brand_id')
-          .eq('session_id', sessionId)
+          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
           .order('created_at', { ascending: false })
 
         if (followsError) {
@@ -247,7 +257,7 @@ function FollowedBrandsPageFallback() {
     }
 
     loadFollowedBrands()
-  }, [])
+  }, [user, clerkId])
 
   if (loading) {
     return (
@@ -315,74 +325,9 @@ function FollowedBrandsPageFallback() {
 // Main component that uses Clerk hooks
 function FollowedBrandsPageInner() {
   const { user, isLoaded } = useUser()
-  const [followedBrands, setFollowedBrands] = useState<Brand[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadFollowedBrands = async () => {
-      // Wait for Clerk to load if configured
-      if (isLoaded === false) {
-        return
-      }
-      
-      try {
-        setLoading(true)
-        
-        const currentUserId = getUserIdentifier(user)
-        if (!currentUserId) {
-          setFollowedBrands([])
-          return
-        }
-        
-        const isLoggedIn = !!user?.id
-        
-        // Get followed brand IDs - use clerk_id if logged in, otherwise session_id
-        const { data: follows, error: followsError } = await supabase
-          .from('brand_follows')
-          .select('brand_id')
-          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
-          .order('created_at', { ascending: false })
-
-        if (followsError) {
-          console.error('Error loading followed brands:', followsError)
-          setError('Failed to load followed brands')
-          return
-        }
-
-        if (!follows || follows.length === 0) {
-          setFollowedBrands([])
-          return
-        }
-
-        // Get brand details for each followed brand
-        const brands = await Promise.all(
-          follows.map(async (follow) => {
-            try {
-              const brand = await getBrandById(follow.brand_id)
-              return brand
-            } catch (error) {
-              console.error(`Error loading brand ${follow.brand_id}:`, error)
-              return null
-            }
-          })
-        )
-
-        // Filter out null brands (brands that might have been deleted)
-        const validBrands = brands.filter((brand): brand is Brand => brand !== null)
-        setFollowedBrands(validBrands)
-      } catch (error) {
-        console.error('Error loading followed brands:', error)
-        setError('Failed to load followed brands')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadFollowedBrands()
-  }, [user, isLoaded])
-
-  if (isLoaded === false) {
+  // Wait for Clerk to load
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-black">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
@@ -390,66 +335,12 @@ function FollowedBrandsPageInner() {
     )
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="px-6 py-10 bg-black min-h-screen">
-        <div className="text-red-600 mb-4">{error}</div>
-        <Link href="/" className="text-blue-400 underline">Back to Home</Link>
-      </div>
-    )
-  }
-
-  if (followedBrands.length === 0) {
-    return (
-      <div className="px-6 py-10 text-center bg-black min-h-screen">
-        <div className="text-gray-400 text-lg mb-4">No followed brands yet</div>
-        <p className="text-gray-500 mb-6">Start exploring and follow brands you love!</p>
-        <Link 
-          href="/brands" 
-          className="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-        >
-          Explore Brands
-        </Link>
-      </div>
-    )
-  }
-
+  // Reuse FollowedBrandsPageFallback for layout - only authentication logic differs
   return (
-    <div className="px-3 sm:px-10 py-6 bg-black min-h-screen">
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-white mb-2">FOLLOWED BRANDS</h1>
-        <p className="text-gray-400">{followedBrands.length} brand(s) you&apos;re following</p>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {followedBrands.map((brand) => (
-          <div key={brand.id}>
-            {/* Mobile: CompactBrandCard */}
-            <div className="block sm:hidden">
-              <CompactBrandCard 
-                brand={brand} 
-                getStyleDisplayName={getStyleDisplayName}
-              />
-            </div>
-            {/* Tablet/Desktop: BrandCard */}
-            <div className="hidden sm:block">
-              <BrandCard 
-                brand={brand} 
-                getStyleDisplayName={getStyleDisplayName}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <FollowedBrandsPageFallback 
+      user={user}
+      clerkId={user?.id || null}
+    />
   )
 }
 

@@ -335,15 +335,23 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const filteredProducts = data.filter(product => {
     const productName = product.name.toLowerCase()
     
-    // First check: simple substring match (e.g., "kaiju" matches "KAIJU Brand")
-    if (productName.includes(queryLower)) {
+    // First check: name starts with query (e.g., "s" matches "shirt" but not "ahsj")
+    if (productName.startsWith(queryLower)) {
       return true
     }
     
-    // Second check: match query characters to first letters of words
+    // Second check: any word starts with query (e.g., "s" matches "Ajdhj Sjdcj" because "Sjdcj" starts with "s")
     // Split product name into words (by spaces)
     const words = productName.split(/\s+/).filter((word: string) => word.length > 0)
     
+    // Check if any word starts with the query
+    for (const word of words) {
+      if (word.startsWith(queryLower)) {
+        return true
+      }
+    }
+    
+    // Third check: match query characters to first letters of words
     // Get the first letter of each word
     const firstLetters = words.map((word: string) => word.charAt(0))
     
@@ -392,15 +400,23 @@ export async function searchBrands(query: string): Promise<Brand[]> {
   const filteredBrands = data.filter(brand => {
     const brandName = brand.name.toLowerCase()
     
-    // First check: simple substring match (e.g., "kaiju" matches "KAIJU")
-    if (brandName.includes(queryLower)) {
+    // First check: name starts with query (e.g., "s" matches "shirt" but not "ahsj")
+    if (brandName.startsWith(queryLower)) {
       return true
     }
     
-    // Second check: match query characters to first letters of words
+    // Second check: any word starts with query (e.g., "s" matches "Ajdhj Sjdcj" because "Sjdcj" starts with "s")
     // Split brand name into words (by spaces)
     const words = brandName.split(/\s+/).filter((word: string) => word.length > 0)
     
+    // Check if any word starts with the query
+    for (const word of words) {
+      if (word.startsWith(queryLower)) {
+        return true
+      }
+    }
+    
+    // Third check: match query characters to first letters of words
     // Get the first letter of each word
     const firstLetters = words.map((word: string) => word.charAt(0))
     

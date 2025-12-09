@@ -61,22 +61,21 @@ function getUserId(user: { id?: string } | null | undefined): string | null {
 }
 
 // Fallback component that doesn't use Clerk hooks (for non-ClerkProvider environments)
-function BrandFollowButtonFallback({ brandId, className = '', initialFollowState }: BrandFollowButtonProps) {
+// Can also be used by Inner component with authentication props
+function BrandFollowButtonFallback({ 
+  brandId, 
+  className = '', 
+  initialFollowState,
+  user: providedUser,
+  clerkId: providedClerkId
+}: BrandFollowButtonProps & {
+  user?: { id?: string } | null
+  clerkId?: string | null
+}) {
   const [isFollowed, setIsFollowed] = useState(initialFollowState || false)
   const [isLoading, setIsLoading] = useState(false)
-
-  // Get session_id for non-logged-in users
-  const getSessionId = (): string | null => {
-    if (typeof window !== 'undefined') {
-      let sessionId = localStorage.getItem('session_id')
-      if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        localStorage.setItem('session_id', sessionId)
-      }
-      return sessionId
-    }
-    return null
-  }
+  const user = providedUser ?? null
+  const clerkId = providedClerkId ?? null
 
   // Check if brand is followed
   useEffect(() => {
@@ -87,16 +86,18 @@ function BrandFollowButtonFallback({ brandId, className = '', initialFollowState
 
     const checkFollow = async () => {
       try {
-        const sessionId = getSessionId()
-        if (!sessionId) {
+        const currentUserId = getUserId(user)
+        if (!currentUserId) {
           setIsFollowed(false)
           return
         }
+
+        const isLoggedIn = !!(clerkId && user?.id)
         
         const { data, error } = await supabase
           .from('brand_follows')
           .select('id')
-          .eq('session_id', sessionId)
+          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
           .eq('brand_id', brandId)
           .maybeSingle()
 
@@ -112,7 +113,7 @@ function BrandFollowButtonFallback({ brandId, className = '', initialFollowState
     }
 
     checkFollow()
-  }, [brandId, initialFollowState])
+  }, [brandId, initialFollowState, user, clerkId])
 
   const toggleFollow = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -120,17 +121,19 @@ function BrandFollowButtonFallback({ brandId, className = '', initialFollowState
     
     if (isLoading) return
 
-    const sessionId = getSessionId()
-    if (!sessionId) return
+    const currentUserId = getUserId(user)
+    if (!currentUserId) return
 
     setIsLoading(true)
     try {
+      const isLoggedIn = !!(clerkId && user?.id)
+
       if (isFollowed) {
         // Unfollow brand
         const { error } = await supabase
           .from('brand_follows')
           .delete()
-          .eq('session_id', sessionId)
+          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
           .eq('brand_id', brandId)
 
         if (error) {
@@ -140,13 +143,21 @@ function BrandFollowButtonFallback({ brandId, className = '', initialFollowState
         }
       } else {
         // Follow brand
+        const insertData = isLoggedIn
+          ? {
+              clerk_id: currentUserId,
+              brand_id: brandId,
+              session_id: null
+            }
+          : {
+              session_id: currentUserId,
+              brand_id: brandId,
+              clerk_id: null
+            }
+
         const { error } = await supabase
           .from('brand_follows')
-          .insert({
-            session_id: sessionId,
-            brand_id: brandId,
-            clerk_id: null
-          })
+          .insert(insertData)
 
         if (error) {
           console.error('Error following brand:', error)
@@ -197,141 +208,20 @@ function BrandFollowButtonFallback({ brandId, className = '', initialFollowState
 function BrandFollowButtonInner({ brandId, className = '', initialFollowState }: BrandFollowButtonProps) {
   const { user, isLoaded } = useUser()
 
-  const [isFollowed, setIsFollowed] = useState(initialFollowState || false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Check if brand is followed - only if initialFollowState is not provided
-  useEffect(() => {
-    if (!isLoaded) return
-
-    if (initialFollowState !== undefined) {
-      setIsFollowed(initialFollowState)
-      return
-    }
-
-    const checkFollow = async () => {
-      try {
-        const currentUserId = getUserId(user)
-        if (!currentUserId) {
-          setIsFollowed(false)
-          return
-        }
-
-        const isLoggedIn = !!user?.id
-        
-        const { data, error } = await supabase
-          .from('brand_follows')
-          .select('id')
-          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
-          .eq('brand_id', brandId)
-          .maybeSingle()
-
-        if (error) {
-          console.error('Error checking brand follow:', error)
-          return
-        }
-        
-        setIsFollowed(!!data)
-      } catch (error) {
-        console.error('Error checking brand follow:', error)
-      }
-    }
-
-    checkFollow()
-  }, [brandId, user?.id, initialFollowState, isLoaded, user])
-
-  const toggleFollow = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (isLoading) return
-
-    const currentUserId = getUserId(user)
-    if (!currentUserId) return
-
-    setIsLoading(true)
-    try {
-      const isLoggedIn = !!user?.id
-
-      if (isFollowed) {
-        // Unfollow brand
-        const { error } = await supabase
-          .from('brand_follows')
-          .delete()
-          .eq(isLoggedIn ? 'clerk_id' : 'session_id', currentUserId)
-          .eq('brand_id', brandId)
-
-        if (error) {
-          console.error('Error unfollowing brand:', error)
-        } else {
-          setIsFollowed(false)
-        }
-      } else {
-        // Follow brand
-        const insertData = isLoggedIn
-          ? {
-              clerk_id: currentUserId,
-              brand_id: brandId,
-              session_id: null
-            }
-          : {
-              session_id: currentUserId,
-              brand_id: brandId,
-              clerk_id: null
-            }
-
-        const { error } = await supabase
-          .from('brand_follows')
-          .insert(insertData)
-
-        if (error) {
-          console.error('Error following brand:', error)
-        } else {
-          setIsFollowed(true)
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling brand follow:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Show button for both logged-in and non-logged-in users
+  // Wait for Clerk to load
   if (!isLoaded) {
     return null
   }
 
+  // Reuse BrandFollowButtonFallback for layout - only authentication logic differs
   return (
-    <button
-      onClick={toggleFollow}
-      disabled={isLoading}
-      className={`absolute top-2 right-2 z-20 flex items-center justify-center w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg transition-all duration-200 hover:bg-white/20 hover:scale-110 ${
-        isFollowed
-          ? 'text-black'
-          : 'text-white'
-      } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
-      title={isFollowed ? 'Unfollow brand' : 'Follow brand'}
-    >
-      {isLoading ? (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <svg
-          className="w-5 h-5"
-          stroke="currentColor"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2.5}
-        >
-          {/* Plus icon (cross) - always shown */}
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
-      )}
-    </button>
+    <BrandFollowButtonFallback 
+      brandId={brandId}
+      className={className}
+      initialFollowState={initialFollowState}
+      user={user}
+      clerkId={user?.id || null}
+    />
   )
 }
 

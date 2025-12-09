@@ -66,11 +66,25 @@ function getUserIdentifier(user: { id?: string } | null | undefined, userId?: st
 }
 
 // Fallback component that doesn't use Clerk hooks
-function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteRemoved, initialFavoriteState }: FavoriteButtonProps) {
+// Can also be used by Inner component with authentication props
+function FavoriteButtonFallback({ 
+  productId, 
+  userId, 
+  className = '', 
+  onFavoriteRemoved, 
+  initialFavoriteState,
+  user: providedUser,
+  clerkId: providedClerkId
+}: FavoriteButtonProps & {
+  user?: { id?: string } | null
+  clerkId?: string | null
+}) {
   const [isFavorited, setIsFavorited] = useState(initialFavoriteState || false)
   const [isLoading, setIsLoading] = useState(false)
   const [showMessage, setShowMessage] = useState(false)
   const [message, setMessage] = useState('')
+  const user = providedUser ?? null
+  const clerkId = providedClerkId ?? null
 
   // Check if product is favorited - only if initialFavoriteState is not provided
   useEffect(() => {
@@ -81,15 +95,27 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
 
     const checkFavorite = async () => {
       try {
-        const currentUserId = getUserIdentifier(null, userId)
+        const currentUserId = getUserIdentifier(user, userId)
         if (!currentUserId) return
         
-        const { data, error } = await supabase
-          .from('favorites')
-          .select('id')
-          .eq('session_id', currentUserId)
-          .eq('product_id', productId)
-          .maybeSingle()
+        const isLoggedIn = !!(clerkId && user?.id)
+        
+        // Use clerk_id if logged in, otherwise use session_id
+        const query = isLoggedIn
+          ? supabase
+              .from('favorites')
+              .select('id')
+              .eq('clerk_id', currentUserId)
+              .eq('product_id', productId)
+              .maybeSingle()
+          : supabase
+              .from('favorites')
+              .select('id')
+              .eq('session_id', currentUserId)
+              .eq('product_id', productId)
+              .maybeSingle()
+        
+        const { data, error } = await query
 
         if (error) {
           console.error('Error checking favorite:', error)
@@ -103,23 +129,33 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
     }
 
     checkFavorite()
-  }, [productId, userId, initialFavoriteState])
+  }, [productId, userId, initialFavoriteState, user, clerkId])
 
   const toggleFavorite = async () => {
     if (isLoading) return
 
     setIsLoading(true)
     try {
-      const currentUserId = getUserIdentifier(null, userId)
+      const currentUserId = getUserIdentifier(user, userId)
       if (!currentUserId) return
+      
+      const isLoggedIn = !!(clerkId && user?.id)
 
       if (isFavorited) {
         // Remove from favorites
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('session_id', currentUserId)
-          .eq('product_id', productId)
+        const deleteQuery = isLoggedIn
+          ? supabase
+              .from('favorites')
+              .delete()
+              .eq('clerk_id', currentUserId)
+              .eq('product_id', productId)
+          : supabase
+              .from('favorites')
+              .delete()
+              .eq('session_id', currentUserId)
+              .eq('product_id', productId)
+        
+        const { error } = await deleteQuery
 
         if (error) {
           console.error('Error removing favorite:', error)
@@ -133,12 +169,20 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
         }
       } else {
         // Add to favorites
+        // For logged-in users, use clerk_id; for non-logged-in users, use session_id
+        const insertData = isLoggedIn
+          ? {
+              clerk_id: currentUserId,
+              product_id: productId
+            }
+          : {
+              session_id: currentUserId,
+              product_id: productId
+            }
+        
         const { error } = await supabase
           .from('favorites')
-          .insert({
-            session_id: currentUserId,
-            product_id: productId
-          })
+          .insert(insertData)
 
         if (error) {
           console.error('Error adding favorite:', error)
@@ -206,172 +250,18 @@ function FavoriteButtonFallback({ productId, userId, className = '', onFavoriteR
 // Inner component that uses Clerk hooks
 function FavoriteButtonInner({ productId, userId, className = '', onFavoriteRemoved, initialFavoriteState }: FavoriteButtonProps) {
   const { user } = useUser()
-  const [isFavorited, setIsFavorited] = useState(initialFavoriteState || false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showMessage, setShowMessage] = useState(false)
-  const [message, setMessage] = useState('')
 
-  // Get user ID: prefer Clerk ID if logged in, otherwise use session_id
-  const getUserId = useCallback(() => {
-    return getUserIdentifier(user, userId) || ''
-  }, [userId, user])
-
-  // Check if product is favorited - only if initialFavoriteState is not provided
-  useEffect(() => {
-    if (initialFavoriteState !== undefined) {
-      setIsFavorited(initialFavoriteState)
-      return
-    }
-
-    const checkFavorite = async () => {
-      try {
-        const currentUserId = getUserId()
-        const isLoggedIn = !!user?.id
-        
-        // Use clerk_id if logged in, otherwise use session_id
-        const query = isLoggedIn
-          ? supabase
-              .from('favorites')
-              .select('id')
-              .eq('clerk_id', currentUserId)
-              .eq('product_id', productId)
-              .maybeSingle()
-          : supabase
-              .from('favorites')
-              .select('id')
-              .eq('session_id', currentUserId)
-              .eq('product_id', productId)
-              .maybeSingle()
-
-        const { data, error } = await query
-
-        if (error) {
-          console.error('Error checking favorite:', error)
-          return
-        }
-        
-        setIsFavorited(!!data)
-      } catch (error) {
-        console.error('Error checking favorite:', error)
-      }
-    }
-
-    checkFavorite()
-  }, [productId, getUserId, initialFavoriteState, user])
-
-  const toggleFavorite = async () => {
-    if (isLoading) return
-
-    setIsLoading(true)
-    try {
-      const currentUserId = getUserId()
-      const isLoggedIn = !!user?.id
-
-      if (isFavorited) {
-        // Remove from favorites
-        const deleteQuery = isLoggedIn
-          ? supabase
-              .from('favorites')
-              .delete()
-              .eq('clerk_id', currentUserId)
-              .eq('product_id', productId)
-          : supabase
-              .from('favorites')
-              .delete()
-              .eq('session_id', currentUserId)
-              .eq('product_id', productId)
-
-        const { error } = await deleteQuery
-
-        if (error) {
-          console.error('Error removing favorite:', error)
-          setMessage('Failed to remove from favorites')
-          setShowMessage(true)
-          setTimeout(() => setShowMessage(false), 2000)
-        } else {
-          setIsFavorited(false)
-          // Don't show message when removing from favorites
-          onFavoriteRemoved?.(productId)
-        }
-      } else {
-        // Add to favorites
-        // For logged-in users, use clerk_id; for non-logged-in users, use session_id
-        const insertData = isLoggedIn
-          ? {
-              clerk_id: currentUserId,
-              product_id: productId
-            }
-          : {
-              session_id: currentUserId,
-              product_id: productId
-            }
-        
-        console.log('Adding favorite:', { insertData, isLoggedIn, currentUserId, user: user?.id })
-
-        const { error } = await supabase
-          .from('favorites')
-          .insert(insertData)
-
-        if (error) {
-          console.error('Error adding favorite:', error)
-          setMessage('Failed to add to favorites')
-          setShowMessage(true)
-          setTimeout(() => setShowMessage(false), 2000)
-        } else {
-          setIsFavorited(true)
-          setMessage('Added to favorites')
-          setShowMessage(true)
-          setTimeout(() => setShowMessage(false), 2000)
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error)
-      setMessage('Something went wrong')
-      setShowMessage(true)
-      setTimeout(() => setShowMessage(false), 2000)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+  // Reuse FavoriteButtonFallback for layout - only authentication logic differs
   return (
-    <>
-      <button
-        onClick={toggleFavorite}
-        disabled={isLoading}
-        className={`flex items-center justify-center p-2 rounded-md transition-all duration-200 ${
-          isFavorited
-            ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100'
-            : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
-        } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
-        title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-      >
-        {isLoading ? (
-          <div className="w-7 h-7 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <svg
-            className="w-7 h-7"
-            fill={isFavorited ? 'currentColor' : 'none'}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        )}
-      </button>
-      
-      {/* Message Banner */}
-      {showMessage && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-          {message}
-        </div>
-      )}
-    </>
+    <FavoriteButtonFallback 
+      productId={productId}
+      userId={userId}
+      className={className}
+      onFavoriteRemoved={onFavoriteRemoved}
+      initialFavoriteState={initialFavoriteState}
+      user={user}
+      clerkId={user?.id || null}
+    />
   )
 }
 
