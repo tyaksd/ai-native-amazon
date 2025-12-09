@@ -304,14 +304,15 @@ function useFavoritesInner(userId?: string): UseFavoritesReturn {
 // Export function - always call hooks in the same order
 // This ensures React Hooks rules are followed
 export function useFavorites(userId?: string): UseFavoritesReturn {
-  // If Clerk is not configured, use the fallback version directly
-  // This avoids calling useUser when ClerkProvider is not available
-  if (!isClerkConfigured) {
-    return useFavoritesFallback(userId)
-  }
+  // Always call useUser unconditionally to follow React Hooks rules
+  // If Clerk is not configured, useUser will throw, which should be caught by error boundaries
+  // Components using this hook should wrap it in an error boundary if Clerk might not be configured
   
-  // If Clerk is configured, use the version that calls useUser
-  // This will throw if ClerkProvider is not available, which should be caught by error boundaries
+  // Always call useUser unconditionally - this follows React Hooks rules
+  // If ClerkProvider is not available, this will throw and should be handled by error boundaries
+  // For environments without Clerk, components should use useFavoritesFallback directly
+  // or wrap useFavorites in an error boundary that falls back to useFavoritesFallback
+  
   return useFavoritesInner(userId)
 }
 

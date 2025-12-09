@@ -521,7 +521,7 @@ function ProductDetailFallback({ params }: PageProps) {
                     <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
                     <li>• 100% cotton face</li>
                   </ul>
-                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it&apos;s perfect for everyday use.</p>
                   <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                 </div>
               </div>
@@ -967,7 +967,7 @@ function ProductDetailFallback({ params }: PageProps) {
                       <li>• 100% cotton face</li>
                       <li>• Front pouch pocket</li>
                   </ul>
-                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it’s perfect for everyday use.</p>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it&apos;s perfect for everyday use.</p>
                   <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                   </div>
                 </div>
@@ -1308,7 +1308,7 @@ function ProductDetailInner({ params }: PageProps) {
                     <li>• Grey: 55% ring-spun cotton, 45% polyester</li>
                     <li>• 100% cotton face</li>
                   </ul>
-                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it's perfect for everyday use.</p>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it&apos;s perfect for everyday use.</p>
                   <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                 </div>
               </div>
@@ -1754,7 +1754,7 @@ function ProductDetailInner({ params }: PageProps) {
                       <li>• 100% cotton face</li>
                       <li>• Front pouch pocket</li>
                   </ul>
-                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it's perfect for everyday use.</p>
+                  <p><strong>Comfort:</strong> This hoodie features a front pouch pocket and matching flat drawstrings, with a 100% cotton exterior that feels soft to the touch. Comfortable and easy to wear, it&apos;s perfect for everyday use.</p>
                   <p className="mt-3 text-sm text-red-600">This product uses a unisex body based on men&apos;s sizing. We recommend that men choose their usual size, and women choose one size down from their regular women&apos;s size.</p>
                   </div>
                 </div>
