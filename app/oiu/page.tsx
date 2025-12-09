@@ -372,7 +372,8 @@ export default function AdminPage() {
         images: finalImages,
         price: Number(newProduct.price),
         is_visible: true,
-        design_png: designPng
+        design_png: designPng,
+        badge: null
       })
       if (product) {
         setProducts(prev => [...prev, product])
