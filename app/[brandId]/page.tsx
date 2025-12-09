@@ -381,19 +381,22 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       
       {/* Brand Logo Space */}
       {!hideHeader && (
-      <div className="relative z-10 h-20 flex items-end justify-between px-3">
-        <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
-          <Image 
-            src={brand.icon} 
-            alt={brand.name} 
-            width={100}
-            height={100}
-            className="object-cover rounded"
-          />
+      <div className="relative z-10 flex items-end px-3 pb-4">
+        <div className="flex flex-col items-start gap-3 transform translate-y-8">
+          <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+            <Image 
+              src={brand.icon} 
+              alt={brand.name} 
+              width={100}
+              height={100}
+              className="object-cover rounded"
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
         </div>
         
         {/* Navigation Buttons and Follow Button */}
-        <div className="relative z-20 flex flex-col items-center gap-2 transform translate-y-8.5 md:translate-y-12" style={{ pointerEvents: 'auto' }}>
+        <div className="absolute top-16 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}
@@ -460,7 +463,7 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
               WebkitTapHighlightColor: 'transparent'
             }}
             className={`
-              px-4 py-1.5 rounded-lg backdrop-blur-md border 
+              px-3 py-1 rounded-lg backdrop-blur-md border 
               transition-all duration-200 hover:scale-105 
               text-sm font-medium
               ${isFollowed
@@ -503,16 +506,12 @@ function BrandPageWithoutClerk({ params, hideHeader = false }: PageProps & { hid
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto py-8">
+      <div className="relative z-10 max-w-7xl mx-auto py-7">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Brand Info */}
           <div className="lg:col-span-2">
-            <div className=" mt-4 px-3">
-              <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg">{brand.name} products</h2>
-            </div>
-
             {/* Category Navigation */}
-            <div className="mb-8 px-3">
+            <div className="mb-6 px-3">
               <div className="flex flex-wrap gap-2 border-b border-white/30">
                 <button
                   onClick={() => setSelectedTab('all')}
@@ -1041,19 +1040,22 @@ function BrandPageInner({ params }: PageProps) {
       )}
       
       {/* Brand Logo Space */}
-      <div className="relative z-30 h-20 flex items-end justify-between px-3" style={{ pointerEvents: 'auto' }}>
-        <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden transform translate-y-8">
-          <Image 
-            src={brand.icon} 
-            alt={brand.name} 
-            width={100}
-            height={100}
-            className="object-cover rounded"
-          />
+      <div className="relative z-30 flex items-end px-3 pb-4" style={{ pointerEvents: 'auto' }}>
+        <div className="flex flex-col items-start gap-3 transform translate-y-8">
+          <div className="w-25 h-25 bg-white/90 rounded-lg shadow-lg overflow-hidden">
+            <Image 
+              src={brand.icon} 
+              alt={brand.name} 
+              width={100}
+              height={100}
+              className="object-cover rounded"
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg whitespace-nowrap">{brand.name} products</h2>
         </div>
         
         {/* Navigation Buttons and Follow Button */}
-        <div className="relative z-50 flex flex-col items-center gap-2 transform translate-y-12 md:translate-y-16" style={{ pointerEvents: 'auto' }}>
+        <div className="absolute top-5 right-3 flex flex-col items-center gap-2 transform -translate-y-4 md:translate-y-0" style={{ pointerEvents: 'auto' }}>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             {/* Previous Brand Navigation Button */}

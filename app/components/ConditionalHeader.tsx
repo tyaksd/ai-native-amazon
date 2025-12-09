@@ -24,7 +24,7 @@ export default function ConditionalHeader() {
 
   return (
     <header id="site-header" className="fixed top-0 left-0 right-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)', height: 'calc(60px + env(safe-area-inset-top))', minHeight: '60px'}}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-10 h-full flex items-center gap-4 justify-center md:justify-between relative">
+      <div className="mx-auto max-w-7xl px-4 sm:px-10 h-full flex items-center gap-4 justify-between relative">
         <MobileMenu />
         <LogoLink />
         <div className="hidden md:flex flex-1">
@@ -80,7 +80,7 @@ export default function ConditionalHeader() {
             />
           </SignedIn>
         </div>
-        <div className="md:hidden absolute  inline-flex items-center  text-gray-300">
+        <div className="md:hidden absolute right-3 inline-flex items-center gap-2 text-gray-300">
           <MobileSearch className="" />
           <Link href="/followed-brands" aria-label="Followed Brands" className="p-1 text-gray-300">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6" strokeWidth={2}>

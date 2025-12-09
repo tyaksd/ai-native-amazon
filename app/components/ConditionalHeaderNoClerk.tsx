@@ -17,7 +17,7 @@ export default function ConditionalHeaderNoClerk() {
 
   return (
     <header id="site-header" className="fixed top-0 left-0 right-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/5 md:supports-[backdrop-filter]:bg-white/10 bg-white/10 md:bg-white/20" style={{paddingTop: 'env(safe-area-inset-top)', height: 'calc(60px + env(safe-area-inset-top))', minHeight: '60px'}}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-10 h-full flex items-center gap-4 justify-center md:justify-between relative">
+      <div className="mx-auto max-w-7xl px-4 sm:px-10 h-full flex items-center gap-4 justify-between relative">
         <MobileMenu />
         <LogoLink />
         <div className="hidden md:flex flex-1">
