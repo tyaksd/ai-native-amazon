@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [productVisibility, setProductVisibility] = useState<{[key: string]: boolean}>({})
+  const [productImageVisibility, setProductImageVisibility] = useState<{[key: string]: boolean}>({})
   
 
   // AI Products form states
@@ -1009,21 +1010,34 @@ export default function AdminPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredProducts.map(product => {
                       const brand = brands.find(b => b.id === product.brand_id)
+                      const showImage = productImageVisibility[product.id] || false
+                      // Only get image URL when showImage is true
+                      const firstImage = showImage && product.images && product.images.length > 0 ? product.images[0] : null
+                      
                       return (
                         <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                          {product.images && product.images.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-1 mb-3">
-                              {product.images.slice(0, 4).map((image, index) => (
-                                <div key={index} className="aspect-square overflow-hidden rounded">
-                                  <Image src={image} alt={`${product.name} ${index + 1}`} width={400} height={400} className="w-full h-full object-cover" />
-                                </div>
-                              ))}
+                          {showImage && firstImage ? (
+                            <div className="mb-3">
+                              <div className="aspect-square overflow-hidden rounded">
+                                <Image src={firstImage} alt={`${product.name}`} width={400} height={400} className="w-full h-full object-cover" />
+                              </div>
                             </div>
                           ) : (
                             <div className="aspect-square bg-gray-200 rounded mb-3 flex items-center justify-center">
-                              <span className="text-gray-500">No images</span>
+                              <span className="text-gray-500">画像非表示</span>
                             </div>
                           )}
+                          <div className="mb-2">
+                            <button
+                              onClick={() => setProductImageVisibility(prev => ({
+                                ...prev,
+                                [product.id]: !prev[product.id]
+                              }))}
+                              className="px-3 py-1 rounded text-sm bg-blue-500 text-white hover:bg-blue-600"
+                            >
+                              {showImage ? '画像を非表示' : '画像を表示'}
+                            </button>
+                          </div>
                           <h3 className="font-semibold text-gray-900">{product.name}</h3>
                           <p className="text-sm text-gray-600">Brand: {brand?.name}</p>
                           <p className="text-sm text-gray-600">Type: {product.type}</p>

@@ -24,7 +24,7 @@ import ConditionalFooterNoClerk from "./components/ConditionalFooterNoClerk";
 // });
 
 export const metadata: Metadata = {
-  title: "Godship - The Next-Gen Streetwear Platform",
+  title: "Godship - Streetwear From Parallel Worlds",
   description: "Discover brands you love and their unique products.",
   icons: {
     icon: "/gblack.png",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Godship",
-    description: "The Next-Gen Streetwear Platform",
+    description: "Streetwear From Parallel Worlds",
     images: [
       {
-        url: "/gblack.png",
+        url: "/gblack2.png",
         width: 1200,
         height: 630,
-        alt: "Godship - The Next-Gen Streetwear Platform",
+        alt: "Godship - Streetwear From Parallel Worlds",
       },
     ],
     type: "website",

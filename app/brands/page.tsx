@@ -11,7 +11,7 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
   const [randomProducts, setRandomProducts] = useState<Product[]>([])
   const [productImages, setProductImages] = useState<Record<string, string>>({})
 
-  // Function to get random image for a product based on random color
+  // Function to get random image for a product based on black or white color only
   const getRandomImageForProduct = (product: Product): string | null => {
     if (!product.images || product.images.length === 0) {
       return null
@@ -22,8 +22,18 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
       return product.images[0]
     }
     
-    // Randomly select one color
-    const randomColor = product.colors[Math.floor(Math.random() * product.colors.length)]
+    // Filter for black or white colors only
+    const blackOrWhiteColors = product.colors.filter(color => 
+      color.toUpperCase() === 'BLACK' || color.toUpperCase() === 'WHITE'
+    )
+    
+    if (blackOrWhiteColors.length === 0) {
+      // If no black or white, return first image
+      return product.images[0]
+    }
+    
+    // Randomly select one from black or white colors
+    const randomColor = blackOrWhiteColors[Math.floor(Math.random() * blackOrWhiteColors.length)]
     
     // Get image index corresponding to selected color
     const colorIndex = product.colors.indexOf(randomColor)
@@ -40,9 +50,21 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
       const fetchProducts = async () => {
         try {
           const products = await getProductsByBrand(brand.id)
-          // Randomly select 4 products
-          const shuffled = [...products].sort(() => 0.5 - Math.random())
-          const selectedProducts = shuffled.slice(0, 4)
+          // Separate products with HOT badge and others
+          const hotProducts = products.filter(p => p.badge === 'HOT')
+          const otherProducts = products.filter(p => p.badge !== 'HOT')
+          
+          // Shuffle both arrays
+          const shuffledHot = [...hotProducts].sort(() => 0.5 - Math.random())
+          const shuffledOther = [...otherProducts].sort(() => 0.5 - Math.random())
+          
+          // Prioritize HOT products, then fill with others
+          const selectedProducts: Product[] = []
+          selectedProducts.push(...shuffledHot.slice(0, 4))
+          if (selectedProducts.length < 4) {
+            selectedProducts.push(...shuffledOther.slice(0, 4 - selectedProducts.length))
+          }
+          
           setRandomProducts(selectedProducts)
           
           // Get random image for each product
