@@ -249,7 +249,7 @@ function CartFallback({
 
   if (isLoadingCart) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-black min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
           <p className="text-gray-400 mb-8">Loading...</p>
@@ -260,7 +260,7 @@ function CartFallback({
 
   if (products.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-black min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
           <p className="text-gray-400 mb-8">Your cart is empty</p>
@@ -273,7 +273,7 @@ function CartFallback({
   }
 
   return (
-    <div className="bg-black min-h-screen">
+    <div className="bg-[#151920] min-h-screen">
       <div className="max-w-4xl mx-auto px-2 py-10">
         <h1 className="text-2xl font-bold text-white mb-8">YOUR CART</h1>
       
@@ -329,7 +329,7 @@ function CartFallback({
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-black p-6 rounded-lg sticky top-8 border ">
+          <div className="bg-[#151920] p-6 rounded-lg sticky top-8 border ">
             <h2 className="text-lg font-semibold text-white mb-4">ORDER SUMMARY</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (
@@ -348,7 +348,7 @@ function CartFallback({
             {/* Apple Pay Button */}
             {isApplePayAvailable && (
               <button 
-                className="w-full mt-4 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 bg-[#151920] text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                 onClick={handleApplePay}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -447,7 +447,7 @@ function CartInner() {
   // Wait for Clerk to load
   if (!isLoaded) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-black min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
           <p className="text-gray-400 mb-8">Loading...</p>

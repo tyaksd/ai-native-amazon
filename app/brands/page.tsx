@@ -7,7 +7,7 @@ import { getBrands, Brand, getFeatures, Feature, getProductsByBrand, Product } f
 import BrandFollowButton from '@/app/components/BrandFollowButton'
 
 // Brand card component to avoid repetition
-function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; compact?: boolean; getStyleDisplayName?: (style: string | null | undefined) => string }) {
+function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; compact?: boolean; getCategoryDisplayName?: (category: string | null | undefined) => string }) {
   const [randomProducts, setRandomProducts] = useState<Product[]>([])
   const [productImages, setProductImages] = useState<Record<string, string>>({})
 
@@ -119,14 +119,14 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
               </div>
             </div>
             
-            {/* Brand name and style button - positioned at bottom right */}
+            {/* Brand name and category button - positioned at bottom right */}
             <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
               <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
                 {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
               </div>
-              {brand.style && (
+              {brand.category && (
                 <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-                  {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
+                  {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
                 </span>
               )}
             </div>
@@ -211,9 +211,9 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
               {brand.name}
             </h3>
-            {brand.style && (
+            {brand.category && (
               <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
-                {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
+                {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
               </span>
             )}
           </div>
@@ -227,7 +227,7 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
 }
 
 // Brand carousel component for Hot Drop and New Drop sections
-function BrandCarousel({ brands, title, getStyleDisplayName }: { brands: Brand[], title: string; getStyleDisplayName?: (style: string | null | undefined) => string }) {
+function BrandCarousel({ brands, title, getCategoryDisplayName }: { brands: Brand[], title: string; getCategoryDisplayName?: (category: string | null | undefined) => string }) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
   const [isDragging, setIsDragging] = useState(false)
@@ -391,7 +391,7 @@ function BrandCarousel({ brands, title, getStyleDisplayName }: { brands: Brand[]
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {slideItems.map((brand, index) => (
                   brand ? (
-                    <BrandCard key={brand.id} brand={brand} compact={screenSize === 'mobile'} getStyleDisplayName={getStyleDisplayName} />
+                    <BrandCard key={brand.id} brand={brand} compact={screenSize === 'mobile'} getCategoryDisplayName={getCategoryDisplayName} />
                   ) : (
                     <div key={`empty-${slideIndex}-${index}`} className={screenSize === 'mobile' ? 'aspect-[2/1] lg:hidden' : 'min-h-[210px] lg:hidden'} />
                   )
@@ -424,7 +424,7 @@ function BrandCarousel({ brands, title, getStyleDisplayName }: { brands: Brand[]
 }
 
 // Compact brand card for mobile All section and search results
-function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getStyleDisplayName?: (style: string | null | undefined) => string }) {
+function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; getCategoryDisplayName?: (category: string | null | undefined) => string }) {
   return (
     <Link href={`/${brand.id}`} className="group block">
       <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
@@ -457,14 +457,14 @@ function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getSty
           </div>
         </div>
         
-        {/* Brand name and style button with glass design - positioned at bottom right */}
+        {/* Brand name and category button with glass design - positioned at bottom right */}
         <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
           <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
             {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
           </div>
-          {brand.style && (
+          {brand.category && (
             <span className="mr-1 px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-              {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
+              {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
             </span>
           )}
         </div>
@@ -481,46 +481,25 @@ export default function BrandsPage() {
   const [features, setFeatures] = useState<Feature[]>([])
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [selectedStyle, setSelectedStyle] = useState<string>('All')
-  const [availableStyles, setAvailableStyles] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [availableCategories, setAvailableCategories] = useState<string[]>([])
   const [isMobile, setIsMobile] = useState(false)
   
-  // Style name mapping for display
-  const styleDisplayNames: Record<string, string> = {
-    'Core Street': 'STREET CLASSIC',
-    'Hip-Hop/Urban': 'BLOCK HIP-HOP',
-    'Sports/Athleisure': 'COURT ENERGY',
-    'Retro/Vintage/Y2K': 'REWIND / Y2K',
-    'Techwear/Futuristic': 'NEO TECH',
-    'Luxury/Mode Street': 'MODE LUXE',
-    'Grunge/Punk/Rock': 'NOISE PUNK',
-    'Minimal/Normcore': 'LOW-KEY MINIMAL',
-    'Art/Graphic Driven': 'CANVAS GRAPHIC',
-    'Culture/Character/Anime': 'CULTURE / ANIME'
+  // Category name mapping for display
+  const categoryDisplayNames: Record<string, string> = {
+    'PETS': 'PETS',
+    'PREDATORS': 'PREDATORS',
+    'WILD NATURE': 'WILD NATURE',
+    'OCEAN': 'OCEAN',
+    'DARK / NOCTURNAL': 'DARK / NOCTURNAL',
+    'MYTHICAL': 'MYTHICAL',
+    'INSECTS / SMALL CREATURES': 'INSECTS / SMALL CREATURES',
+    'OTHERS': 'OTHERS'
   }
   
-  // Style description mapping
-  const styleDescriptions: Record<string, string> = {
-    'Core Street': 'Clean logos, everyday fits, pure city street basics.',
-    'Hip-Hop/Urban': 'Rappers, block parties, heavy bass and late-night corners.',
-    'Sports/Athleisure': 'Hoops, tracks, fast breaks – game-day street heat.',
-    'Retro/Vintage/Y2K': 'VHS grain, chrome logos, 90s–00s nostalgia turned up.',
-    'Techwear/Futuristic': 'Neon shadows, utility straps, future-city street armor.',
-    'Luxury/Mode Street': 'Dark tailoring, quiet flex, runway attitude on the block.',
-    'Grunge/Punk/Rock': 'Distorted prints, rips, chaos from underground shows.',
-    'Minimal/Normcore': 'Soft tones, small details, don\'t-try-too-hard street fits.',
-    'Art/Graphic Driven': 'Big central artwork, gallery pieces printed on cotton.',
-    'Culture/Character/Anime': 'Characters, panels, stories ripped from anime and pop culture'
-  }
-  
-  const getStyleDisplayName = (style: string | null | undefined): string => {
-    if (!style) return ''
-    return styleDisplayNames[style] || style
-  }
-  
-  const getStyleDescription = (style: string | null | undefined): string => {
-    if (!style || style === 'All') return ''
-    return styleDescriptions[style] || ''
+  const getCategoryDisplayName = (category: string | null | undefined): string => {
+    if (!category) return ''
+    return categoryDisplayNames[category] || category
   }
   const [selectedDot, setSelectedDot] = useState<number | null>(null)
   const topRowRef = useRef<HTMLDivElement>(null)
@@ -925,12 +904,12 @@ export default function BrandsPage() {
         
         setFeatures(featuresData)
         
-        // Get unique styles from brands that have styles
-        const styles = [...new Set(brandsData
-          .filter(brand => brand.style)
-          .map(brand => brand.style!)
+        // Get unique categories from brands that have categories
+        const categories = [...new Set(brandsData
+          .filter(brand => brand.category)
+          .map(brand => brand.category!)
         )].sort()
-        setAvailableStyles(styles)
+        setAvailableCategories(categories)
       } catch (error) {
         console.error('Error loading data:', error)
       } finally {
@@ -1033,14 +1012,14 @@ export default function BrandsPage() {
     return baseOffset + dragPercent
   }
 
-  // Filter all brands by style
+  // Filter all brands by category
   useEffect(() => {
-    if (selectedStyle === 'All') {
+    if (selectedCategory === 'All') {
       setAllBrands(brands)
     } else {
-      setAllBrands(brands.filter(brand => brand.style && brand.style.toLowerCase() === selectedStyle.toLowerCase()))
+      setAllBrands(brands.filter(brand => brand.category && brand.category.toUpperCase() === selectedCategory.toUpperCase()))
     }
-  }, [brands, selectedStyle])
+  }, [brands, selectedCategory])
 
   if (loading) {
     return (
@@ -1051,7 +1030,7 @@ export default function BrandsPage() {
   }
 
   return (
-    <div className="bg-black">
+    <div className="bg-[#151920]">
       {/* Hero Section with Features Carousel */}
       {features.length > 0 && (
         <section className="relative overflow-hidden">
@@ -1123,40 +1102,40 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         {hotBrands.length > 0 && (
-          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" getStyleDisplayName={getStyleDisplayName} />
+          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" getCategoryDisplayName={getCategoryDisplayName} />
         )}
         
         {/* New Drop Section */}
         {newBrands.length > 0 && (
-          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" getStyleDisplayName={getStyleDisplayName} />
+          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" getCategoryDisplayName={getCategoryDisplayName} />
         )}
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-white mb-3">PICK YOUR STREET VIBE</h2>
+          <h2 className="text-2xl font-bold text-white mb-3">Find your animal</h2>
           
-          {/* Style Filter */}
+          {/* Category Filter */}
           {/* Button grid for all devices */}
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
-              {['All', ...availableStyles].map((style) => (
+              {['All', ...availableCategories].map((category) => (
                 <button
-                  key={style}
+                  key={category}
                   onClick={() => {
-                    const styleValue = style === 'All' ? 'All' : style.toLowerCase()
-                    setSelectedStyle(styleValue)
+                    const categoryValue = category === 'All' ? 'All' : category.toUpperCase()
+                    setSelectedCategory(categoryValue)
                     // Small vibration on tap
                     if ('vibrate' in navigator) {
                       navigator.vibrate(10)
                     }
                   }}
                   className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
-                    selectedStyle === (style === 'All' ? 'All' : style.toLowerCase())
+                    selectedCategory === (category === 'All' ? 'All' : category.toUpperCase())
                       ? 'bg-white/40 border-white/50 text-white'
                       : 'bg-black/10 border-white/60 text-gray-300 hover:bg-black/30'
                   }`}
                 >
-                  {style === 'All' ? 'ALL' : getStyleDisplayName(style)}
+                  {category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
                 </button>
               ))}
             </div>
@@ -1164,25 +1143,16 @@ export default function BrandsPage() {
               <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
             </div>
           </div>
-          
-          {/* Style Description */}
-          {selectedStyle !== 'All' && getStyleDescription(selectedStyle) && (
-            <div className="mb-4">
-              <p className="text-sm text-gray-300 leading-relaxed">
-                {getStyleDescription(selectedStyle)}
-              </p>
-            </div>
-          )}
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
           <div className="grid grid-cols-2 sm:hidden gap-2">
             {allBrands.map((brand) => (
-              <CompactBrandCard key={brand.id} brand={brand} getStyleDisplayName={getStyleDisplayName} />
+              <CompactBrandCard key={brand.id} brand={brand} getCategoryDisplayName={getCategoryDisplayName} />
             ))}
           </div>
           <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {allBrands.map((brand) => (
-              <BrandCard key={brand.id} brand={brand} getStyleDisplayName={getStyleDisplayName} />
+              <BrandCard key={brand.id} brand={brand} getCategoryDisplayName={getCategoryDisplayName} />
             ))}
           </div>
         </div>

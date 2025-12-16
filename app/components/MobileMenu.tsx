@@ -52,9 +52,9 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsOpen(false)}>
-          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-black border-r border-gray-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 bg-black relative">
+        <div className="md:hidden fixed inset-0 z-50 bg-[#151920]/50" onClick={() => setIsOpen(false)}>
+          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-[#151920] border-r border-gray-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 bg-[#151920] relative">
               {/* Close Button */}
               <button 
                 className="absolute top-4 left-4 p-2 text-white hover:text-gray-300"
@@ -67,7 +67,7 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
               </button>
               
               {/* Authentication Section */}
-              <div className="pt-8 bg-black">
+              <div className="pt-8 bg-[#151920]">
                 {!clerkLoaded ? (
                   <div className="space-y-3">
                     <div className="text-sm text-gray-400 text-center py-4">

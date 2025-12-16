@@ -24,8 +24,8 @@ import ConditionalFooterNoClerk from "./components/ConditionalFooterNoClerk";
 // });
 
 export const metadata: Metadata = {
-  title: "Godship - Streetwear From Parallel Worlds",
-  description: "Discover brands you love and their unique products.",
+  title: "Godship - The Animal Apparel Marketplace",
+  description: "Shop clothing with animal designs, made on-demand.",
   icons: {
     icon: "/gblack.png",
     shortcut: "/gblack.png",
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Godship",
-    description: "Streetwear From Parallel Worlds",
+    description: "The Animal Apparel Marketplace",
     images: [
       {
         url: "/gblack2.png",
         width: 1200,
         height: 630,
-        alt: "Godship - Streetwear From Parallel Worlds",
+        alt: "Godship - The Animal Apparel Marketplace",
       },
     ],
     type: "website",
@@ -83,7 +83,7 @@ export default function RootLayout({
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
         >
           <ConditionalHeaderNoClerk />
-          <main className="mx-auto max-w-7xl" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
+          <main className="mx-auto max-w-7xl bg-[#151920]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
             {children}
           </main>
           <ConditionalFooterNoClerk />
@@ -111,7 +111,7 @@ export default function RootLayout({
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
         >
           <ConditionalHeader />
-          <main className="mx-auto max-w-7xl" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
+          <main className="mx-auto max-w-7xl bg-[#151920]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
             {children}
           </main>
           <ConditionalFooter />

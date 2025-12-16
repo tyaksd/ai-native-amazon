@@ -40,7 +40,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="mt-0 bg-black text-white">
+    <footer className="mt-0 bg-[#151920] text-white">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 pt-6">
         <h3 className="text-xl font-semibold text-white mb-1">Sign up for Godship</h3>
         <p className="text-white/80 text-sm">Get exclusive deals and early access to new products.</p>

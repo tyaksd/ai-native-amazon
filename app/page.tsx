@@ -393,10 +393,10 @@ export default function Home() {
     )
   }
   return (
-    <div className="bg-black">
+    <div className="bg-[#151920]">
       {/* Hero Carousel Section */}
       {features.length > 0 && (
-        <div className="relative w-full h-screen overflow-hidden bg-black">
+        <div className="relative w-full h-screen overflow-hidden bg-[#151920]">
           {/* Carousel container */}
           <div 
             className="relative w-full h-full overflow-hidden"

@@ -80,7 +80,7 @@ export default function AdminPage() {
     background_image: '', 
     description: '',
     style: 'Core Street',
-    category: 'Streetwear'
+    category: 'OTHERS'
   })
   // Get default colors based on product type
   const getDefaultColorsForType = (type: string): string[] => {
