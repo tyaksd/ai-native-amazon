@@ -1023,14 +1023,14 @@ export default function BrandsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }
 
   return (
-    <div className="bg-[#151920]">
+    <div className="bg-[#FAFAF7]">
       {/* Hero Section with Features Carousel */}
       {features.length > 0 && (
         <section className="relative overflow-hidden">
@@ -1112,7 +1112,7 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-white mb-3">Find your animal</h2>
+          <h2 className="text-2xl font-bold text-black mb-3">Find your animal</h2>
           
           {/* Category Filter */}
           {/* Button grid for all devices */}
@@ -1131,8 +1131,8 @@ export default function BrandsPage() {
                   }}
                   className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
                     selectedCategory === (category === 'All' ? 'All' : category.toUpperCase())
-                      ? 'bg-white/40 border-white/50 text-white'
-                      : 'bg-black/10 border-white/60 text-gray-300 hover:bg-black/30'
+                      ? 'bg-black/40 border-black/50 text-white'
+                      : 'bg-black/10 border-black/60 text-black hover:bg-black/30'
                   }`}
                 >
                   {category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
@@ -1140,7 +1140,7 @@ export default function BrandsPage() {
               ))}
             </div>
             <div className="text-center mt-2">
-              <span className="text-sm text-gray-400">({allBrands.length} brands)</span>
+              <span className="text-sm text-black/60">({allBrands.length} brands)</span>
             </div>
           </div>
         

@@ -40,7 +40,7 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 text-black">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
@@ -52,9 +52,9 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-[#151920]/50" onClick={() => setIsOpen(false)}>
-          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-[#151920] border-r border-gray-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 bg-[#151920] relative">
+        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsOpen(false)}>
+          <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-black border-r border-gray-700 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 bg-black relative">
               {/* Close Button */}
               <button 
                 className="absolute top-4 left-4 p-2 text-white hover:text-gray-300"
@@ -67,7 +67,7 @@ export default function MobileMenu({ className = '' }: MobileMenuProps) {
               </button>
               
               {/* Authentication Section */}
-              <div className="pt-8 bg-[#151920]">
+              <div className="pt-8 bg-black">
                 {!clerkLoaded ? (
                   <div className="space-y-3">
                     <div className="text-sm text-gray-400 text-center py-4">

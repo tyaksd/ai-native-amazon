@@ -64,8 +64,6 @@ export default function AdminPage() {
     { name: 'NAVY', value: '#0f1830' },
     { name: 'GREY', value: '#d1d2d6' },
     { name: 'DARK HEATHER', value: '#424848' },
-    { name: 'RED', value: '#FF1B2B' },
-    { name: 'BLUE', value: '#2665CC' },
     { name: 'SAND', value: '#d8c5a9' },
     { name: 'NATURAL', value: '#fff6ea' },
     { name: 'MILITARY GREEN', value: '#686f54' },
@@ -79,14 +77,14 @@ export default function AdminPage() {
     icon: '', 
     background_image: '', 
     description: '',
-    style: 'Core Street',
-    category: 'OTHERS'
+    category: 'OTHERS',
+    animal: ''
   })
   // Get default colors based on product type
   const getDefaultColorsForType = (type: string): string[] => {
     switch (type) {
       case 'T-Shirt':
-        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'RED', 'BLUE', 'SAND', 'SKY BLUE', 'DARK HEATHER']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'SAND', 'SKY BLUE', 'DARK HEATHER']
       case 'Long Tee':
         return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'MAROON', 'SAND', 'SKY BLUE']
       case 'Sweatshirt':
@@ -94,7 +92,7 @@ export default function AdminPage() {
       case 'Hoodie':
         return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'SKY BLUE', 'MILITARY GREEN', 'MAROON', 'CREAM']
       default:
-        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'RED', 'BLUE', 'SAND', 'SKY BLUE', 'DARK HEATHER']
+        return ['BLACK', 'WHITE', 'NAVY', 'GREY', 'MILITARY GREEN', 'SAND', 'SKY BLUE', 'DARK HEATHER']
     }
   }
 
@@ -292,7 +290,12 @@ export default function AdminPage() {
     e.preventDefault()
     try {
       const brand = await createBrand({
-        ...newBrand,
+        name: newBrand.name,
+        icon: newBrand.icon,
+        background_image: newBrand.background_image || null,
+        description: newBrand.description || null,
+        category: newBrand.category || null,
+        animal: newBrand.animal || null,
         design_concept: null,
         target_audience: null,
         logo_design: null,
@@ -301,7 +304,8 @@ export default function AdminPage() {
       })
       if (brand) {
         setBrands(prev => [...prev, brand])
-        setNewBrand({ name: '', icon: '', background_image: '', description: '', style: 'Core Street', category: 'Streetwear' })
+        const currentCategory = newBrand.category || 'OTHERS'
+        setNewBrand({ name: '', icon: '', background_image: '', description: '', category: currentCategory, animal: '' })
         setCreatedMessage('Created!')
         setShowCreatedBanner(true)
         setTimeout(() => setShowCreatedBanner(false), 1000)
@@ -680,9 +684,9 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAFAF7] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black mx-auto"></div>
           <p className="mt-4 text-white">Loading...</p>
         </div>
       </div>
@@ -1136,24 +1140,33 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Style</label>
+                      <label className="block text-sm font-medium text-gray-700">Category</label>
                       <select
-                        value={newBrand.style}
-                        onChange={(e) => setNewBrand(prev => ({ ...prev, style: e.target.value }))}
+                        value={newBrand.category}
+                        onChange={(e) => setNewBrand(prev => ({ ...prev, category: e.target.value }))}
                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         required
                       >
-                        <option value="Core Street">Core Street</option>
-                        <option value="Hip-Hop/Urban">Hip-Hop/Urban</option>
-                        <option value="Sports/Athleisure">Sports/Athleisure</option>
-                        <option value="Retro/Vintage/Y2K">Retro/Vintage/Y2K</option>
-                        <option value="Techwear/Futuristic">Techwear/Futuristic</option>
-                        <option value="Luxury/Mode Street">Luxury/Mode Street</option>
-                        <option value="Grunge/Punk/Rock">Grunge/Punk/Rock</option>
-                        <option value="Minimal/Normcore">Minimal/Normcore</option>
-                        <option value="Art/Graphic Driven">Art/Graphic Driven</option>
-                        <option value="Culture/Character/Anime">Culture/Character/Anime</option>
+                        <option value="PETS">PETS</option>
+                        <option value="PREDATORS">PREDATORS</option>
+                        <option value="WILD NATURE">WILD NATURE</option>
+                        <option value="OCEAN">OCEAN</option>
+                        <option value="DARK / NOCTURNAL">DARK / NOCTURNAL</option>
+                        <option value="MYTHICAL">MYTHICAL</option>
+                        <option value="INSECTS / SMALL CREATURES">INSECTS / SMALL CREATURES</option>
+                        <option value="OTHERS">OTHERS</option>
                       </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Animal</label>
+                      <input
+                        type="text"
+                        value={newBrand.animal}
+                        onChange={(e) => setNewBrand(prev => ({ ...prev, animal: e.target.value }))}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter animal (optional)"
+                      />
                     </div>
 
                     <div>
@@ -1214,8 +1227,8 @@ export default function AdminPage() {
                             <Image src={brand.background_image} alt={`${brand.name} background`} width={800} height={96} className="w-full h-24 object-cover rounded" />
                           </div>
                         )}
-                        {brand.style && (
-                          <p className="text-sm text-blue-600 font-medium mb-2">Style: {brand.style}</p>
+                        {brand.category && (
+                          <p className="text-sm text-blue-600 font-medium mb-2">Category: {brand.category}</p>
                         )}
                         {brand.description && (
                           <p className="text-sm text-gray-600 break-words">{brand.description}</p>

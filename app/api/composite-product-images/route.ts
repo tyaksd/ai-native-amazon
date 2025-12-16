@@ -91,8 +91,6 @@ const plainTshirtUrls: { [key: string]: string } = {
   'NAVY': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647344/Screenshot_2025-12-02_at_11.48.41_vmnxma.png',
   'GREY': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647346/Screenshot_2025-12-02_at_11.49.59_p3k5bx.png',
   'DARK HEATHER': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647346/Screenshot_2025-12-02_at_11.59.37_lynxnv.png',
-  'RED': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647345/Screenshot_2025-12-02_at_11.50.57_i7z8rx.png',
-  'BLUE': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647343/Screenshot_2025-12-02_at_12.01.34_exvrvr.png',
   'SAND': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647345/Screenshot_2025-12-02_at_11.53.05_udd0fv.png',
   'SKY BLUE': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647344/Screenshot_2025-12-02_at_11.56.11_gefija.png',
   'MILITARY GREEN': 'https://res.cloudinary.com/dczsafftw/image/upload/v1764647347/Screenshot_2025-12-02_at_11.54.49_ddodoq.png'

@@ -7,7 +7,7 @@ export type Brand = {
   background_image: string | null;
   description: string | null;
   category: string | null;
-  style: string | null;
+  animal: string | null;
   design_concept: string | null;
   target_audience: string | null;
   logo_design: string | null;

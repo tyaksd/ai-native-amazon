@@ -40,7 +40,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="mt-0 bg-[#151920] text-white">
+    <footer className="mt-0 bg-[#070A0C] text-white">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 pt-6">
         <h3 className="text-xl font-semibold text-white mb-1">Sign up for Godship</h3>
         <p className="text-white/80 text-sm">Get exclusive deals and early access to new products.</p>
@@ -71,11 +71,11 @@ export default function Footer() {
               </p>
             )}
           </form>
-          <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight mt-4">New brands. New drops. Every day.</h3>
+          <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight mt-4 text-white">New brands. New drops. Every day.</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:col-span-3">
           <div>
-            <div className="text-sm font-semibold mb-3">Company</div>
+            <div className="text-sm font-semibold mb-3 text-white">Company</div>
             <ul className="space-y-2 text-sm text-white/80">
               <li><Link href="/about" className="hover:underline">About us</Link></li>
               <li><Link href="/company/newsroom" className="hover:underline">Newsroom</Link></li>
@@ -86,7 +86,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <div className="text-sm font-semibold mb-3">Explore</div>
+            <div className="text-sm font-semibold mb-3 text-white">Explore</div>
             <ul className="space-y-2 text-sm text-white/80">
               <li><Link href="/explore/help-center" className="hover:underline">FAQ</Link></li>
               <li><Link href="/explore/markets" className="hover:underline">Markets</Link></li>
@@ -104,7 +104,7 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <div className="text-sm font-semibold mb-3">Legal</div>
+            <div className="text-sm font-semibold mb-3 text-white">Legal</div>
             <ul className="space-y-2 text-sm text-white/80">
               <li><Link href="/legal/terms-of-service" className="hover:underline">Terms of Service</Link></li>
               <li><Link href="/legal/privacy-policy" className="hover:underline">Privacy Policy</Link></li>

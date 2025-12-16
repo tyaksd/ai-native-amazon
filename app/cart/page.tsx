@@ -249,7 +249,7 @@ function CartFallback({
 
   if (isLoadingCart) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
           <p className="text-gray-400 mb-8">Loading...</p>
@@ -260,11 +260,11 @@ function CartFallback({
 
   if (products.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
-          <p className="text-gray-400 mb-8">Your cart is empty</p>
-          <Link href="/" className="inline-flex items-center px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200">
+          <h1 className="text-2xl font-bold text-black mb-4">YOUR CART</h1>
+          <p className="text-gray-600 mb-8">Your cart is empty</p>
+          <Link href="/" className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
             Continue Shopping
           </Link>
         </div>
@@ -273,9 +273,9 @@ function CartFallback({
   }
 
   return (
-    <div className="bg-[#151920] min-h-screen">
+    <div className="bg-[#FAFAF7] min-h-screen">
       <div className="max-w-4xl mx-auto px-2 py-10">
-        <h1 className="text-2xl font-bold text-white mb-8">YOUR CART</h1>
+        <h1 className="text-2xl font-bold text-black mb-8">YOUR CART</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Cart Items */}
@@ -329,18 +329,18 @@ function CartFallback({
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-[#151920] p-6 rounded-lg sticky top-8 border ">
-            <h2 className="text-lg font-semibold text-white mb-4">ORDER SUMMARY</h2>
+          <div className="bg-[#FAFAF7] p-6 rounded-lg sticky top-8 border ">
+            <h2 className="text-lg font-semibold text-black mb-4">ORDER SUMMARY</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (
-                <div key={product.id} className="flex justify-between text-sm text-white">
+                <div key={product.id} className="flex justify-between text-sm text-black">
                   <span>{product.name} x{product.quantity}</span>
                   <span>{formatUSD(product.price * product.quantity)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-700 pt-4">
-              <div className="flex justify-between text-lg font-semibold text-white">
+              <div className="flex justify-between text-lg font-semibold text-black">
                 <span>Total</span>
                 <span>{formatUSD(getTotalPrice())}</span>
               </div>
@@ -348,7 +348,7 @@ function CartFallback({
             {/* Apple Pay Button */}
             {isApplePayAvailable && (
               <button 
-                className="w-full mt-4 bg-[#151920] text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                 onClick={handleApplePay}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -447,7 +447,7 @@ function CartInner() {
   // Wait for Clerk to load
   if (!isLoaded) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#151920] min-h-screen">
+      <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
           <p className="text-gray-400 mb-8">Loading...</p>

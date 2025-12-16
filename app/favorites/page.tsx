@@ -138,15 +138,15 @@ function FavoritesPageFallback({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-[#151920]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="px-6 py-10 bg-[#151920] min-h-screen">
+      <div className="px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-red-600 mb-4">{error}</div>
         <Link href="/" className="text-blue-400 underline">Back to Home</Link>
       </div>
@@ -155,8 +155,8 @@ function FavoritesPageFallback({
 
   if (favoriteProducts.length === 0) {
     return (
-      <div className="px-6 py-10 text-center bg-[#151920] min-h-screen">
-        <div className="text-gray-400 text-lg mb-4">No favorite products yet</div>
+      <div className="px-6 py-10 text-center bg-[#FAFAF7] min-h-screen">
+        <div className="text-gray-600 text-lg mb-4">No favorite products yet</div>
         <p className="text-gray-500 mb-6">Start exploring and add products to your favorites!</p>
         <Link 
           href="/brands" 
@@ -169,10 +169,10 @@ function FavoritesPageFallback({
   }
 
   return (
-    <div className="px-3 sm:px-10 py-6 bg-[#151920] min-h-screen">
+    <div className="px-3 sm:px-10 py-6 bg-[#FAFAF7] min-h-screen">
       <div className="mb-4">
-        <h1 className="text-3xl font-bold text-white mb-2">MY FAVORITES</h1>
-        <p className="text-gray-400">{favoriteProducts.length} item(s) in your favorites</p>
+        <h1 className="text-3xl font-bold text-black mb-2">MY FAVORITES</h1>
+        <p className="text-gray-600">{favoriteProducts.length} item(s) in your favorites</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-6">
@@ -246,8 +246,8 @@ function FavoritesPageInner() {
   // Wait for Clerk to load
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-[#151920]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }

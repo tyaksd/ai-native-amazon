@@ -387,16 +387,16 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }
   return (
-    <div className="bg-[#151920]">
+    <div className="bg-[#070A0C]">
       {/* Hero Carousel Section */}
       {features.length > 0 && (
-        <div className="relative w-full h-screen overflow-hidden bg-[#151920]">
+        <div className="relative w-full h-screen overflow-hidden bg-[#070A0C]">
           {/* Carousel container */}
           <div 
             className="relative w-full h-full overflow-hidden"

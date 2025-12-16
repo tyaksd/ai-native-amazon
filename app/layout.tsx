@@ -83,7 +83,7 @@ export default function RootLayout({
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
         >
           <ConditionalHeaderNoClerk />
-          <main className="mx-auto max-w-7xl bg-[#151920]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
+          <main className="mx-auto max-w-7xl bg-[#000000]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
             {children}
           </main>
           <ConditionalFooterNoClerk />
@@ -111,7 +111,7 @@ export default function RootLayout({
           className="antialiased bg-gradient-to-b from-gray-50 to-white text-gray-900 font-sans"
         >
           <ConditionalHeader />
-          <main className="mx-auto max-w-7xl bg-[#151920]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
+          <main className="mx-auto max-w-7xl bg-[#000000]" style={{paddingTop: 'calc(60px + env(safe-area-inset-top))'}}>
             {children}
           </main>
           <ConditionalFooter />

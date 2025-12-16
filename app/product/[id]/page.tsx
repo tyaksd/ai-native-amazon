@@ -354,8 +354,8 @@ function ProductDetailFallback({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }
@@ -370,7 +370,7 @@ function ProductDetailFallback({
   }
 
   return (
-    <div className=" pt-0 pb-0 bg-white  relative">
+    <div className=" pt-0 pb-0 bg-[#FAFAF7]  relative">
       {/* Copied Banner */}
       {showCopied && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg shadow-lg z-50">
@@ -594,15 +594,22 @@ function ProductDetailFallback({
                 const isLongTee = product.type?.toLowerCase().includes('long tee') || product.type?.toLowerCase().includes('longtee') || product.type?.toLowerCase().includes('long-tee')
                 const isHoodie = product.type?.toLowerCase().includes('hoodie')
                 
+                let colors: string[]
                 if (isTShirt) {
-                  return sortColorsForTShirt(product.colors)
+                  colors = sortColorsForTShirt(product.colors)
+                  // Filter out RED and BLUE for T-Shirts
+                  colors = colors.filter(color => {
+                    const lowerColor = color.toLowerCase()
+                    return lowerColor !== 'red' && lowerColor !== 'blue'
+                  })
                 } else if (isLongTee) {
-                  return sortColorsForLongTee(product.colors)
+                  colors = sortColorsForLongTee(product.colors)
                 } else if (isHoodie) {
-                  return sortColorsForHoodie(product.colors)
+                  colors = sortColorsForHoodie(product.colors)
                 } else {
-                  return product.colors
+                  colors = product.colors
                 }
+                return colors
               })().map((color, index) => (
                   <button
                     key={index}
@@ -1023,8 +1030,8 @@ function ProductDetailInner({ params }: PageProps) {
   // Wait for Clerk to load
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-black">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }

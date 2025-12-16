@@ -906,8 +906,6 @@ async function generateProductImages(
       'Navy': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187015/navy-plain_l6l4ky.png',
       'Grey': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187078/grey-plain_l4a4pj.png',
       'Dark Heather': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187206/dark-heather_iyj1xr.png',
-      'Red': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187046/red-plain_i0lkag.png',
-      'Blue': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763186952/blue-plain_no6w1x.png',
       'Sand': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187100/sand-plain_jr6tsc.png',
       'Natural': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187126/natural-plain_yaml1f.png',
       'Military Green': 'https://res.cloudinary.com/dfb0jdntz/image/upload/v1763187145/military-green-plain_lwf2t9.png'

@@ -9,7 +9,7 @@ import Link from 'next/link'
 import BrandFollowButton from '@/app/components/BrandFollowButton'
 
 // Import BrandCard from brands page
-function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; compact?: boolean; getStyleDisplayName?: (style: string | null | undefined) => string }) {
+function BrandCard({ brand, compact }: { brand: Brand; compact?: boolean }) {
   // Regular layout for desktop (when compact is false or undefined)
   return (
     <Link href={`/${brand.id}`} className="group block">
@@ -46,9 +46,9 @@ function BrandCard({ brand, compact, getStyleDisplayName }: { brand: Brand; comp
             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
               {brand.name}
             </h3>
-            {brand.style && (
+            {brand.category && (
               <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
-                {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
+                {brand.category}
               </span>
             )}
           </div>
@@ -117,7 +117,7 @@ function getUserIdentifier(user: { id?: string } | null | undefined): string | n
 }
 
 // Compact brand card component (same as in brands/page.tsx)
-function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getStyleDisplayName?: (style: string | null | undefined) => string }) {
+function CompactBrandCard({ brand }: { brand: Brand }) {
   return (
     <Link href={`/${brand.id}`} className="group block">
       <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
@@ -166,25 +166,6 @@ function CompactBrandCard({ brand, getStyleDisplayName }: { brand: Brand; getSty
   )
 }
 
-// Style display name helper function (same as brands page)
-function getStyleDisplayName(style: string | null | undefined): string {
-  if (!style) return ''
-  
-  const styleDisplayNames: Record<string, string> = {
-    'Core Street': 'STREET CLASSIC',
-    'Hip-Hop/Urban': 'BLOCK HIP-HOP',
-    'Sports/Athleisure': 'COURT ENERGY',
-    'Retro/Vintage/Y2K': 'REWIND / Y2K',
-    'Techwear/Futuristic': 'NEO TECH',
-    'Luxury/Mode Street': 'MODE LUXE',
-    'Grunge/Punk/Rock': 'NOISE PUNK',
-    'Minimal/Normcore': 'LOW-KEY MINIMAL',
-    'Art/Graphic Driven': 'CANVAS GRAPHIC',
-    'Culture/Character/Anime': 'CULTURE / ANIME'
-  }
-  
-  return styleDisplayNames[style] || style
-}
 
 // Fallback component that doesn't use Clerk hooks
 // Can also be used by Inner component with authentication props
@@ -261,15 +242,15 @@ function FollowedBrandsPageFallback({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-[#151920]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="px-6 py-10 bg-[#151920] min-h-screen">
+      <div className="px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-red-600 mb-4">{error}</div>
         <Link href="/" className="text-blue-400 underline">Back to Home</Link>
       </div>
@@ -278,7 +259,7 @@ function FollowedBrandsPageFallback({
 
   if (followedBrands.length === 0) {
     return (
-      <div className="px-6 py-10 text-center bg-[#151920] min-h-screen">
+      <div className="px-6 py-10 text-center bg-[#FAFAF7] min-h-screen">
         <div className="text-gray-400 text-lg mb-4">No followed brands yet</div>
         <p className="text-gray-500 mb-6">Start exploring and follow brands you love!</p>
         <Link 
@@ -292,7 +273,7 @@ function FollowedBrandsPageFallback({
   }
 
   return (
-    <div className="px-3 sm:px-10 py-6 bg-[#151920] min-h-screen">
+    <div className="px-3 sm:px-10 py-6 bg-[#FAFAF7] min-h-screen">
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-white mb-2">FOLLOWED BRANDS</h1>
         <p className="text-gray-400">{followedBrands.length} brand(s) you&apos;re following</p>
@@ -305,14 +286,12 @@ function FollowedBrandsPageFallback({
             <div className="block sm:hidden">
               <CompactBrandCard 
                 brand={brand} 
-                getStyleDisplayName={getStyleDisplayName}
               />
             </div>
             {/* Tablet/Desktop: BrandCard */}
             <div className="hidden sm:block">
               <BrandCard 
                 brand={brand} 
-                getStyleDisplayName={getStyleDisplayName}
               />
             </div>
           </div>
@@ -329,8 +308,8 @@ function FollowedBrandsPageInner() {
   // Wait for Clerk to load
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-96 bg-[#151920]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     )
   }

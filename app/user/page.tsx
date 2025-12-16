@@ -332,11 +332,11 @@ export default async function UserPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#151920]">
+    <div className="min-h-screen bg-[#FAFAF7]">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 bg-[#151920] rounded-lg p-6">
-          <h1 className="text-3xl font-bold text-white">Welcome, {user.firstName || 'User'}!</h1>
+        <div className="mb-8 bg-[#FAFAF7] rounded-lg p-6">
+          <h1 className="text-3xl font-bold text-black">Welcome, {user.firstName || 'User'}!</h1>
         </div>
 
         {/* Account Information */}

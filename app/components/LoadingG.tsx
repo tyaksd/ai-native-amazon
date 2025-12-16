@@ -3,9 +3,9 @@ export default function LoadingG() {
     <svg className="loading-g-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="white" stopOpacity="0" />
-          <stop offset="50%" stopColor="white" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="white" stopOpacity="1" />
+          <stop offset="0%" stopColor="black" stopOpacity="0" />
+          <stop offset="50%" stopColor="black" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="black" stopOpacity="1" />
         </linearGradient>
       </defs>
       {/* Trail path (faded line that stays behind) */}
