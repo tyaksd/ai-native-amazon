@@ -1539,7 +1539,7 @@ export default function BrandsPage() {
           )}
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
-          <div className="grid grid-cols-2 sm:hidden gap-2">
+          <div className="grid grid-cols-2 sm:hidden gap-1">
             {allBrands.map((brand) => (
               <CompactBrandCard key={brand.id} brand={brand} getCategoryDisplayName={getCategoryDisplayName} />
             ))}

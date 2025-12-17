@@ -371,8 +371,8 @@ function BrandPageWithoutClerk({
 
   if (!brand) {
     return (
-      <div className="px-6 py-10">
-        <div className="text-gray-700">Brand not found.</div>
+      <div className="px-6 py-10 bg-[#FAFAF7]">
+        <div className="text-black">Brand not found.</div>
         <Link href="/" className="text-blue-600 underline">Back to Home</Link>
       </div>
     );

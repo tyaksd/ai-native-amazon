@@ -251,7 +251,7 @@ function CartFallback({
     return (
       <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">Your Cart</h1>
           <p className="text-gray-400 mb-8">Loading...</p>
         </div>
       </div>
@@ -262,7 +262,7 @@ function CartFallback({
     return (
       <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-black mb-4">YOUR CART</h1>
+          <h1 className="text-2xl font-bold text-black mb-4">Your Cart</h1>
           <p className="text-gray-600 mb-8">Your cart is empty</p>
           <Link href="/" className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
             Continue Shopping
@@ -274,15 +274,15 @@ function CartFallback({
 
   return (
     <div className="bg-[#FAFAF7] min-h-screen">
-      <div className="max-w-4xl mx-auto px-2 py-10">
-        <h1 className="text-2xl font-bold text-black mb-8">YOUR CART</h1>
+      <div className="max-w-4xl mx-auto px-3 py-10">
+        <h1 className="text-2xl font-bold text-black mb-8">Your Cart</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
             {products.map((product, idx) => (
-              <div key={`${product.id}-${idx}`} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-white">
+              <div key={`${product.id}-${idx}`} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-[#FAFAF7]">
                 <Image 
                   src={product.images && product.images.length > 0 ? product.images[0] : '/clothingsample.png'} 
                   alt={product.name} 
@@ -329,8 +329,8 @@ function CartFallback({
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-[#FAFAF7] p-6 rounded-lg sticky top-8 border ">
-            <h2 className="text-lg font-semibold text-black mb-4">ORDER SUMMARY</h2>
+          <div className="bg-[#FAFAF7] p-6 rounded-lg sticky top-8">
+            <h2 className="text-lg font-semibold text-black mb-4">Order Summary</h2>
             <div className="space-y-2 mb-4">
               {products.map((product) => (
                 <div key={product.id} className="flex justify-between text-sm text-black">
@@ -449,7 +449,7 @@ function CartInner() {
     return (
       <div className="max-w-4xl mx-auto px-6 py-10 bg-[#FAFAF7] min-h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">YOUR CART</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">Your Cart</h1>
           <p className="text-gray-400 mb-8">Loading...</p>
         </div>
       </div>
