@@ -542,7 +542,7 @@ function BrandCarousel({ brands, title, getCategoryDisplayName }: { brands: Bran
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
+      <h2 className="text-2xl font-bold text-black mb-4">{title}</h2>
       
       {/* Carousel container with touch support */}
       <div 
@@ -582,8 +582,8 @@ function BrandCarousel({ brands, title, getCategoryDisplayName }: { brands: Bran
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-white w-6'
-                    : 'bg-white/50 hover:bg-white/70'
+                    ? 'bg-gray-800 w-6'
+                    : 'bg-gray-400 hover:bg-gray-600'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -1345,15 +1345,7 @@ export default function BrandsPage() {
   const backgroundImage = getBackgroundImage()
 
   return (
-    <div 
-      className="bg-[#FAFAF7] transition-all duration-500"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="bg-[#FAFAF7]">
       {/* Hero Section with Features Carousel */}
       {features.length > 0 && (
         <section className="relative overflow-hidden">
@@ -1421,25 +1413,36 @@ export default function BrandsPage() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto py-4 px-3">
+      <div className="max-w-7xl mx-auto px-2">
         
         {/* Hot Drop Section */}
-        {hotBrands.length > 0 && (
-          <BrandCarousel brands={hotBrands} title="HOT DROPS 🔥" getCategoryDisplayName={getCategoryDisplayName} />
-        )}
+        <div className="py-2">
+          {hotBrands.length > 0 && (
+            <BrandCarousel brands={hotBrands} title="Trending Now" getCategoryDisplayName={getCategoryDisplayName} />
+          )}
+        </div>
         
         {/* New Drop Section */}
         {newBrands.length > 0 && (
-          <BrandCarousel brands={newBrands} title="NEW DROPS ✨" getCategoryDisplayName={getCategoryDisplayName} />
+          <BrandCarousel brands={newBrands} title="New Arrivals" getCategoryDisplayName={getCategoryDisplayName} />
         )}
         
         {/* All Brands Section */}
-        <div className="mb-3">
-          <h2 className="text-2xl font-bold text-black mb-3">Find animal brands</h2>
+        <div 
+          className="transition-all duration-500 py-4 -mx-2 px-1"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundAttachment: 'fixed'
+          }}
+        >
+          <div className="mb-3">
+            <h2 className="text-2xl font-bold text-black mb-3 px-1">Find your favorite brands</h2>
           
           {/* Category Filter */}
           {/* Button grid for all devices */}
-          <div className="mb-1 md:mb-2">
+          <div className="mb-1 md:mb-2 px-1">
             <div className="flex flex-wrap gap-1">
               {['All', ...availableCategories].map((category) => {
                 const categoryValue = category === 'All' ? 'All' : category.toUpperCase()
@@ -1545,6 +1548,7 @@ export default function BrandsPage() {
             {allBrands.map((brand) => (
               <BrandCard key={brand.id} brand={brand} getCategoryDisplayName={getCategoryDisplayName} />
             ))}
+          </div>
           </div>
         </div>
       </div>
