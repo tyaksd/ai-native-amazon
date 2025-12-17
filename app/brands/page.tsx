@@ -119,14 +119,14 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
               </div>
             </div>
             
-            {/* Brand name and category button - positioned at bottom right */}
+            {/* Brand name and animal button - positioned at bottom right */}
             <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
               <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
                 {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
               </div>
-              {brand.category && (
+              {brand.animal && (
                 <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-                  {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
+                  {brand.animal}
                 </span>
               )}
             </div>
@@ -211,9 +211,9 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
             <h3 className="font-bold text-white text-lg group-hover:text-white transition-colors">
               {brand.name}
             </h3>
-            {brand.category && (
+            {brand.animal && (
               <span className="px-2 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-medium rounded-full">
-                {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
+                {brand.animal}
               </span>
             )}
           </div>
@@ -457,14 +457,14 @@ function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; get
           </div>
         </div>
         
-        {/* Brand name and category button with glass design - positioned at bottom right */}
+        {/* Brand name and animal button with glass design - positioned at bottom right */}
         <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
           <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
             {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
           </div>
-          {brand.category && (
+          {brand.animal && (
             <span className="mr-1 px-2  bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-              {getCategoryDisplayName ? getCategoryDisplayName(brand.category) : brand.category}
+              {brand.animal}
             </span>
           )}
         </div>
@@ -483,6 +483,8 @@ export default function BrandsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [availableCategories, setAvailableCategories] = useState<string[]>([])
+  const [selectedAnimal, setSelectedAnimal] = useState<string>('All')
+  const [availableAnimals, setAvailableAnimals] = useState<string[]>([])
   const [isMobile, setIsMobile] = useState(false)
   
   // Category name mapping for display
@@ -910,6 +912,13 @@ export default function BrandsPage() {
           .map(brand => brand.category!)
         )].sort()
         setAvailableCategories(categories)
+        
+        // Initial animals list (will be filtered by category)
+        const allAnimals = [...new Set(brandsData
+          .filter(brand => brand.animal)
+          .map(brand => brand.animal!)
+        )].sort()
+        setAvailableAnimals(allAnimals)
       } catch (error) {
         console.error('Error loading data:', error)
       } finally {
@@ -1012,14 +1021,44 @@ export default function BrandsPage() {
     return baseOffset + dragPercent
   }
 
-  // Filter all brands by category
+  // Update available animals based on selected category
   useEffect(() => {
-    if (selectedCategory === 'All') {
-      setAllBrands(brands)
-    } else {
-      setAllBrands(brands.filter(brand => brand.category && brand.category.toUpperCase() === selectedCategory.toUpperCase()))
+    let categoryFiltered = brands
+    
+    // Filter by category to get available animals
+    if (selectedCategory !== 'All') {
+      categoryFiltered = categoryFiltered.filter(brand => brand.category && brand.category.toUpperCase() === selectedCategory.toUpperCase())
+    }
+    
+    // Get unique animals from filtered brands
+    const animals = [...new Set(categoryFiltered
+      .filter(brand => brand.animal)
+      .map(brand => brand.animal!)
+    )].sort()
+    setAvailableAnimals(animals)
+    
+    // If selected animal is not in available animals, reset to 'All'
+    if (selectedAnimal !== 'All' && !animals.includes(selectedAnimal)) {
+      setSelectedAnimal('All')
     }
   }, [brands, selectedCategory])
+
+  // Filter all brands by category and animal
+  useEffect(() => {
+    let filtered = brands
+    
+    // Filter by category
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(brand => brand.category && brand.category.toUpperCase() === selectedCategory.toUpperCase())
+    }
+    
+    // Filter by animal
+    if (selectedAnimal !== 'All') {
+      filtered = filtered.filter(brand => brand.animal && brand.animal === selectedAnimal)
+    }
+    
+    setAllBrands(filtered)
+  }, [brands, selectedCategory, selectedAnimal])
 
   if (loading) {
     return (
@@ -1112,11 +1151,11 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-black mb-3">Find your animal</h2>
+          <h2 className="text-2xl font-bold text-black mb-3">Find your animal brands</h2>
           
           {/* Category Filter */}
           {/* Button grid for all devices */}
-          <div className="mb-4">
+          <div className="mb-2">
             <div className="flex flex-wrap gap-1">
               {['All', ...availableCategories].map((category) => (
                 <button
@@ -1131,18 +1170,53 @@ export default function BrandsPage() {
                   }}
                   className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
                     selectedCategory === (category === 'All' ? 'All' : category.toUpperCase())
-                      ? 'bg-black/40 border-black/50 text-white'
-                      : 'bg-black/10 border-black/60 text-black hover:bg-black/30'
+                      ? 'bg-black border-black text-white shadow-lg shadow-black/50'
+                      : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 shadow-md shadow-gray-300/50 hover:shadow-lg hover:shadow-gray-400/50'
                   }`}
                 >
                   {category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
                 </button>
               ))}
             </div>
-            <div className="text-center mt-2">
+          </div>
+          
+          {/* Animal Filter - Only show when a category is selected */}
+          {selectedCategory !== 'All' && (
+            <div className="mb-2">
+              {/* Button grid for all devices */}
+              <div className="flex flex-wrap gap-1">
+                {['All', ...availableAnimals].map((animal) => (
+                  <button
+                    key={animal}
+                    onClick={() => {
+                      setSelectedAnimal(animal === 'All' ? 'All' : animal)
+                      // Small vibration on tap
+                      if ('vibrate' in navigator) {
+                        navigator.vibrate(10)
+                      }
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
+                      selectedAnimal === (animal === 'All' ? 'All' : animal)
+                        ? 'bg-gray-800 border-gray-900 text-white shadow-lg shadow-gray-900/50'
+                        : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 shadow-md shadow-gray-300/50 hover:shadow-lg hover:shadow-gray-400/50'
+                    }`}
+                  >
+                    {animal === 'All' ? 'ALL' : animal}
+                  </button>
+                ))}
+              </div>
+              <div className="text-center mt-2">
+                <span className="text-sm text-black/60">({allBrands.length} brands)</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Brand count - Show when no category is selected */}
+          {selectedCategory === 'All' && (
+            <div className="text-center mb-4">
               <span className="text-sm text-black/60">({allBrands.length} brands)</span>
             </div>
-          </div>
+          )}
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
           <div className="grid grid-cols-2 sm:hidden gap-2">

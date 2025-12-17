@@ -396,7 +396,7 @@ export default function Home() {
     <div className="bg-[#070A0C]">
       {/* Hero Carousel Section */}
       {features.length > 0 && (
-        <div className="relative w-full h-screen overflow-hidden bg-[#070A0C]">
+        <div className="relative w-full h-[100vh] lg:h-[120vh] overflow-hidden bg-[#070A0C]">
           {/* Carousel container */}
           <div 
             className="relative w-full h-full overflow-hidden"

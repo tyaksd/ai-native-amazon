@@ -428,7 +428,6 @@ Please provide the response in the following JSON format:
         design_concept: brandContent.design_concept,
         target_audience: brandContent.target_audience,
         logo_design: brandContent.logo_design,
-        style: brandStyle === 'street' ? 'Street' : 'Casual',
         is_hot: false,
         is_new: false,
       })

@@ -155,11 +155,6 @@ function CompactBrandCard({ brand }: { brand: Brand }) {
           <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
             {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
           </div>
-          {brand.style && (
-            <span className="mr-1 px-2 bg-black/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium rounded-full">
-              {getStyleDisplayName ? getStyleDisplayName(brand.style) : brand.style}
-            </span>
-          )}
         </div>
       </div>
     </Link>
