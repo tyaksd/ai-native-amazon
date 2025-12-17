@@ -1317,21 +1317,50 @@ export default function BrandsPage() {
     setAllBrands(filtered)
   }, [brands, selectedCategory, selectedAnimal])
 
-  // Get background image based on selected category
-  const getBackgroundImage = () => {
-    const categoryMap: Record<string, string> = {
-      'All': '/all.png',
-      'PETS': '/pets.png',
-      'WILD NATURE': '/wild.png',
-      'OCEAN': '/ocean.png',
-      'PREDATORS': '/predator.png',
-      'MYTHICAL': '/myth.png',
-      'DARK / NOCTURNAL': '/noct.png',
-      'INSECTS / SMALL CREATURES': '/insects.png',
-      'OTHERS': '/others.png'
+  // Detect screen size for responsive background images
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024) // < 1024px is tablet or mobile
     }
     
-    return categoryMap[selectedCategory] || '/all.png'
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
+
+  // Get background image based on selected category and screen size
+  const getBackgroundImage = () => {
+    if (isMobileOrTablet) {
+      // Mobile and Tablet images
+      const categoryMapMobile: Record<string, string> = {
+        'All': '/all2.png',
+        'PETS': '/pet2.png',
+        'WILD NATURE': '/wild2.png',
+        'OCEAN': '/ocean2.png',
+        'PREDATORS': '/pre2.png',
+        'MYTHICAL': '/myth2.png',
+        'DARK / NOCTURNAL': '/noct2.png',
+        'INSECTS / SMALL CREATURES': '/inse2.png',
+        'OTHERS': '/others2.png'
+      }
+      return categoryMapMobile[selectedCategory] || '/all2.png'
+    } else {
+      // Desktop images
+      const categoryMapDesktop: Record<string, string> = {
+        'All': '/all.png',
+        'PETS': '/pets.png',
+        'WILD NATURE': '/wild.png',
+        'OCEAN': '/ocean.png',
+        'PREDATORS': '/predator.png',
+        'MYTHICAL': '/myth.png',
+        'DARK / NOCTURNAL': '/noct.png',
+        'INSECTS / SMALL CREATURES': '/insects.png',
+        'OTHERS': '/others.png'
+      }
+      return categoryMapDesktop[selectedCategory] || '/all.png'
+    }
   }
 
   if (loading) {
@@ -1429,7 +1458,7 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div 
-          className="transition-all duration-500 py-4 -mx-2 px-1"
+          className="py-4 -mx-2 px-1"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             backgroundSize: 'cover',
