@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const contentType = request.headers.get('content-type');
     
     if (contentType?.includes('application/json')) {
-      // JSONデータの場合（Sora2からの映像データ）
+      // JSONデータの場合
       const body = await request.json();
       
       if (body.data && body.data.startsWith('data:video/')) {
