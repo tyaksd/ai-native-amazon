@@ -109,13 +109,19 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
             {/* Brand icon - positioned at bottom left */}
             <div className="absolute bottom-1 left-1 z-10">
               <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
-                <Image 
-                  src={brand.icon} 
-                  alt={brand.name} 
-                  fill
-                  sizes="56px"
-                  className="object-cover"
-                />
+                {brand.icon ? (
+                  <Image 
+                    src={brand.icon} 
+                    alt={brand.name} 
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500 text-xs font-bold">{brand.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -195,13 +201,19 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
         {/* Brand icon */}
         <div className="absolute top-9 left-4">
           <div className="w-22 h-22 bg-white backdrop-blur-md rounded-xl shadow-lg overflow-hidden">
-            <Image 
-              src={brand.icon} 
-              alt={brand.name} 
-              fill
-              sizes="88px"
-              className="object-cover"
-            />
+            {brand.icon ? (
+              <Image 
+                src={brand.icon} 
+                alt={brand.name} 
+                fill
+                sizes="88px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500 text-lg font-bold">{brand.name.charAt(0)}</span>
+              </div>
+            )}
           </div>
         </div>
         
@@ -619,13 +631,19 @@ function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; get
         {/* Brand icon - positioned at bottom left */}
         <div className="absolute bottom-1 left-1 z-10">
           <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
-            <Image 
-              src={brand.icon} 
-              alt={brand.name} 
-              fill
-              sizes="56px"
-              className="object-cover"
-            />
+            {brand.icon ? (
+              <Image 
+                src={brand.icon} 
+                alt={brand.name} 
+                fill
+                sizes="56px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500 text-xs font-bold">{brand.name.charAt(0)}</span>
+              </div>
+            )}
           </div>
         </div>
         
