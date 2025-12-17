@@ -425,6 +425,7 @@ Please provide the response in the following JSON format:
         icon: uploadedLogoUrl,
         background_image: uploadedBackgroundUrl,
         category: category,
+        animal: null,
         design_concept: brandContent.design_concept,
         target_audience: brandContent.target_audience,
         logo_design: brandContent.logo_design,

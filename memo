@@ -68,9 +68,8 @@ estimated deliveryとtracking urlを/lkjで送信する
 e
 
 
-git add .
-git commit -m "changes"
-git push origin main
+
+
 
 
 stripe login
