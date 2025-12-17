@@ -1335,50 +1335,20 @@ export default function BrandsPage() {
     setAllBrands(filtered)
   }, [brands, selectedCategory, selectedAnimal])
 
-  // Detect screen size for responsive background images
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
-  
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobileOrTablet(window.innerWidth < 1024) // < 1024px is tablet or mobile
+  // Get background color based on selected category
+  const getBackgroundColor = () => {
+    const categoryColorMap: Record<string, string> = {
+      'All': '#E7E8E9',
+      'PETS': '#E8F6ED',
+      'WILD NATURE': '#E6EFEC',
+      'OCEAN': '#E6F3F9',
+      'PREDATORS': '#F8EEE6',
+      'MYTHICAL': '#F2EBFD',
+      'DARK / NOCTURNAL': '#EAEAF2',
+      'INSECTS / SMALL CREATURES': '#EDF2E7',
+      'OTHERS': '#EBECEE'
     }
-    
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
-
-  // Get background image based on selected category and screen size
-  const getBackgroundImage = () => {
-    if (isMobileOrTablet) {
-      // Mobile and Tablet images
-      const categoryMapMobile: Record<string, string> = {
-        'All': '/all2.png',
-        'PETS': '/pet2.png',
-        'WILD NATURE': '/wild2.png',
-        'OCEAN': '/ocean2.png',
-        'PREDATORS': '/pre2.png',
-        'MYTHICAL': '/myth2.png',
-        'DARK / NOCTURNAL': '/noct2.png',
-        'INSECTS / SMALL CREATURES': '/inse2.png',
-        'OTHERS': '/others2.png'
-      }
-      return categoryMapMobile[selectedCategory] || '/all2.png'
-    } else {
-      // Desktop images
-      const categoryMapDesktop: Record<string, string> = {
-        'All': '/all.png',
-        'PETS': '/pets.png',
-        'WILD NATURE': '/wild.png',
-        'OCEAN': '/ocean.png',
-        'PREDATORS': '/predator.png',
-        'MYTHICAL': '/myth.png',
-        'DARK / NOCTURNAL': '/noct.png',
-        'INSECTS / SMALL CREATURES': '/insects.png',
-        'OTHERS': '/others.png'
-      }
-      return categoryMapDesktop[selectedCategory] || '/all.png'
-    }
+    return categoryColorMap[selectedCategory] || '#E7E8E9'
   }
 
   if (loading) {
@@ -1389,7 +1359,7 @@ export default function BrandsPage() {
     )
   }
 
-  const backgroundImage = getBackgroundImage()
+  const backgroundColor = getBackgroundColor()
 
   return (
     <div className="bg-[#FAFAF7]">
@@ -1478,10 +1448,7 @@ export default function BrandsPage() {
         <div 
           className="py-4 -mx-2 px-1"
           style={{
-            backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundAttachment: 'fixed'
+            backgroundColor: backgroundColor
           }}
         >
         <div className="mb-3">
