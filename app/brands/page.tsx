@@ -1446,9 +1446,9 @@ export default function BrandsPage() {
         
         {/* Hot Drop Section */}
         <div className="py-2">
-          {hotBrands.length > 0 && (
+        {hotBrands.length > 0 && (
             <BrandCarousel brands={hotBrands} title="Trending Now" getCategoryDisplayName={getCategoryDisplayName} />
-          )}
+        )}
         </div>
         
         {/* New Drop Section */}
@@ -1466,7 +1466,7 @@ export default function BrandsPage() {
             backgroundAttachment: 'fixed'
           }}
         >
-          <div className="mb-3">
+        <div className="mb-3">
             <h2 className="text-2xl font-bold text-black mb-3 px-1">Find your favorite brands</h2>
           
           {/* Category Filter */}
@@ -1480,17 +1480,17 @@ export default function BrandsPage() {
                 
                 return (
                   <CategoryButton
-                    key={category}
+                  key={category}
                     category={category}
                     isSelected={isSelected}
                     colors={colors}
-                    onClick={() => {
-                      setSelectedCategory(categoryValue)
-                      // Small vibration on tap
-                      if ('vibrate' in navigator) {
-                        navigator.vibrate(10)
-                      }
-                    }}
+                  onClick={() => {
+                    setSelectedCategory(categoryValue)
+                    // Small vibration on tap
+                    if ('vibrate' in navigator) {
+                      navigator.vibrate(10)
+                    }
+                  }}
                     displayName={category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
                   />
                 )
@@ -1516,7 +1516,7 @@ export default function BrandsPage() {
             }
             
             return (
-              <div className="mb-2">
+            <div className="mb-2">
                 {/* Divider with icon */}
                 <div className="flex items-center justify-center my-1">
                   <div className="flex-1 border-t border-slate-200"></div>
@@ -1524,20 +1524,20 @@ export default function BrandsPage() {
                   <div className="flex-1 border-t border-slate-200"></div>
                 </div>
                 
-                {/* Button grid for all devices */}
-                <div className="flex flex-wrap gap-1">
+              {/* Button grid for all devices */}
+              <div className="flex flex-wrap gap-1">
                 {['All', ...availableAnimals].map((animal) => {
                   const isSelected = selectedAnimal === (animal === 'All' ? 'All' : animal)
                   return (
-                    <button
-                      key={animal}
-                      onClick={() => {
-                        setSelectedAnimal(animal === 'All' ? 'All' : animal)
-                        // Small vibration on tap
-                        if ('vibrate' in navigator) {
-                          navigator.vibrate(10)
-                        }
-                      }}
+                  <button
+                    key={animal}
+                    onClick={() => {
+                      setSelectedAnimal(animal === 'All' ? 'All' : animal)
+                      // Small vibration on tap
+                      if ('vibrate' in navigator) {
+                        navigator.vibrate(10)
+                      }
+                    }}
                       className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border shadow-md ${
                         isSelected
                           ? 'text-white shadow-lg'
@@ -1547,9 +1547,9 @@ export default function BrandsPage() {
                         backgroundColor: isSelected ? '#1F2937' : 'rgba(255, 255, 255, 0.5)',
                         borderColor: isSelected ? '#111827' : '#D1D5DB',
                       }}
-                    >
-                      {animal === 'All' ? 'ALL' : animal}
-                    </button>
+                  >
+                    {animal === 'All' ? 'ALL' : animal}
+                  </button>
                   )
                 })}
               </div>
