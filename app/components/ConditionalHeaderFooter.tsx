@@ -39,7 +39,7 @@ export default function ConditionalHeaderFooter() {
                 name="search"
                 type="search"
                 placeholder="Search brands or products"
-                className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm placeholder-gray-600 focus:outline-none focus:ring-0 focus:border-white/20"
+                className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm placeholder-gray-300 focus:outline-none focus:ring-0 focus:border-white/20"
               />
             </form>
           </div>
@@ -66,12 +66,12 @@ export default function ConditionalHeaderFooter() {
             </Link>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="inline-flex items-center rounded-md border border-gray-500 bg-transparent px-4 py-2 text-sm text-gray-700 hover:border-gray-400 hover:bg-gray-50">
+                <button className="inline-flex items-center rounded-md border border-white/20 bg-white/10  px-4 py-2 text-sm text-gray-300 hover:bg-white/20 hover:border-white/30">
                   Login
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="inline-flex items-center rounded-md border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-gray-700 hover:bg-white/20 hover:border-white/30 ml-2">
+                <button className="inline-flex items-center rounded-md border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2 text-sm text-gray-300 hover:bg-white/20 hover:border-white/30 ml-2">
                   Sign Up
                 </button>
               </SignUpButton>
