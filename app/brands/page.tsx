@@ -226,6 +226,178 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
   )
 }
 
+// Category button component to handle hover state
+function CategoryButton({ 
+  category, 
+  isSelected, 
+  colors, 
+  onClick, 
+  displayName 
+}: { 
+  category: string; 
+  isSelected: boolean; 
+  colors: { 
+    activeBg: string; 
+    activeText: string; 
+    activeBorder: string;
+    inactiveBg: string;
+    inactiveText: string;
+    inactiveBorder: string;
+    hoverBg: string;
+    hoverBorder: string;
+  }; 
+  onClick: () => void; 
+  displayName: string;
+}) {
+  const [isHovered, setIsHovered] = useState(false)
+  
+  // Category patterns (subtle)
+  const getCategoryPattern = () => {
+    if (!isSelected) return 'none'
+    
+    const categoryUpper = category.toUpperCase()
+    
+    // Paw pattern for PETS
+    if (categoryUpper === 'PETS') {
+      return `
+        radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.15) 8%, transparent 8%),
+        radial-gradient(circle at 45% 35%, rgba(255, 255, 255, 0.15) 7%, transparent 7%),
+        radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.15) 8%, transparent 8%),
+        radial-gradient(circle at 38% 55%, rgba(255, 255, 255, 0.15) 12%, transparent 12%),
+        radial-gradient(circle at 52% 58%, rgba(255, 255, 255, 0.15) 12%, transparent 12%)
+      `
+    }
+    
+    // Diagonal stripes for PREDATORS (fangs/claws image)
+    if (categoryUpper === 'PREDATORS') {
+      return `
+        repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 8px,
+          rgba(255, 255, 255, 0.12) 8px,
+          rgba(255, 255, 255, 0.12) 10px
+        )
+      `
+    }
+    
+    // Leaf vein pattern for WILD NATURE
+    if (categoryUpper === 'WILD NATURE') {
+      return `
+        linear-gradient(125deg, transparent 48%, rgba(255, 255, 255, 0.08) 49%, rgba(255, 255, 255, 0.08) 51%, transparent 52%),
+        linear-gradient(235deg, transparent 48%, rgba(255, 255, 255, 0.08) 49%, rgba(255, 255, 255, 0.08) 51%, transparent 52%)
+      `
+    }
+    
+    // Wave pattern for OCEAN
+    if (categoryUpper === 'OCEAN') {
+      return `
+        repeating-radial-gradient(
+          ellipse at 50% 0%,
+          transparent 0px,
+          transparent 8px,
+          rgba(255, 255, 255, 0.1) 8px,
+          rgba(255, 255, 255, 0.1) 10px,
+          transparent 10px,
+          transparent 18px
+        )
+      `
+    }
+    
+    // Stars and subtle gradient for NOCTURNAL
+    if (categoryUpper === 'DARK / NOCTURNAL') {
+      return `
+        radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.2) 2%, transparent 2%),
+        radial-gradient(circle at 35% 60%, rgba(255, 255, 255, 0.15) 1.5%, transparent 1.5%),
+        radial-gradient(circle at 55% 35%, rgba(255, 255, 255, 0.18) 2%, transparent 2%),
+        radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.15) 1.5%, transparent 1.5%),
+        radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.2) 2%, transparent 2%),
+        radial-gradient(circle at 25% 80%, rgba(255, 255, 255, 0.15) 1.5%, transparent 1.5%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%)
+      `
+    }
+    
+    // Sparkle dots for MYTHICAL
+    if (categoryUpper === 'MYTHICAL') {
+      return `
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.25) 2%, transparent 2%),
+        radial-gradient(circle at 60% 50%, rgba(255, 255, 255, 0.2) 1.5%, transparent 1.5%),
+        radial-gradient(circle at 80% 25%, rgba(255, 255, 255, 0.22) 2%, transparent 2%),
+        radial-gradient(circle at 40% 75%, rgba(255, 255, 255, 0.18) 1.5%, transparent 1.5%),
+        radial-gradient(circle at 15% 70%, rgba(255, 255, 255, 0.2) 2%, transparent 2%)
+      `
+    }
+    
+    // Hexagon honeycomb for INSECTS
+    if (categoryUpper === 'INSECTS / SMALL CREATURES') {
+      return `
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 14px,
+          rgba(255, 255, 255, 0.1) 14px,
+          rgba(255, 255, 255, 0.1) 15px
+        ),
+        repeating-linear-gradient(
+          60deg,
+          transparent,
+          transparent 14px,
+          rgba(255, 255, 255, 0.1) 14px,
+          rgba(255, 255, 255, 0.1) 15px
+        ),
+        repeating-linear-gradient(
+          120deg,
+          transparent,
+          transparent 14px,
+          rgba(255, 255, 255, 0.1) 14px,
+          rgba(255, 255, 255, 0.1) 15px
+        )
+      `
+    }
+    
+    return 'none'
+  }
+  
+  // Get background size for each category pattern
+  const getBackgroundSize = () => {
+    if (!isSelected) return 'auto'
+    
+    const categoryUpper = category.toUpperCase()
+    
+    if (categoryUpper === 'PETS') return '40px 40px'
+    if (categoryUpper === 'WILD NATURE') return '30px 30px'
+    if (categoryUpper === 'OCEAN') return '100% 20px'
+    if (categoryUpper === 'DARK / NOCTURNAL') return '100% 100%'
+    if (categoryUpper === 'MYTHICAL') return '100% 100%'
+    if (categoryUpper === 'INSECTS / SMALL CREATURES') return '28px 28px'
+    
+    return 'auto'
+  }
+  
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="px-2 py-1.5 rounded-lg text-sm font-medium transition-all border shadow-md relative overflow-hidden backdrop-blur-md"
+      style={{
+        backgroundColor: isSelected 
+          ? colors.activeBg 
+          : (isHovered ? colors.hoverBg : colors.inactiveBg),
+        color: isSelected ? colors.activeText : colors.inactiveText,
+        borderColor: isSelected 
+          ? colors.activeBorder 
+          : (isHovered ? colors.hoverBorder : colors.inactiveBorder),
+        backgroundImage: getCategoryPattern(),
+        backgroundSize: getBackgroundSize(),
+        backgroundRepeat: 'repeat',
+      }}
+    >
+      {displayName}
+    </button>
+  )
+}
+
 // Brand carousel component for Hot Drop and New Drop sections
 function BrandCarousel({ brands, title, getCategoryDisplayName }: { brands: Brand[], title: string; getCategoryDisplayName?: (category: string | null | undefined) => string }) {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -493,15 +665,78 @@ export default function BrandsPage() {
     'PREDATORS': 'PREDATORS',
     'WILD NATURE': 'WILD NATURE',
     'OCEAN': 'OCEAN',
-    'DARK / NOCTURNAL': 'DARK / NOCTURNAL',
+    'DARK / NOCTURNAL': 'NOCTURNAL',
     'MYTHICAL': 'MYTHICAL',
-    'INSECTS / SMALL CREATURES': 'INSECTS / SMALL CREATURES',
+    'INSECTS / SMALL CREATURES': 'INSECTS',
     'OTHERS': 'OTHERS'
+  }
+  
+  // Category color mapping for all states
+  const categoryColors: Record<string, { 
+    activeBg: string; 
+    activeText: string; 
+    activeBorder: string;
+    inactiveBg: string;
+    inactiveText: string;
+    inactiveBorder: string;
+    hoverBg: string;
+    hoverBorder: string;
+  }> = {
+    'ALL': { 
+      activeBg: '#111827', activeText: '#FFFFFF', activeBorder: '#111827',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#CBD5E1',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#94A3B8'
+    },
+    'PETS': { 
+      activeBg: '#16A34A', activeText: '#FFFFFF', activeBorder: '#16A34A',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#86EFAC',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#22C55E'
+    },
+    'PREDATORS': { 
+      activeBg: '#B45309', activeText: '#FFFFFF', activeBorder: '#B45309',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#FCD34D',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#F59E0B'
+    },
+    'WILD NATURE': { 
+      activeBg: '#065F46', activeText: '#FFFFFF', activeBorder: '#065F46',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#6EE7B7',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#10B981'
+    },
+    'OCEAN': { 
+      activeBg: '#0284C7', activeText: '#FFFFFF', activeBorder: '#0284C7',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#7DD3FC',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#38BDF8'
+    },
+    'DARK / NOCTURNAL': { 
+      activeBg: '#312E81', activeText: '#FFFFFF', activeBorder: '#312E81',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#A5B4FC',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#6366F1'
+    },
+    'MYTHICAL': { 
+      activeBg: '#7C3AED', activeText: '#FFFFFF', activeBorder: '#7C3AED',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#C4B5FD',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#8B5CF6'
+    },
+    'INSECTS / SMALL CREATURES': { 
+      activeBg: '#4D7C0F', activeText: '#FFFFFF', activeBorder: '#4D7C0F',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#BEF264',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#84CC16'
+    },
+    'OTHERS': { 
+      activeBg: '#334155', activeText: '#FFFFFF', activeBorder: '#334155',
+      inactiveBg: 'rgba(255, 255, 255, 0.5)', inactiveText: '#0F172A', inactiveBorder: '#CBD5E1',
+      hoverBg: 'rgba(255, 255, 255, 0.75)', hoverBorder: '#64748B'
+    }
   }
   
   const getCategoryDisplayName = (category: string | null | undefined): string => {
     if (!category) return ''
     return categoryDisplayNames[category] || category
+  }
+  
+  const getCategoryColor = (category: string) => {
+    const normalizedCategory = category === 'All' ? 'ALL' : category.toUpperCase()
+    return categoryColors[normalizedCategory] || categoryColors['ALL']
   }
   const [selectedDot, setSelectedDot] = useState<number | null>(null)
   const topRowRef = useRef<HTMLDivElement>(null)
@@ -910,8 +1145,30 @@ export default function BrandsPage() {
         const categories = [...new Set(brandsData
           .filter(brand => brand.category)
           .map(brand => brand.category!)
-        )].sort()
-        setAvailableCategories(categories)
+        )]
+        
+        // Sort categories in the specified order
+        const categoryOrder = [
+          'PETS',
+          'WILD NATURE',
+          'OCEAN',
+          'PREDATORS',
+          'MYTHICAL',
+          'DARK / NOCTURNAL',
+          'INSECTS / SMALL CREATURES',
+          'OTHERS'
+        ]
+        
+        const sortedCategories = categories.sort((a, b) => {
+          const indexA = categoryOrder.indexOf(a.toUpperCase())
+          const indexB = categoryOrder.indexOf(b.toUpperCase())
+          // If category not in order list, put it at the end
+          if (indexA === -1) return 1
+          if (indexB === -1) return -1
+          return indexA - indexB
+        })
+        
+        setAvailableCategories(sortedCategories)
         
         // Initial animals list (will be filtered by category)
         const allAnimals = [...new Set(brandsData
@@ -1060,6 +1317,23 @@ export default function BrandsPage() {
     setAllBrands(filtered)
   }, [brands, selectedCategory, selectedAnimal])
 
+  // Get background image based on selected category
+  const getBackgroundImage = () => {
+    const categoryMap: Record<string, string> = {
+      'All': '/all.png',
+      'PETS': '/pets.png',
+      'WILD NATURE': '/wild.png',
+      'OCEAN': '/ocean.png',
+      'PREDATORS': '/predator.png',
+      'MYTHICAL': '/myth.png',
+      'DARK / NOCTURNAL': '/noct.png',
+      'INSECTS / SMALL CREATURES': '/insects.png',
+      'OTHERS': '/others.png'
+    }
+    
+    return categoryMap[selectedCategory] || '/all.png'
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-[#FAFAF7]">
@@ -1068,8 +1342,18 @@ export default function BrandsPage() {
     )
   }
 
+  const backgroundImage = getBackgroundImage()
+
   return (
-    <div className="bg-[#FAFAF7]">
+    <div 
+      className="bg-[#FAFAF7] transition-all duration-500"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       {/* Hero Section with Features Carousel */}
       {features.length > 0 && (
         <section className="relative overflow-hidden">
@@ -1151,65 +1435,98 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div className="mb-3">
-          <h2 className="text-2xl font-bold text-black mb-3">Find your animal brands</h2>
+          <h2 className="text-2xl font-bold text-black mb-3">Find animal brands</h2>
           
           {/* Category Filter */}
           {/* Button grid for all devices */}
-          <div className="mb-2">
+          <div className="mb-1 md:mb-2">
             <div className="flex flex-wrap gap-1">
-              {['All', ...availableCategories].map((category) => (
-                <button
-                  key={category}
-                  onClick={() => {
-                    const categoryValue = category === 'All' ? 'All' : category.toUpperCase()
-                    setSelectedCategory(categoryValue)
-                    // Small vibration on tap
-                    if ('vibrate' in navigator) {
-                      navigator.vibrate(10)
-                    }
-                  }}
-                  className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
-                    selectedCategory === (category === 'All' ? 'All' : category.toUpperCase())
-                      ? 'bg-black border-black text-white shadow-lg shadow-black/50'
-                      : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 shadow-md shadow-gray-300/50 hover:shadow-lg hover:shadow-gray-400/50'
-                  }`}
-                >
-                  {category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Animal Filter - Only show when a category is selected */}
-          {selectedCategory !== 'All' && (
-            <div className="mb-2">
-              {/* Button grid for all devices */}
-              <div className="flex flex-wrap gap-1">
-                {['All', ...availableAnimals].map((animal) => (
-                  <button
-                    key={animal}
+              {['All', ...availableCategories].map((category) => {
+                const categoryValue = category === 'All' ? 'All' : category.toUpperCase()
+                const isSelected = selectedCategory === categoryValue
+                const colors = getCategoryColor(category)
+                
+                return (
+                  <CategoryButton
+                    key={category}
+                    category={category}
+                    isSelected={isSelected}
+                    colors={colors}
                     onClick={() => {
-                      setSelectedAnimal(animal === 'All' ? 'All' : animal)
+                      setSelectedCategory(categoryValue)
                       // Small vibration on tap
                       if ('vibrate' in navigator) {
                         navigator.vibrate(10)
                       }
                     }}
-                    className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border ${
-                      selectedAnimal === (animal === 'All' ? 'All' : animal)
-                        ? 'bg-gray-800 border-gray-900 text-white shadow-lg shadow-gray-900/50'
-                        : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 shadow-md shadow-gray-300/50 hover:shadow-lg hover:shadow-gray-400/50'
-                    }`}
-                  >
-                    {animal === 'All' ? 'ALL' : animal}
-                  </button>
-                ))}
+                    displayName={category === 'All' ? 'ALL' : getCategoryDisplayName(category)}
+                  />
+                )
+              })}
+            </div>
+          </div>
+          
+          {/* Animal Filter - Only show when a category is selected */}
+          {selectedCategory !== 'All' && (() => {
+            // Get icon based on selected category
+            const getCategoryIcon = () => {
+              const iconMap: Record<string, string> = {
+                'PETS': '🐾',
+                'WILD NATURE': '🌿',
+                'OCEAN': '🌊',
+                'PREDATORS': '🦁',
+                'MYTHICAL': '🦄',
+                'DARK / NOCTURNAL': '🌙',
+                'INSECTS / SMALL CREATURES': '🦋',
+                'OTHERS': '🧩'
+              }
+              return iconMap[selectedCategory] || '🐾'
+            }
+            
+            return (
+              <div className="mb-2">
+                {/* Divider with icon */}
+                <div className="flex items-center justify-center my-1">
+                  <div className="flex-1 border-t border-slate-200"></div>
+                  <div className="px-3 text-2xl">{getCategoryIcon()}</div>
+                  <div className="flex-1 border-t border-slate-200"></div>
+                </div>
+                
+                {/* Button grid for all devices */}
+                <div className="flex flex-wrap gap-1">
+                {['All', ...availableAnimals].map((animal) => {
+                  const isSelected = selectedAnimal === (animal === 'All' ? 'All' : animal)
+                  return (
+                    <button
+                      key={animal}
+                      onClick={() => {
+                        setSelectedAnimal(animal === 'All' ? 'All' : animal)
+                        // Small vibration on tap
+                        if ('vibrate' in navigator) {
+                          navigator.vibrate(10)
+                        }
+                      }}
+                      className={`px-2 py-1.5 rounded-lg text-sm font-medium transition-all backdrop-blur-md border shadow-md ${
+                        isSelected
+                          ? 'text-white shadow-lg'
+                          : 'text-gray-700'
+                      }`}
+                      style={{
+                        backgroundColor: isSelected ? '#1F2937' : 'rgba(255, 255, 255, 0.5)',
+                        borderColor: isSelected ? '#111827' : '#D1D5DB',
+                      }}
+                    >
+                      {animal === 'All' ? 'ALL' : animal}
+                    </button>
+                  )
+                })}
               </div>
               <div className="text-center mt-2">
                 <span className="text-sm text-black/60">({allBrands.length} brands)</span>
               </div>
             </div>
-          )}
+            )
+          })()}
           
           {/* Brand count - Show when no category is selected */}
           {selectedCategory === 'All' && (

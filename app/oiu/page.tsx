@@ -1151,9 +1151,9 @@ export default function AdminPage() {
                         <option value="PREDATORS">PREDATORS</option>
                         <option value="WILD NATURE">WILD NATURE</option>
                         <option value="OCEAN">OCEAN</option>
-                        <option value="DARK / NOCTURNAL">DARK / NOCTURNAL</option>
+                        <option value="DARK / NOCTURNAL">NOCTURNAL</option>
                         <option value="MYTHICAL">MYTHICAL</option>
-                        <option value="INSECTS / SMALL CREATURES">INSECTS / SMALL CREATURES</option>
+                        <option value="INSECTS / SMALL CREATURES">INSECTS</option>
                         <option value="OTHERS">OTHERS</option>
                       </select>
                     </div>
