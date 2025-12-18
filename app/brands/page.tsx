@@ -1430,10 +1430,10 @@ export default function BrandsPage() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-2">
+      <div className="max-w-7xl mx-auto px-3">
         
         {/* Hot Drop Section */}
-        <div className="py-2">
+        <div className="py-6">
         {hotBrands.length > 0 && (
             <BrandCarousel brands={hotBrands} title="Trending Now" getCategoryDisplayName={getCategoryDisplayName} />
         )}
@@ -1446,7 +1446,7 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div 
-          className="py-4 -mx-2 px-1"
+          className="py-8 -mx-2 px-1"
           style={{
             backgroundColor: backgroundColor
           }}

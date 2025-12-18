@@ -239,7 +239,7 @@ function SearchContent() {
         {searchQuery ? (
           <>
             <div className="mb-2 mt-2">
-              <h2 className="text-xl font-semibold tracking-tight text-white px-3 sm:px-6">
+              <h2 className="text-xl font-semibold tracking-tight text-black px-3 sm:px-6">
                 SEARCH RESULTS FOR &quot;{searchQuery}&quot;
               </h2>
             </div>
@@ -247,7 +247,7 @@ function SearchContent() {
             {/* Brand Results */}
             {foundBrands.length > 0 && (
               <div className="mb-4 px-3 sm:px-6">
-                <h3 className="text-lg font-bold mb-4 text-white">BRANDS</h3>
+                <h3 className="text-lg font-bold mb-4 text-black">BRANDS</h3>
                 
                 {/* Mobile: 2 columns with compact cards */}
                 <div className="grid grid-cols-2 sm:hidden gap-3">
@@ -366,7 +366,7 @@ function SearchContent() {
             {/* Product Results */}
             {products.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4 text-white px-3 sm:px-6">PRODUCTS</h3>
+                <h3 className="text-lg font-bold mb-4 text-black px-3 sm:px-6">PRODUCTS</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
                   {currentProducts.map((p, index) => (
                     <div key={p.id} className="group relative">
@@ -465,7 +465,7 @@ function SearchContent() {
                         <div className="flex items-center justify-between gap-3">
                           <Link 
                             href={`/${p.brand_id}/${p.id}`} 
-                            className="block font-medium text-white truncate hover:underline"
+                            className="block font-medium text-black truncate hover:underline"
                             onClick={() => {
                               // Track search result click
                               analytics.trackSearchResultClick(
@@ -505,7 +505,7 @@ function SearchContent() {
                             <OptimizedImage src={(allBrands.find(b=>b.id===p.brand_id))?.icon || "/vercel.svg"} alt="brand" width={18} height={18} className="rounded" />
                           </Link>
                         </div>
-                        <div className="text-sm text-gray-300">{formatUSD(p.price)}</div>
+                        <div className="text-sm text-black">{formatUSD(p.price)}</div>
                       </div>
                     </div>
                   ))}

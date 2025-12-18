@@ -80,7 +80,4 @@ stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
 
-
-dog cat panda tiger fox butterfly shark bear dolphin wolf rabbit penguin
-
-shipping info前がclerk前と同じならと同じ
+shipping info前がclerk前と同じならと同じ保存
