@@ -80,4 +80,9 @@ stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
 
 
+PETS dog cat  rabbit 
+WILD NATURE panda bear fox
+OCEAN shark dolphin penguin
+PREDATORS tiger  wolf 
+
 shipping info前がclerk前と同じならと同じ保存
