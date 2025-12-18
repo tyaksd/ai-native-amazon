@@ -103,9 +103,6 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
               <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
             )}
             
-            {/* Follow button - positioned at top right */}
-            <BrandFollowButton brandId={brand.id} />
-            
             {/* Brand icon - positioned at bottom left */}
             <div className="absolute bottom-1 left-1 z-10">
               <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
@@ -126,7 +123,7 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
             </div>
             
             {/* Brand name and animal button - positioned at bottom right */}
-            <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
+            <div className="absolute bottom-0.5 right-0 z-10 flex flex-col items-end gap-0.3">
               <div className="px-1 py-1 bg-black/30 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
                 {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
               </div>
@@ -635,7 +632,7 @@ function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; get
         </div>
         
         {/* Brand name and animal button with glass design - positioned at bottom right */}
-        <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
+        <div className="absolute bottom-0.5 right-0.5 z-10 flex flex-col items-end gap-0.3">
           <div className="px-1 py-1 bg-black/30 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
             {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
           </div>
