@@ -73,7 +73,7 @@ function BrandPageWithoutClerk({
   const [nextBrand, setNextBrand] = useState<Brand | null>(null)
   const [prevBrand, setPrevBrand] = useState<Brand | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedTab, setSelectedTab] = useState<'all' | 'new'>('all')
+  const [selectedTab, setSelectedTab] = useState<'all' | 'new' | 'hot'>('all')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedGender, setSelectedGender] = useState<string>('All')
   const [selectedType, setSelectedType] = useState<string>('All')
@@ -138,9 +138,11 @@ function BrandPageWithoutClerk({
   const availableTypesAfterFilters = useMemo(() => {
     let filtered = items
     
-    // Filter by tab (all vs new)
+    // Filter by tab (all vs new vs hot)
     if (selectedTab === 'new') {
       filtered = filtered.filter(p => p.badge === 'NEW')
+    } else if (selectedTab === 'hot') {
+      filtered = filtered.filter(p => p.badge === 'HOT')
     }
     
     // Filter by category (using type field)
@@ -165,9 +167,11 @@ function BrandPageWithoutClerk({
   const displayedItems = useMemo(() => {
     let filtered = items
     
-    // Filter by tab (all vs new)
+    // Filter by tab (all vs new vs hot)
     if (selectedTab === 'new') {
       filtered = filtered.filter(p => p.badge === 'NEW')
+    } else if (selectedTab === 'hot') {
+      filtered = filtered.filter(p => p.badge === 'HOT')
     }
     
     // Filter by category (using type field)
@@ -435,6 +439,16 @@ function BrandPageWithoutClerk({
                     }`}
                   >
                     New
+                  </button>
+                  <button
+                    onClick={() => setSelectedTab('hot')}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                      selectedTab === 'hot'
+                        ? 'border-white text-white'
+                        : 'border-transparent text-white/70 hover:text-white'
+                    }`}
+                  >
+                    HOT
                   </button>
                 </div>
               </div>

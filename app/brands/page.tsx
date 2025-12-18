@@ -127,7 +127,7 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
             
             {/* Brand name and animal button - positioned at bottom right */}
             <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
-              <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
+              <div className="px-1 py-1 bg-black/30 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
                 {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
               </div>
             </div>
@@ -614,9 +614,6 @@ function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; get
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
         )}
-        
-        {/* Follow button - positioned at top right */}
-        <BrandFollowButton brandId={brand.id} />
         
         {/* Brand icon - positioned at bottom left */}
         <div className="absolute bottom-1 left-1 z-10">
@@ -1415,7 +1412,7 @@ export default function BrandsPage() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-3">
+      <div className="max-w-7xl mx-auto px-2">
         
         {/* Hot Drop Section */}
         <div className="py-6">
