@@ -88,7 +88,7 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
   if (compact) {
     return (
       <Link href={`/${brand.id}`} className="group block">
-        <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-[2/1] flex">
+        <div className="relative rounded-md overflow-hidden hover:shadow-xl transition-all duration-300 aspect-[2/1] flex">
           {/* Left half - CompactBrandCard layout */}
           <div className="relative w-1/2 h-full">
             {brand.background_image ? (
@@ -176,7 +176,7 @@ function BrandCard({ brand, compact, getCategoryDisplayName }: { brand: Brand; c
   // Regular layout for desktop
   return (
     <Link href={`/${brand.id}`} className="group block">
-      <div className="relative rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full min-h-[210px]">
+      <div className="relative rounded-md overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 h-full min-h-[210px]">
         {/* Full background image */}
         {brand.background_image ? (
           <Image 
@@ -598,7 +598,7 @@ function BrandCarousel({ brands, title, getCategoryDisplayName }: { brands: Bran
 function CompactBrandCard({ brand, getCategoryDisplayName }: { brand: Brand; getCategoryDisplayName?: (category: string | null | undefined) => string }) {
   return (
     <Link href={`/${brand.id}`} className="group block">
-      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
+      <div className="relative rounded-sm overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
         {/* Full background image */}
         {brand.background_image ? (
           <Image 
@@ -1348,7 +1348,7 @@ export default function BrandsPage() {
           {/* Feature Images with swipe support */}
           <div 
             ref={heroContainerRef}
-            className="relative h-[200px] sm:h-[280px] md:h-[380px] overflow-hidden"
+            className="relative h-[230px] sm:h-[320px] md:h-[400px] overflow-hidden"
             style={{ touchAction: 'pan-y' }}
           >
             <div 
@@ -1425,17 +1425,17 @@ export default function BrandsPage() {
         
         {/* All Brands Section */}
         <div 
-          className="py-8 -mx-2 px-1"
+          className="py-8 -mx-2"
           style={{
             backgroundColor: backgroundColor
           }}
         >
         <div className="mb-3">
-            <h2 className="text-2xl font-bold text-black mb-3 px-1">Find your favorite brands</h2>
+            <h2 className="text-2xl font-bold text-black mb-3 px-3">Find your favorite brands</h2>
           
           {/* Category Filter */}
           {/* Button grid for all devices */}
-          <div className="mb-1 md:mb-2 px-1">
+          <div className="mb-1 md:mb-2 px-3">
             <div className="flex flex-wrap gap-1">
               {['All', ...availableCategories].map((category) => {
                 const categoryValue = category === 'All' ? 'All' : category.toUpperCase()
@@ -1489,7 +1489,7 @@ export default function BrandsPage() {
                 </div>
                 
               {/* Button grid for all devices */}
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1 px-3">
                 {['All', ...availableAnimals].map((animal) => {
                   const isSelected = selectedAnimal === (animal === 'All' ? 'All' : animal)
                   return (
@@ -1532,7 +1532,7 @@ export default function BrandsPage() {
           )}
         
           {/* Mobile: 2 columns with compact cards, Desktop: 3 columns with regular cards */}
-          <div className="grid grid-cols-2 sm:hidden gap-1">
+          <div className="grid grid-cols-2 sm:hidden gap-0.5">
             {allBrands.map((brand) => (
               <CompactBrandCard key={brand.id} brand={brand} getCategoryDisplayName={getCategoryDisplayName} />
             ))}

@@ -20,6 +20,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [productVisibility, setProductVisibility] = useState<{[key: string]: boolean}>({})
   const [productImageVisibility, setProductImageVisibility] = useState<{[key: string]: boolean}>({})
+  const [isSmallImage, setIsSmallImage] = useState(false)
   
 
   // AI Products form states
@@ -339,6 +340,7 @@ export default function AdminPage() {
           // 最初のアップロード画像を使用して、各カラーの無地商品画像に重ね合わせる
           // productTypeに応じて適切な無地画像が選択される（T-Shirt, Hoodie, Long Teeなど）
           const designImageUrl = newProduct.images[0]
+          console.log(`[Product Create] Sending to API - productType: ${newProduct.type}, isSmall: ${isSmallImage}`)
           const response = await fetch('/api/composite-product-images', {
             method: 'POST',
             headers: {
@@ -347,7 +349,8 @@ export default function AdminPage() {
             body: JSON.stringify({
               designImageUrl: designImageUrl,
               colors: newProduct.colors,
-              productType: newProduct.type
+              productType: newProduct.type,
+              isSmall: isSmallImage
             }),
           })
 
@@ -904,7 +907,18 @@ export default function AdminPage() {
 
                     <div className="flex gap-6 items-center">
                       <div className="w-1/5">
-                        <label className="block text-sm font-medium text-gray-700">Product Images</label>
+                        <div className="flex items-center gap-3 mb-1">
+                          <label className="block text-sm font-medium text-gray-700">Product Images</label>
+                          <label className="flex items-center gap-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={isSmallImage}
+                              onChange={(e) => setIsSmallImage(e.target.checked)}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm text-gray-700">Small</span>
+                          </label>
+                        </div>
                         <input
                           type="file"
                           accept="image/*"

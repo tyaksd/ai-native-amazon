@@ -33,7 +33,8 @@ function compositeDesignOnTshirt(
   plainTshirtUrl: string, 
   designPngUrl: string,
   isLongTee: boolean = false,
-  productType?: string
+  productType?: string,
+  isSmall: boolean = false
 ): string {
   try {
     const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
@@ -46,23 +47,62 @@ function compositeDesignOnTshirt(
       throw new Error(`Failed to parse public_id. design=${designPublicId}, base=${basePublicId}`)
     }
 
-    // フーディーの場合はデザイン位置をより上に、少し左に配置
+    // 製品タイプの判定
     const isHoodie = productType === 'Hoodie' || productType?.toLowerCase() === 'hoodie'
     const isSweatshirt = productType === 'Sweatshirt' || productType?.toLowerCase() === 'sweatshirt'
-    const yOffset = isHoodie ? '-0.12' : (isLongTee ? '-0.13' : (isSweatshirt ? '-0.12' : '-0.08')) // フーディーの場合はより上に、Long Teeは-0.13、Sweatshirtは少し上に
-    const xOffset = isHoodie ? '0' : (isLongTee ? '0' : '0') // フーディーも中央寄せに調整
-
-    // デザインサイズ: Long Teeは29%、T-Shirtは29.7%、Hoodie/Sweatshirtは26.0%
-    const designSize = isLongTee
-      ? '0.28'
-      : isHoodie || isSweatshirt
-        ? '0.26'
-        : '0.297'
+    const isTShirt = productType === 'T-Shirt' || productType?.toLowerCase() === 't-shirt' || (!isLongTee && !isHoodie && !isSweatshirt)
+    
+    console.log(`[Composite Debug] productType: ${productType}, isSmall: ${isSmall}, isTShirt: ${isTShirt}, isLongTee: ${isLongTee}`)
+    
+    // T-ShirtでSmallがチェックされている場合は、位置を右上に調整
+    let yOffset: string
+    let xOffset: string
+    let designSize: string
+    
+    if (isTShirt && isSmall) {
+      // T-ShirtでSmallの場合
+      designSize = '0.09'
+      yOffset = '-0.15' // より上に移動
+      xOffset = '0.12' // 少し右に移動
+      console.log(`[Composite Debug] Applying SMALL T-Shirt settings: size=${designSize}, x=${xOffset}, y=${yOffset}`)
+    } else if (isLongTee && isSmall) {
+      // Long TeeでSmallの場合
+      designSize = '0.09'
+      yOffset = '-0.20'
+      xOffset = '0.12'
+      console.log(`[Composite Debug] Applying SMALL Long Tee settings: size=${designSize}, x=${xOffset}, y=${yOffset}`)
+    } else if (isLongTee) {
+      // Long Teeの場合（通常）
+      designSize = '0.28'
+      yOffset = '-0.13'
+      xOffset = '0'
+    } else if (isHoodie && isSmall) {
+      // HoodieでSmallの場合
+      designSize = '0.09'
+      yOffset = '-0.17'
+      xOffset = '0.12'
+      console.log(`[Composite Debug] Applying SMALL Hoodie settings: size=${designSize}, x=${xOffset}, y=${yOffset}`)
+    } else if (isHoodie) {
+      // Hoodieの場合（通常）
+      designSize = '0.26'
+      yOffset = '-0.12'
+      xOffset = '0'
+    } else if (isSweatshirt) {
+      // Sweatshirtの場合
+      designSize = '0.26'
+      yOffset = '-0.12'
+      xOffset = '0'
+    } else {
+      // 通常のT-Shirtの場合
+      designSize = '0.297'
+      yOffset = '-0.08'
+      xOffset = '0'
+    }
 
     // デザインを相対サイズで中央より僅かに上に配置
     // 注: l_<public_id> は同一Cloudアカウントのアセットを参照
     // Cloudinaryでは、g_パラメータを先に指定し、その後にx/yオフセットを指定する
-    const overlayParams = (isHoodie || isLongTee)
+    const overlayParams = (xOffset !== '0')
       ? `fl_relative,w_${designSize},h_${designSize},g_center,x_${xOffset},y_${yOffset}`
       : `fl_relative,w_${designSize},h_${designSize},g_center,y_${yOffset}`
     
@@ -73,7 +113,7 @@ function compositeDesignOnTshirt(
       `/${encodeURIComponent(basePublicId)}`
 
     // 変換URLを直接返す（再アップロードを避けてタイムアウトを防ぐ）
-    console.log(`[Composite] ProductType: ${productType}, isHoodie: ${isHoodie}, isLongTee: ${isLongTee}, isSweatshirt: ${isSweatshirt}, xOffset: ${xOffset}, yOffset: ${yOffset}`)
+    console.log(`[Composite] ProductType: ${productType}, isHoodie: ${isHoodie}, isLongTee: ${isLongTee}, isSweatshirt: ${isSweatshirt}, isSmall: ${isSmall}, designSize: ${designSize}, xOffset: ${xOffset}, yOffset: ${yOffset}`)
     console.log(`[Composite] Generated composite URL: ${compositeUrl}`)
     return compositeUrl
   } catch (error) {
@@ -171,7 +211,9 @@ function normalizeColorName(color: string, colorMap: { [key: string]: string }):
 
 export async function POST(request: NextRequest) {
   try {
-    const { designImageUrl, colors, productType } = await request.json()
+    const { designImageUrl, colors, productType, isSmall } = await request.json()
+
+    console.log(`[Composite API] Received request - productType: ${productType}, isSmall: ${isSmall}, colors: ${colors.length}`)
 
     if (!designImageUrl || !colors || !Array.isArray(colors) || colors.length === 0) {
       return NextResponse.json(
@@ -223,8 +265,8 @@ export async function POST(request: NextRequest) {
 
       console.log(`[Composite:${normalizedColor}] Compositing design onto ${normalizedColor} ${productTypeName.toLowerCase()}...`)
       try {
-        // productTypeを渡して、Hoodieの場合は位置調整を適用
-        const compositeUrl = compositeDesignOnTshirt(baseImageUrl, designImageUrl, isLongTee, productType)
+        // productTypeとisSmallを渡して、位置調整を適用
+        const compositeUrl = compositeDesignOnTshirt(baseImageUrl, designImageUrl, isLongTee, productType, isSmall || false)
         compositeImages.push(compositeUrl)
         console.log(`[Composite:${normalizedColor}] Design composited: ${compositeUrl}`)
       } catch (err) {
