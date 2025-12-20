@@ -250,7 +250,7 @@ function SearchContent() {
                 <h3 className="text-lg font-bold mb-4 text-black">BRANDS</h3>
                 
                 {/* Mobile: 2 columns with compact cards */}
-                <div className="grid grid-cols-2 sm:hidden gap-3">
+                <div className="grid grid-cols-2 sm:hidden gap-0.5">
                   {foundBrands.map((brand) => (
                     <Link 
                       key={brand.id} 
@@ -260,7 +260,7 @@ function SearchContent() {
                         analytics.trackSearchResultClick(brand.id, 'brand', searchQuery)
                       }}
                     >
-                      <div className="relative rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
+                      <div className="relative rounded-sm overflow-hidden hover:shadow-xl transition-all duration-300 aspect-square">
                         {/* Full background image */}
                         {brand.background_image ? (
                           <Image 
@@ -274,26 +274,29 @@ function SearchContent() {
                           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
                         )}
                         
-                        {/* Follow button - positioned at top right */}
-                        <BrandFollowButton brandId={brand.id} />
-                        
                         {/* Brand icon - positioned at bottom left */}
                         <div className="absolute bottom-1 left-1 z-10">
-                          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-2 border-white/50 overflow-hidden ring-2 ring-black/20">
-                            <Image 
-                              src={brand.icon} 
-                              alt={brand.name} 
-                              fill
-                              sizes="56px"
-                              className="object-cover"
-                            />
+                          <div className="w-14 h-14 bg-white backdrop-blur-md rounded-lg shadow-2xl border-1 border-white/50 overflow-hidden ring-2 ring-black/20">
+                            {brand.icon ? (
+                              <Image 
+                                src={brand.icon} 
+                                alt={brand.name} 
+                                fill
+                                sizes="56px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <span className="text-gray-500 text-xs font-bold">{brand.name.charAt(0)}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         
                         {/* Brand name and style button with glass design - positioned at bottom right */}
-                        <div className="absolute bottom-1 right-0 z-10 flex flex-col items-end gap-0.3">
-                          <div className="px-1 py-1 bg-black/50 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-md truncate max-w-[180px]">
-                            {brand.name.length > 10 ? brand.name.slice(0, 10) : brand.name}
+                        <div className="absolute bottom-0.5 right-0.5 z-10 flex flex-col items-end gap-0.3">
+                          <div className="px-1 py-0 bg-black/30 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-sm truncate max-w-[180px]">
+                            {brand.name.length > 11 ? brand.name.slice(0, 11) : brand.name}
                           </div>
                         </div>
                       </div>
@@ -363,8 +366,8 @@ function SearchContent() {
               </div>
             )}
 
-            {/* Product Results */}
-            {products.length > 0 && (
+            {/* Product Results - Hidden */}
+            {false && products.length > 0 && (
               <div>
                 <h3 className="text-lg font-bold mb-4 text-black px-3 sm:px-6">PRODUCTS</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-4">
@@ -585,7 +588,7 @@ function SearchContent() {
             )}
 
             {/* No Results */}
-            {foundBrands.length === 0 && products.length === 0 && (
+            {foundBrands.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-300">No results found for &quot;{searchQuery}&quot;</p>
               </div>
