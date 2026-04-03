@@ -78,7 +78,7 @@ git push origin main
 stripe login
 stripe listen --forward-to http://localhost:3000/api/stripe-webhook
 stripe trigger payment_intent.succeeded
-
+835621
 
 PETS dog cat  rabbit 
 WILD NATURE panda bear fox
@@ -86,3 +86,4 @@ OCEAN shark dolphin penguin
 PREDATORS tiger  wolf 
 
 shipping info前がclerk前と同じならと同じ保存
+
