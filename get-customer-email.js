@@ -2,21 +2,31 @@
 
 /**
  * Get Customer Email Script
- * 
- * This script retrieves the customer email for the specified order item ID
- * by querying the database directly.
+ *
+ * Requires env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ * and ORDER_ITEM_ID, or pass order item UUID as first CLI argument.
  */
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Supabase configuration
-const supabaseUrl = 'https://lphwwwhwtbxgujmdqquf.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwaHd3d2h3dGJ4Z3VqbWRxcXVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTA0MzkwMSwiZXhwIjoyMDc0NjE5OTAxfQ.fJJy_7DRXYqEWL17XVmm5lRcmF7oouyrYjDraB9e9wA';
+function requireEnv (name) {
+  const v = process.env[name];
+  if (!v || !String(v).trim()) {
+    console.error(`Missing required environment variable: ${name}`);
+    process.exit(1);
+  }
+  return v;
+}
 
+const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseKey = requireEnv('SUPABASE_SERVICE_ROLE_KEY');
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Configuration
-const ORDER_ITEM_ID = '760ecd24-2c82-4ac5-a5cd-a71f99cf903f';
+function orderItemIdFromEnv () {
+  const fromArg = process.argv[2];
+  if (fromArg) return fromArg;
+  return requireEnv('ORDER_ITEM_ID');
+}
 
 /**
  * Get customer email for order item
@@ -77,12 +87,13 @@ async function getCustomerEmail(orderItemId) {
 /**
  * Main function
  */
-async function main() {
+async function main () {
+  const orderItemId = orderItemIdFromEnv();
   console.log('🚀 Getting Customer Email Information...');
-  console.log(`📦 Order Item ID: ${ORDER_ITEM_ID}`);
+  console.log(`📦 Order Item ID: ${orderItemId}`);
   console.log('');
 
-  const orderInfo = await getCustomerEmail(ORDER_ITEM_ID);
+  const orderInfo = await getCustomerEmail(orderItemId);
 
   if (orderInfo) {
     console.log('');

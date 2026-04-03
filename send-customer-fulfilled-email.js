@@ -2,34 +2,51 @@
 
 /**
  * Send Customer Fulfilled Email Script
- * 
- * This script sends a fulfilled status email to the specific customer
- * for the order item ID: 760ecd24-2c82-4ac5-a5cd-a71f99cf903f
+ *
+ * Requires env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+ * SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM (or falls back to SMTP_USER),
+ * ORDER_ITEM_ID, CUSTOMER_EMAIL. Optional: SMTP_PORT (default 465), SMTP_SECURE (default true).
  */
 
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
-// Supabase configuration
-const supabaseUrl = 'https://lphwwwhwtbxgujmdqquf.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxwaHd3d2h3dGJ4Z3VqbWRxcXVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTA0MzkwMSwiZXhwIjoyMDc0NjE5OTAxfQ.fJJy_7DRXYqEWL17XVmm5lRcmF7oouyrYjDraB9e9wA';
+function requireEnv (name) {
+  const v = process.env[name];
+  if (!v || !String(v).trim()) {
+    console.error(`Missing required environment variable: ${name}`);
+    process.exit(1);
+  }
+  return v;
+}
 
+const supabaseUrl = requireEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseKey = requireEnv('SUPABASE_SERVICE_ROLE_KEY');
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Email configuration
-const SMTP_CONFIG = {
-  host: 'smtp.titan.email',
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'jack@godship.io',
-    pass: 'Shsnwu2877-'
-  }
-};
+function smtpConfigFromEnv () {
+  const port = parseInt(process.env.SMTP_PORT || '465', 10);
+  const secure = (process.env.SMTP_SECURE || 'true').toLowerCase() !== 'false';
+  return {
+    host: requireEnv('SMTP_HOST'),
+    port,
+    secure,
+    auth: {
+      user: requireEnv('SMTP_USER'),
+      pass: requireEnv('SMTP_PASS')
+    }
+  };
+}
 
-// Configuration
-const ORDER_ITEM_ID = '760ecd24-2c82-4ac5-a5cd-a71f99cf903f';
-const CUSTOMER_EMAIL = 'z42i9h0o3j1c4rj3a7p@icloud.com';
+function orderItemIdFromEnv () {
+  const fromArg = process.argv[2];
+  if (fromArg) return fromArg;
+  return requireEnv('ORDER_ITEM_ID');
+}
+
+function customerEmailFromEnv () {
+  return requireEnv('CUSTOMER_EMAIL');
+}
 
 /**
  * Get order information
@@ -110,11 +127,11 @@ function renderFulfilledEmail(orderInfo) {
 /**
  * Send email
  */
-async function sendEmail(to, subject, html) {
+async function sendEmail (to, subject, html, smtpConfig, fromAddress) {
   console.log(`📧 Sending email to: ${to}`);
   
   try {
-    const transporter = nodemailer.createTransport(SMTP_CONFIG);
+    const transporter = nodemailer.createTransport(smtpConfig);
     
     // Verify connection
     await transporter.verify();
@@ -122,7 +139,7 @@ async function sendEmail(to, subject, html) {
     
     // Send email
     const info = await transporter.sendMail({
-      from: 'jack@godship.io',
+      from: fromAddress,
       to: to,
       subject: subject,
       html: html
@@ -142,14 +159,18 @@ async function sendEmail(to, subject, html) {
 /**
  * Main function
  */
-async function main() {
+async function main () {
+  const orderItemId = orderItemIdFromEnv();
+  const customerEmail = customerEmailFromEnv();
+  const smtpConfig = smtpConfigFromEnv();
+  const fromAddress = process.env.SMTP_FROM?.trim() || smtpConfig.auth.user;
+
   console.log('🚀 Sending Fulfilled Status Email...');
-  console.log(`📦 Order Item ID: ${ORDER_ITEM_ID}`);
-  console.log(`📧 Customer Email: ${CUSTOMER_EMAIL}`);
+  console.log(`📦 Order Item ID: ${orderItemId}`);
+  console.log(`📧 Customer Email: ${customerEmail}`);
   console.log('');
   
-  // Step 1: Get order information
-  const orderInfo = await getOrderInfo(ORDER_ITEM_ID);
+  const orderInfo = await getOrderInfo(orderItemId);
   
   if (!orderInfo) {
     console.log('❌ Failed to get order information');
@@ -167,16 +188,16 @@ async function main() {
   const subject = `Order Update - ${orderInfo.orders.id}`;
   
   // Step 3: Send email
-  const emailSent = await sendEmail(CUSTOMER_EMAIL, subject, emailHtml);
+  const emailSent = await sendEmail(customerEmail, subject, emailHtml, smtpConfig, fromAddress);
   
   if (emailSent) {
     console.log('');
     console.log('🎉 Fulfilled status email sent successfully!');
-    console.log(`📧 Sent to: ${CUSTOMER_EMAIL}`);
+    console.log(`📧 Sent to: ${customerEmail}`);
     console.log('');
     console.log('📋 Email Details:');
     console.log(`- Subject: ${subject}`);
-    console.log(`- Recipient: ${CUSTOMER_EMAIL}`);
+    console.log(`- Recipient: ${customerEmail}`);
     console.log(`- Order ID: ${orderInfo.orders.id}`);
     console.log(`- Product: ${orderInfo.product_name}`);
   } else {

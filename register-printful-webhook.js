@@ -9,10 +9,19 @@
 
 const https = require('https');
 
-// Configuration
-const PRINTFUL_API_KEY = 'hlCMQ1drtAUg3IHfwj6sK1iY6x4wPHwDojt5fAGM';
-const WEBHOOK_URL = 'https://godship-2u9vk2y21-godship-projects.vercel.app/api/printful-webhook';
-const WEBHOOK_SECRET = 'af468692fdd8ebe1d705605b117c6a4f43b3556b86ac49143b4f71ba838ad967';
+function requireEnv (name) {
+  const v = process.env[name];
+  if (!v || !String(v).trim()) {
+    console.error(`Missing required environment variable: ${name}`);
+    process.exit(1);
+  }
+  return v;
+}
+
+// Configuration (set in the shell or .env.local — never commit real values)
+const PRINTFUL_API_KEY = requireEnv('PRINTFUL_API_KEY');
+const WEBHOOK_URL = requireEnv('PRINTFUL_WEBHOOK_URL');
+const WEBHOOK_SECRET = requireEnv('PRINTFUL_WEBHOOK_SECRET');
 
 // Events to subscribe to
 const WEBHOOK_EVENTS = [
@@ -177,7 +186,7 @@ async function testWebhook(webhookId) {
 async function main() {
   console.log('🚀 Starting Printful Webhook Registration...');
   console.log(`🔗 Webhook URL: ${WEBHOOK_URL}`);
-  console.log(`🔑 Webhook Secret: ${WEBHOOK_SECRET.substring(0, 8)}...`);
+  console.log('🔑 Webhook Secret: (set via PRINTFUL_WEBHOOK_SECRET)');
   console.log(`📋 Events: ${WEBHOOK_EVENTS.join(', ')}`);
   console.log('');
   
