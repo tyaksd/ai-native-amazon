@@ -52,7 +52,11 @@ export default function FeatureManagementPage() {
   }, [])
 
   const handleLogin = useCallback(() => {
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? ''
+    if (!adminPassword) {
+      setError('Admin password is not configured')
+      return
+    }
     if (password === adminPassword) {
       setIsAuthenticated(true)
       if (typeof window !== 'undefined') {

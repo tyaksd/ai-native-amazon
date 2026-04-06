@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? ''
 const PROTECTED_ROUTES = ['/oiu', '/lkj', '/sns']
 
 export function isProtectedRoute(pathname: string): boolean {
@@ -25,7 +25,7 @@ export function checkAuth(request: NextRequest): { isAuthenticated: boolean; res
   // Check for password in session storage or cookie
   const authToken = request.cookies.get('admin-auth')?.value
   
-  if (authToken === ADMIN_PASSWORD) {
+  if (ADMIN_PASSWORD && authToken === ADMIN_PASSWORD) {
     return { isAuthenticated: true }
   }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? ''
 
 export async function GET(request: NextRequest) {
   // In development, always allow access
@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
 
   // Check for password in cookies
   const authToken = request.cookies.get('admin-auth')?.value
-  
-  if (authToken === ADMIN_PASSWORD) {
+
+  if (ADMIN_PASSWORD && authToken === ADMIN_PASSWORD) {
     return NextResponse.json({ authenticated: true })
   }
 

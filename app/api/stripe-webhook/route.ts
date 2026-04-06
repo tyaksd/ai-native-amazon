@@ -286,15 +286,6 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
-  console.log('=== WEBHOOK CALLED ===')
-  console.log('Request method:', req.method)
-  console.log('Request headers:', Object.fromEntries(req.headers.entries()))
-  console.log('Environment check:')
-  console.log('- STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? 'Set' : 'Missing')
-  console.log('- STRIPE_WEBHOOK_SECRET:', process.env.STRIPE_WEBHOOK_SECRET ? 'Set' : 'Missing')
-  console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Missing')
-  console.log('- NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Missing')
-  
   if (!endpointSecret) {
     console.error('Webhook secret not configured')
     return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
